@@ -240,6 +240,13 @@ class Handler extends EventEmitter {
         r.connectionType = "websocket";
         this.send([r]);
       }
+      return;
+    }
+    if(data[0].channel == consts.channels.connect && typeof(data[0].advice) == "undefined"){
+      //ping + pong system.
+      let r = this.getPacket(data[0])[0];
+      r.clientId = this.clientID;
+      this.send([r]);
     }
   }
   send(msg){
