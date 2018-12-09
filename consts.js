@@ -1,7 +1,7 @@
 module.exports = {
   endpoint: "kahoot.it",
   port: 443,
-  wss_endpoint: "wss://kahoot.it/cometd",
+  wss_endpoint: "wss://play.kahoot.it/cometd",
   quiz_id: "https://create.kahoot.it/rest/kahoots/",//61d327f5-1c9c-44f6-9886-4362d2cfc607
   quiz_extra: "?_=",//time
   //Note: the session request also has the kahoot token.
