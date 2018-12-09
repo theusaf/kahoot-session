@@ -73,6 +73,9 @@ class Handler extends EventEmitter {
         this.close();
         this.connected = false;
       });
+      this.ws.on('connection', (ws) => {
+        ws.on('error', console.log);
+      });
       //end of ws stuff
     });
   }
