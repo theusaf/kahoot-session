@@ -115,7 +115,7 @@ class Handler extends EventEmitter {
     console.log("message recieved: " + msg);
     let data = JSON.parse(msg);
     if(data[0].channel == consts.channels.handshake && data[0].clientId){
-      this.emit("handshake");
+      this.emit("handshake",data[0].clientId);
       this.clientID = data[0].clientId;
       let r = this.getPacket(data[0])[0];
       r.ext.ack = undefined,
@@ -158,7 +158,7 @@ class Handler extends EventEmitter {
           type: "started"
         };
         this.send([r]);
-        this.emit("ready");
+        this.emit("ready",this.session);
       }
       return;
     }
@@ -247,6 +247,7 @@ class Handler extends EventEmitter {
       let r = this.getPacket(data[0])[0];
       r.clientId = this.clientID;
       this.send([r]);
+      return;
     }
   }
   send(msg){
@@ -321,7 +322,7 @@ class Handler extends EventEmitter {
           })
         }
       };
-      this.emit("start");
+      this.emit("start",this.quiz.questions[this.questionIndex]);
       this.send([r]);
     }else{
       return "Start the quiz first using kahoot.start()";
@@ -453,7 +454,7 @@ class Handler extends EventEmitter {
       }
     };
     this.send([r]);
-    this.emit("questionEnd");
+    this.emit("questionEnd",this.rankPlayers());
     //send results..
     let rs = [];
     for(let i in this.players){
@@ -541,7 +542,7 @@ class Handler extends EventEmitter {
     if(this.questionIndex == this.quiz.questions.length){
       this.endQuiz();
     }
-    this.emit("start");
+    this.emit("start",this.quiz.questions[this.quizIndex]);
     this.msgID++;
     this.questionIndex++;
     let answerMap = {};
@@ -578,7 +579,7 @@ class Handler extends EventEmitter {
     for(let i in this.quiz.questions){
       ans.push(this.quiz.questions[i].choices.length);
     }
-    this.emit("quizEnd");
+    this.emit("quizEnd",this.rankPlayers());
     //send end message.
     this.msgID++;
     let r = {
