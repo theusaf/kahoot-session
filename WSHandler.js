@@ -103,12 +103,12 @@ class Handler extends EventEmitter {
           form.e[0].event_properties.kahoot_description= this.quiz.description;
           form.e[0].event_properties.kahoot_description_length= this.quiz.description.length;
           form.e[0].event_properties.kahoot_tags_list= (()=>{
-              let a = this.quiz.questions.description.split("#").slice(1).join("#").split(" ");
+              let a = this.quiz.description.split("#").slice(1).join("#").split(" ");
               a[0] = "#" + a[0];
               return a;
             })();
           form.e[0].event_properties.kahoot_tags_count= (()=>{
-              let a = this.quiz.questions.description.split("#").slice(1).join("#").split(" ");
+              let a = this.quiz.description.split("#").slice(1).join("#").split(" ");
               a[0] = "#" + a[0];
               return a;
             })().length;
