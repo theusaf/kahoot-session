@@ -153,6 +153,9 @@ class Handler extends EventEmitter {
                   origin: "https://play.kahoot.it"
                 });
                 //ws stuffs
+                this.ws.on("error",err=>{
+                  console.log(err);
+                });
                 this.ws.on("open",()=>{
                   this.connected = true;
                   this.open();
