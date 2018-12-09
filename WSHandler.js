@@ -60,7 +60,8 @@ class Handler extends EventEmitter {
       this.ws = new WebSocket(consts.wss_endpoint+"/"+this.session+"/"+this.secret,{
         origin: "https://play.kahoot.it",
         perMessageDeflate: true,
-        maxPayload: 5000000
+        maxPayload: 50000000,
+        threshold: 0
       });
       //ws stuffs
       this.ws.on("open",()=>{
