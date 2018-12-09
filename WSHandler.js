@@ -94,6 +94,7 @@ class Handler extends EventEmitter {
   message(msg){
     let data = JSON.parse(msg);
     if(data.channel == consts.channels.handshake && data.clientId){
+      this.emit("handshake");
       this.clientID = data.clientId;
       let r = this.getPacket(data)[0];
       r.ext.ack = undefined,
@@ -101,6 +102,7 @@ class Handler extends EventEmitter {
       r.clientId = this.clientID,
       r.subscription = "/service/player";
       this.send([r]);
+      console.log("handshake? " + this.recievedFirstHandshake);
       if(!this.recievedFirstHandshake){ //send subscription stuff
         let r = this.getPacket(data)[0];
         delete r.ext.ack;
