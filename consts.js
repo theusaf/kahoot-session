@@ -69,7 +69,7 @@ module.exports = {
       api_properties:{},
       event_properties:{},
       user_properties:{
-        $set:{
+        "$set":{
           username:"nodejs",
           has_avatar:false,
           primary_usage:"student",
