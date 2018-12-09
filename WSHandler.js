@@ -33,7 +33,7 @@ class Handler extends EventEmitter {
     this.on("questionStart",()=>{
       this.timeout = setTimeout(endQuestion,this.quiz.questions[quizIndex].time);
     });
-    this.timesyncs = {
+    this.timesync = {
       a: [],
       b: []
     }
