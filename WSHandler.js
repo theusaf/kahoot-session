@@ -58,7 +58,9 @@ class Handler extends EventEmitter {
       console.log(this.session + "," + this.secret);
       //now create the web socket.
       this.ws = new WebSocket(consts.wss_endpoint+"/"+this.session+"/"+this.secret,{
-        origin: "https://play.kahoot.it"
+        origin: "https://play.kahoot.it",
+        perMessageDeflate: true,
+        
       });
       //ws stuffs
       this.ws.on("open",()=>{
@@ -73,8 +75,8 @@ class Handler extends EventEmitter {
         this.close();
         this.connected = false;
       });
-      this.ws.on('connection', (ws) => {
-        ws.on('error', console.log);
+      this.ws.on("error",err=>{
+        console.log("Error! " + err);
       });
       //end of ws stuff
     });
