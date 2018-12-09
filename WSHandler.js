@@ -66,7 +66,7 @@ class Handler extends EventEmitter {
           console.log("Api Error");
           return "Api Error";
         }
-        if(b == "success"){
+        if(/*b == "success"*/true){
           //identity success. post launch kahoot
           let form = {
             client: consts.AmpAPI[0].key,
