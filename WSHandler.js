@@ -1,4 +1,4 @@
-const WebSocket = require('isomorphic-ws');
+const WebSocket = require('ws');
 const EventEmitter = require('events');
 const request = require('request');
 const consts = require('./consts.js');
