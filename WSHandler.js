@@ -208,6 +208,7 @@ class Handler extends EventEmitter {
     }
   }
   send(msg){
+    console.log("conntected: " + this.connected);
     if(this.connected){
       try{
         this.ws.send(JSON.stringify(msg));
