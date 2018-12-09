@@ -98,7 +98,7 @@ class Handler extends EventEmitter {
       this.clientID = data[0].clientId;
       let r = this.getPacket(data[0])[0];
       r.ext.ack = undefined,
-      r.channel = consts.channel.subscribe,
+      r.channel = consts.channels.subscribe,
       r.clientId = this.clientID,
       r.subscription = "/service/player";
       console.log("sending " + r);
