@@ -148,7 +148,7 @@ class Handler extends EventEmitter {
       if(data[0].subscription == consts.channels.subscription && data[0].successful == true && !this.configured){
         console.log("sending final setup thing");
         this.configured = true;
-        let r = this.getPacket(data[0]);
+        let r = this.getPacket(data[0])[0];
         r.channel = consts.channels.subscription;
         r.clientId = this.clientID;
         delete r.ext;
@@ -229,6 +229,14 @@ class Handler extends EventEmitter {
       this.send([r]);
       this.emit("answer",data[0].data.cid);
       return;
+    }
+    if(data[0].channel == consts.channels.connect && typeof(data[0].advice.reconnect) == "string"){
+      if(data[0].advice.reconnect == "retry"){
+        let r = this.getPacket(data[0])[0];
+        r.clientId = this.clientID;
+        r.connectionType = "websocket";
+        this.send([r]);
+      }
     }
   }
   send(msg){
