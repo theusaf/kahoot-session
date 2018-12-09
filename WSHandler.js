@@ -37,149 +37,36 @@ class Handler extends EventEmitter {
   start(){
     //GET quiz.
     this.timestamp = Date.now();
-    request(consts.quiz_id + this.quizID + consts.quiz_extra + this.timestamp,(e,r,b) => {
-      if(e){
-        throw "Invalid URI / API Error";
-      }
-      try{
-        this.quiz = JSON.parse(b);
-      }catch(e){
-        console.log("JSON Error");
-        this.emit("error",e);
-        return;
-      }
-      //Now that we have the quiz, send $identify request?
-      let form = {
-        client: consts.AmpAPI[1].key,
-        e: [consts.AmpAPI[1].s],
-        v: consts.AmpAPI[1].v,
-        upload_time: Date.now()
-      };
-      form.e[0].session_id = -1;
-      form.e[0].timestamp = Date.now();
-      form.checksum = md5(consts.AmpAPI[0].v + consts.AmpAPI[0].key + form.e[0] + form.upload_time);
-      console.log(form);
-      request.post({
-        url: "https://api.amplitude.com",
-        form: form
-      },(e,r,b) => {
-        if(e){
-          console.log("Api Error");
-          return "Api Error";
-        }
-        if(/*b == "success"*/true){
-          //identity success. post launch kahoot
-          let form = {
-            client: consts.AmpAPI[0].key,
-            e: [consts.AmpAPI[0].s],
-            v: consts.AmpAPI[0].v,
-            upload_time: Date.now()
-          }
-          form.e[0].session_id = this.timestamp;
-          form.e[0].timestamp = Date.now();
-          form.e[0].event_properties = consts.event_properties_submit;
-          form.e[0].event_properties.url += this.quizID //info
-          form.e[0].event_properties.kahoot_id= this.quizID;
-          form.e[0].event_properties.kahoot_title= this.quiz.title;
-          form.e[0].event_properties.kahoot_title_length= this.quiz.title.length;
-          form.e[0].event_properties.kahoot_creator_id= this.quiz.creator;
-          form.e[0].event_properties.kahoot_creator_username= this.quiz.creator_username;
-          form.e[0].event_properties.kahoot_type= "quiz";
-          form.e[0].event_properties.kahoot_audience= this.quiz.audience;
-          form.e[0].event_properties.kahoot_has_cover_image= Object.keys(this.quiz.coverMetadata).length != 0;
-          form.e[0].event_properties.kahoot_has_lobby_video= typeof(this.quiz.lobby_video) !== "undefined";
-          form.e[0].event_properties.kahoot_has_theme= false;
-          form.e[0].event_properties.kahoot_language= this.quiz.language;
-          form.e[0].event_properties.kahoot_promoted= false;
-          form.e[0].event_properties.kahoot_resources= "null";
-          form.e[0].event_properties.kahoot_resources_length= 4;
-          form.e[0].event_properties.kahoot_questions_count= this.quiz.questions.length;
-          form.e[0].event_properties.kahoot_image_count= 0;
-          form.e[0].event_properties.kahoot_video_vount= 0;
-          form.e[0].event_properties.kahoot_quiz_block_count= this.quiz.questions.length;
-          form.e[0].event_properties.kahoot_story_block_count= 0;
-          form.e[0].event_properties.kahoot_survey_block_count= 0;
-          form.e[0].event_properties.kahoot_media_ratio= 1;
-          form.e[0].event_properties.kahoot_description= this.quiz.description;
-          form.e[0].event_properties.kahoot_description_length= this.quiz.description.length;
-          form.e[0].event_properties.kahoot_tags_list= (()=>{
-              let a = this.quiz.description.split("#").slice(1).join("#").split(" ");
-              a[0] = "#" + a[0];
-              return a;
-            })();
-          form.e[0].event_properties.kahoot_tags_count= (()=>{
-              let a = this.quiz.description.split("#").slice(1).join("#").split(" ");
-              a[0] = "#" + a[0];
-              return a;
-            })().length;
-          form.e[0].event_properties.kahoot_visibility= "public";
-          form.e[0].event_properties.kahoot_created= (new Date()).toISOString(this.quiz.created);
-          form.e[0].event_properties.option_show_game_pin= true;
-          form.e[0].event_properties.option_minimised_lobby_instructions= true;
-          form.e[0].event_properties.option_randomise_answer_order= false;
-          form.e[0].event_properties.option_automatically_progress_game= false;
-          form.e[0].event_properties.option_require_rejoin= false;
-          form.e[0].event_properties.option_enable_answer_streak_bonus= true;
-          form.e[0].event_properties.option_opt_in_experiments= true;
-          form.e[0].event_properties.option_podium= true;
-          form.e[0].event_properties.option_namerator= false;
-          form.e[0].event_properties.option_two_factor_auth= false;
-          form.e[0].event_properties.is_team_mode= false;
-          form.checksum = md5(consts.AmpAPI[0].v + consts.AmpAPI[0].key + form.e[0] + form.upload_time);
-          console.log(form);
-          request.post({
-            url: "https://api.amplitude.com",
-            form: form
-          },(e,r,b) => {
-            if(e){
-              console.log("Api Error");
-              return "Api Error";
-            }
-            if(/*b == "success"*/true){
-              //ok! ready to go!
-              let form = {
-                gameMode: "normal",
-                namerator: false,
-                twoFactorAuth: false
-              };
-              request.post({
-                url: `https://play.kahoot.it/reserve/session/?${Date.now()}`,
-                form: form
-              },(e,r,b) => {
-                this.session = Number(b);
-                this.secret = r.headers['x-kahoot-session-token'];
-                console.log(this.session + "," + this.secret)
-                //now create the web socket.
-                this.ws = new WebSocket(consts.wss_endpoint+"/"+this.session+"/"+this.secret,{
-                  origin: "https://play.kahoot.it"
-                });
-                //ws stuffs
-                this.ws.on("error",err=>{
-                  console.log(err);
-                });
-                this.ws.on("open",()=>{
-                  this.connected = true;
-                  this.open();
-                });
-                this.ws.on("message",msg => {
-                  this.message(msg);
-                });
-                this.ws.on("close",()=>{
-                  this.close();
-                  this.connected = false;
-                });
-                //end of ws stuff
-              });
-            }else{
-              console.log("Error2: " + b);
-              return "error";
-            }
-          });
-        }else{
-          console.log("Error1: " + b);
-          return "error";
-        }
+    let form = {
+      gameMode: "normal",
+      namerator: false,
+      twoFactorAuth: false
+    };
+    request.post({
+      url: `https://play.kahoot.it/reserve/session/?${Date.now()}`,
+      form: form
+    },(e,r,b) => {
+      this.session = Number(b);
+      this.secret = r.headers['x-kahoot-session-token'];
+      console.log(this.session + "," + this.secret)
+      //now create the web socket.
+      this.ws = new WebSocket(consts.wss_endpoint+"/"+this.session+"/"+this.secret,{
+        origin: "https://play.kahoot.it"
       });
+      //ws stuffs
+      this.ws.on("open",()=>{
+        this.connected = true;
+        this.open();
+      });
+      this.ws.on("message",msg => {
+        console.log("message recieved: " + msg);
+        this.message(msg);
+      });
+      this.ws.on("close",()=>{
+        this.close();
+        this.connected = false;
+      });
+      //end of ws stuff
     });
   }
   getPacket(packet){
