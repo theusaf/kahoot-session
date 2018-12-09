@@ -78,55 +78,53 @@ class Handler extends EventEmitter {
           form.e[0].timestamp = Date.now();
           form.e[0].event_properties = consts.event_properties_submit;
           form.e[0].event_properties.url += this.quizID //info
-          form.e[0].event_properties = {
-            url: form.e[0].event_properties.url,
-            kahoot_id: this.quizID,
-            kahoot_title: this.quiz.title,
-            kahoot_title_length: this.quiz.title.length,
-            kahoot_creator_id: this.quiz.creator,
-            kahoot_creator_username: this.quiz.creator_username,
-            kahoot_type: "quiz",
-            kahoot_audience: this.quiz.audience,
-            kahoot_has_cover_image: Object.keys(this.quiz.coverMetadata).length != 0,
-            kahoot_has_lobby_video: typeof(this.quiz.lobby_video) !== "undefined",
-            kahoot_has_theme: false,
-            kahoot_language: this.quiz.language,
-            kahoot_promoted: false,
-            kahoot_resources: "null",
-            kahoot_resources_length: 4,
-            kahoot_questions_count: this.quiz.questions.length,
-            kahoot_image_count: 0,
-            kahoot_video_vount: 0,
-            kahoot_quiz_block_count: this.quiz.questions.length,
-            kahoot_story_block_count: 0,
-            kahoot_survey_block_count: 0,
-            kahoot_media_ratio: 1,
-            kahoot_description: this.quiz.questions.description,
-            kahoot_description_length: this.quiz.questions.description.length,
-            kahoot_tags_list: (()=>{
+          form.e[0].event_properties.url= form.e[0].event_properties.url;
+          form.e[0].event_properties.kahoot_id= this.quizID;
+          form.e[0].event_properties.kahoot_title= this.quiz.title;
+          form.e[0].event_properties.kahoot_title_length= this.quiz.title.length;
+          form.e[0].event_properties.kahoot_creator_id= this.quiz.creator;
+          form.e[0].event_properties.kahoot_creator_username= this.quiz.creator_username;
+          form.e[0].event_properties.kahoot_type= "quiz";
+          form.e[0].event_properties.kahoot_audience= this.quiz.audience;
+          form.e[0].event_properties.kahoot_has_cover_image= Object.keys(this.quiz.coverMetadata).length != 0;
+          form.e[0].event_properties.kahoot_has_lobby_video= typeof(this.quiz.lobby_video) !== "undefined";
+          form.e[0].event_properties.kahoot_has_theme= false;
+          form.e[0].event_properties.kahoot_language= this.quiz.language;
+          form.e[0].event_properties.kahoot_promoted= false;
+          form.e[0].event_properties.kahoot_resources= "null";
+          form.e[0].event_properties.kahoot_resources_length= 4;
+          form.e[0].event_properties.kahoot_questions_count= this.quiz.questions.length;
+          form.e[0].event_properties.kahoot_image_count= 0;
+          form.e[0].event_properties.kahoot_video_vount= 0;
+          form.e[0].event_properties.kahoot_quiz_block_count= this.quiz.questions.length;
+          form.e[0].event_properties.kahoot_story_block_count= 0;
+          form.e[0].event_properties.kahoot_survey_block_count= 0;
+          form.e[0].event_properties.kahoot_media_ratio= 1;
+          form.e[0].event_properties.kahoot_description= this.quiz.questions.description;
+          form.e[0].event_properties.kahoot_description_length= this.quiz.questions.description.length;
+          form.e[0].event_properties.kahoot_tags_list= (()=>{
               let a = this.quiz.questions.description.split("#").slice(1).join("#").split(" ");
               a[0] = "#" + a[0];
               return a;
-            })(),
-            kahoot_tags_count: (()=>{
+            })();
+          form.e[0].event_properties.kahoot_tags_count= (()=>{
               let a = this.quiz.questions.description.split("#").slice(1).join("#").split(" ");
               a[0] = "#" + a[0];
               return a;
-            })().length,
-            kahoot_visibility: "public",
-            kahoot_created: (new Date()).toISOString(this.quiz.created),
-            option_show_game_pin: true,
-            option_minimised_lobby_instructions: true,
-            option_randomise_answer_order: false,
-            option_automatically_progress_game: false,
-            option_require_rejoin: false,
-            option_enable_answer_streak_bonus: true,
-            option_opt_in_experiments: true,
-            option_podium: true,
-            option_namerator: false,
-            option_two_factor_auth: false,
-            is_team_mode: false
-          };
+            })().length;
+          form.e[0].event_properties.kahoot_visibility= "public";
+          form.e[0].event_properties.kahoot_created= (new Date()).toISOString(this.quiz.created);
+          form.e[0].event_properties.option_show_game_pin= true;
+          form.e[0].event_properties.option_minimised_lobby_instructions= true;
+          form.e[0].event_properties.option_randomise_answer_order= false;
+          form.e[0].event_properties.option_automatically_progress_game= false;
+          form.e[0].event_properties.option_require_rejoin= false;
+          form.e[0].event_properties.option_enable_answer_streak_bonus= true;
+          form.e[0].event_properties.option_opt_in_experiments= true;
+          form.e[0].event_properties.option_podium= true;
+          form.e[0].event_properties.option_namerator= false;
+          form.e[0].event_properties.option_two_factor_auth= false;
+          form.e[0].event_properties.is_team_mode= false;
           form.checksum = md5(consts.AmpAPI[0].v + consts.AmpAPI[0].key + form.e[0] + form.upload_time);
           request.post({
             url: "https://api.amplitude.com",
