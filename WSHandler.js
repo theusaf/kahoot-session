@@ -129,7 +129,7 @@ class Handler extends EventEmitter {
         }
       });
     });
-  },
+  }
   getPacket(packet){
     let l = (Date.now() - packet.ext.timesync.tc - packet.ext.timesync.p) / 2;
     let o = packet.ext.timesync.ts - packet.ext.timesync.tc - l;
