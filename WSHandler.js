@@ -604,7 +604,7 @@ class Handler extends EventEmitter {
           questionNumber: this.questionIndex,
           quizType: "quiz",
           quizQuestionAnswers: ans
-        });
+        })
       }
     };
     this.send([r]);
