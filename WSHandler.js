@@ -87,8 +87,8 @@ class Handler extends EventEmitter {
     }
     var p,g,g,d;
     for(var d = this.timesync.a.length, p = 0, h=0,g=0;g<d;++g){
-      p+=i[g];
-      h+=i[g];
+      p+=this.timesync.a[g];
+      h+=this.timesync.b[g];
     }
     this.msgID++;
     return [{
