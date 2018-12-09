@@ -93,12 +93,10 @@ class Handler extends EventEmitter {
   message(msg){
     console.log("message recieved: " + msg);
     let data = JSON.parse(msg);
-    console.log("channel check " + data.channel == consts.channels.handshake);
-    console.log(data.clientId);
-    if(data.channel == consts.channels.handshake && data.clientId){
+    if(data[0].channel == consts.channels.handshake && data[0].clientId){
       this.emit("handshake");
-      this.clientID = data.clientId;
-      let r = this.getPacket(data)[0];
+      this.clientID = data[0].clientId;
+      let r = this.getPacket(data[0])[0];
       r.ext.ack = undefined,
       r.channel = consts.channel.subscribe,
       r.clientId = this.clientID,
@@ -107,13 +105,13 @@ class Handler extends EventEmitter {
       this.send([r]);
       console.log("handshake? " + this.recievedFirstHandshake);
       if(!this.recievedFirstHandshake){ //send subscription stuff
-        let r = this.getPacket(data)[0];
+        let r = this.getPacket(data[0])[0];
         delete r.ext.ack;
         r.channel = consts.channels.subscribe;
         r.clientId = this.clientID;
         r.subscription = "/controller/" + this.session;
-        this.send(r);
-        r = this.getPacket(data)[0];
+        this.send([r]);
+        r = this.getPacket(data[0])[0];
         r.ext.ack = -1;
         r.advice = {
           timeout: 0
@@ -126,10 +124,10 @@ class Handler extends EventEmitter {
       }
       return;
     }
-    if(data.channel == consts.channels.subscribe){
-      if(data.subscription == consts.channels.subscription && data.successful == true && !this.configured){
+    if(data[0].channel == consts.channels.subscribe){
+      if(data[0].subscription == consts.channels.subscription && data[0].successful == true && !this.configured){
         this.configured = true;
-        let r = this.getPacket(data);
+        let r = this.getPacket(data[0]);
         r.channel = consts.channels.subscription;
         r.clientId = this.clientID;
         delete r.ext;
@@ -143,16 +141,16 @@ class Handler extends EventEmitter {
       }
       return;
     }
-    if(data.channel == "/controller/" + this.session && data.data.type == "joined"){ //a player joind
+    if(data[0].channel == "/controller/" + this.session && data[0].data.type == "joined"){ //a player joind
       this.msgID++;
       let r = {
         channel: consts.channels.subscription,
         clientId: this.clientID,
         id: String(this.msgID),
         data: {
-          cid: data.data.cid,
+          cid: data[0].data.cid,
           content: JSON.stringify({
-            playerName: data.data.name,
+            playerName: data[0].data.name,
             quizType: "quiz"
           }),
           gameid: this.session,
@@ -164,27 +162,27 @@ class Handler extends EventEmitter {
       this.send([r]);
       //add player to list
       this.players.push({
-        name: data.data.name,
-        id: data.data.cid,
+        name: data[0].data.name,
+        id: data[0].data.cid,
         score: 0
       });
-      this.emit("join",{name: data.data.name,id:data.data.cid});
+      this.emit("join",{name: data[0].data.name,id:data[0].data.cid});
       return;
     }
-    if(data.channel == "/controller/" + this.session && data.data.type == "left"){
+    if(data[0].channel == "/controller/" + this.session && data[0].data.type == "left"){
       this.emit("leave",{
         name: this.players.filter(o=>{
-          return o.id == data.data.cid;
+          return o.id == data[0].data.cid;
         })[0].name,
-        id: data.data.cid
+        id: data[0].data.cid
       });
       this.players = this.players.filter(o=>{
-        return o.id != data.data.cid
+        return o.id != data[0].data.cid
       });
       return;
     }
-    if(data.channel == "/controller/" + this.session && JSON.parse(data.data.content).choice){
-      handleScore(data.data.cid,JSON.parse(data.data.content));
+    if(data[0].channel == "/controller/" + this.session && JSON.parse(data[0].data.content).choice){
+      handleScore(data[0].data.cid,JSON.parse(data[0].data.content));
       //send response...
       let ans = [];
       this.msgID++;
@@ -196,7 +194,7 @@ class Handler extends EventEmitter {
         clientId: this.clientID,
         id: String(this.msgID),
         data: {
-          cid: String(data.data.cid),
+          cid: String(data[0].data.cid),
           host: "play.kahoot.it",
           id: 7,
           type: "message",
@@ -208,7 +206,7 @@ class Handler extends EventEmitter {
         }
       };
       this.send([r]);
-      this.emit("answer",data.data.cid);
+      this.emit("answer",data[0].data.cid);
       return;
     }
   }
