@@ -1,7 +1,7 @@
 const WebSocket = require('ws');
 const EventEmitter = require('events');
 const request = require('request');
-const consts = require('/consts.js');
+const consts = require('./consts.js');
 const md5 = require('md5');
 
 class Handler extends EventEmitter {
@@ -37,7 +37,7 @@ class Handler extends EventEmitter {
   start(){
     //GET quiz.
     this.timestamp = Date.now();
-    request(consts.quiz_id + id + consts.quiz_extra + this.timestamp,(e,r,b) => {
+    request(consts.quiz_id + this.quizID + consts.quiz_extra + this.timestamp,(e,r,b) => {
       if(e){
         throw "Invalid URI / API Error";
       }
