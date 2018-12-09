@@ -33,6 +33,10 @@ class Handler extends EventEmitter {
     this.on("questionStart",()=>{
       this.timeout = setTimeout(endQuestion,this.quiz.questions[quizIndex].time);
     });
+    this.timesyncs = {
+      a: [],
+      b: []
+    }
   }
   start(){
     //GET quiz.
@@ -75,6 +79,17 @@ class Handler extends EventEmitter {
   getPacket(packet){
     let l = (Date.now() - packet.ext.timesync.tc - packet.ext.timesync.p) / 2;
     let o = packet.ext.timesync.ts - packet.ext.timesync.tc - l;
+    this.timesync.a.push(l);
+    this.timesync.b.push(o);
+    if(this.timesync.a.length > 10){
+      this.timesync.a.shift();
+      this.timesync.b.shift();
+    }
+    var p,g,g,d;
+    for(var d = this.timesync.a.length, p = 0, h=0,g=0;g<d;++g){
+      p+=i[g];
+      h+=i[g];
+    }
     this.msgID++;
     return [{
       channel: packet.channel,
@@ -82,8 +97,8 @@ class Handler extends EventEmitter {
       ext: {
         ack: packet.ext.ack,
         timesync: {
-          l: l,
-          o: o,
+          l: parseInt((p/d).toFixed()),
+          o: parseInt((h/d).toFixed()),
           tc: Date.now()
         }
       },
