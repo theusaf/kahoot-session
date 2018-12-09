@@ -150,7 +150,7 @@ class Handler extends EventEmitter {
                 this.secret = r.headers['x-kahoot-session-token'];
                 console.log(this.session + "," + this.secret)
                 //now create the web socket.
-                this.ws = new WebSocket(consts.wss_endpoint+this.session+"/"+this.secret,{
+                this.ws = new WebSocket(consts.wss_endpoint+"/"+this.session+"/"+this.secret,{
                   origin: "https://play.kahoot.it"
                 });
                 //ws stuffs
