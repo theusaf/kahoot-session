@@ -74,7 +74,7 @@ class Handler extends EventEmitter {
             v: consts.AmpAPI[0].v,
             upload_time: Date.now()
           }
-          form.e[0].session_id = timestamp;
+          form.e[0].session_id = this.timestamp;
           form.e[0].timestamp = Date.now();
           form.e[0].event_properties = consts.event_properties_submit;
           form.e[0].event_properties.url += this.quizID //info
