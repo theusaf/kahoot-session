@@ -230,7 +230,10 @@ class Handler extends EventEmitter {
       this.emit("answer",data[0].data.cid);
       return;
     }
-    if(data[0].channel == consts.channels.connect && typeof(data[0].advice.reconnect) == "string"){
+    if(data[0].channel == consts.channels.connect && typeof(data[0].advice) != "undefined"){
+      if(typeof(data[0].advice.reconnect) == "undefiend"){
+        return;
+      }
       if(data[0].advice.reconnect == "retry"){
         let r = this.getPacket(data[0])[0];
         r.clientId = this.clientID;
