@@ -55,7 +55,7 @@ class Handler extends EventEmitter {
         v: consts.AmpAPI[1].v,
         upload_time: Date.now()
       };
-      form.e[0].session_id = this.timestamp;
+      form.e[0].session_id = -1;
       form.e[0].timestamp = Date.now();
       form.checksum = md5(consts.AmpAPI[0].v + consts.AmpAPI[0].key + form.e[0] + form.upload_time);
       request.post({
@@ -66,7 +66,7 @@ class Handler extends EventEmitter {
           console.log("Api Error");
           return "Api Error";
         }
-        if(/*b == "success"*/true){
+        if(b == "success"){
           //identity success. post launch kahoot
           let form = {
             client: consts.AmpAPI[0].key,
@@ -78,7 +78,6 @@ class Handler extends EventEmitter {
           form.e[0].timestamp = Date.now();
           form.e[0].event_properties = consts.event_properties_submit;
           form.e[0].event_properties.url += this.quizID //info
-          form.e[0].event_properties.url= form.e[0].event_properties.url;
           form.e[0].event_properties.kahoot_id= this.quizID;
           form.e[0].event_properties.kahoot_title= this.quiz.title;
           form.e[0].event_properties.kahoot_title_length= this.quiz.title.length;

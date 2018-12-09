@@ -69,14 +69,9 @@ module.exports = {
       api_properties:{},
       event_properties:{},
       user_properties:{
-        "$set":{
-          username:"nodejs",
-          has_avatar:false,
-          primary_usage:"student",
-          name:"nodejs",
-          public_access:true,
-          roles:[],
-          pilot_account_id:"null"
+        "$setOnce":{
+          created: null,
+          uuid: "3cd88edb-1df8-46e1-996c-1b54ed0a72ef"
         }
       },
       uuid:"none",
