@@ -133,8 +133,7 @@ class Handler extends EventEmitter {
         r.channel = consts.channels.connect;
         r.clientId = this.clientID;
         r.connectionType = "websocket";
-        var me = this;
-        setTimeout(function(){me.send([r]);},10);
+        this.send([r]);
         this.recievedFirstHandshake = true;
       }
       return;
@@ -263,6 +262,7 @@ class Handler extends EventEmitter {
       ]
     }];
     this.send(r);
+    this.msgID++;
   }
   close(){
     this.connected = false;
