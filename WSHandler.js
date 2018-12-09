@@ -1,4 +1,4 @@
-const WebSocket = require('ws');
+const WebSocket = require('isomorphic-ws');
 const EventEmitter = require('events');
 const request = require('request');
 const consts = require('./consts.js');
@@ -146,7 +146,7 @@ class Handler extends EventEmitter {
     }
     if(data[0].channel == consts.channels.subscribe){
       if(data[0].subscription == consts.channels.subscription && data[0].successful == true && !this.configured){
-        console.log("sending final setup thing")
+        console.log("sending final setup thing");
         this.configured = true;
         let r = this.getPacket(data[0]);
         r.channel = consts.channels.subscription;
