@@ -16,9 +16,9 @@ module.exports = {
   channels: {
     handshake: "/meta/handshake",
     subscribe: "/meta/subscribe",
-    subscription: "/service/player/",
+    subscription: "/service/player",
     sub_controller: "/controller/", //session
-    connect: "/meta/connect/"
+    connect: "/meta/connect"
   },
   AmpAPI: [{
     v: 2,
