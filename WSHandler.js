@@ -63,7 +63,6 @@ class Handler extends EventEmitter {
         this.open();
       });
       this.ws.on("message",msg => {
-        console.log("message recieved: " + msg);
         this.message(msg);
       });
       this.ws.on("close",()=>{
@@ -92,6 +91,7 @@ class Handler extends EventEmitter {
     }];
   }
   message(msg){
+    console.log("message recieved: " + msg);
     let data = JSON.parse(msg);
     if(data.channel == consts.channels.handshake && data.clientId){
       this.emit("handshake");
@@ -101,6 +101,7 @@ class Handler extends EventEmitter {
       r.channel = consts.channel.subscribe,
       r.clientId = this.clientID,
       r.subscription = "/service/player";
+      console.log("sending " + r);
       this.send([r]);
       console.log("handshake? " + this.recievedFirstHandshake);
       if(!this.recievedFirstHandshake){ //send subscription stuff
