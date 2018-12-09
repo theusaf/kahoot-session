@@ -120,7 +120,7 @@ class Handler extends EventEmitter {
       console.log("handshake? " + this.recievedFirstHandshake);
       if(!this.recievedFirstHandshake){ //send subscription stuff
         let r = this.getPacket(data[0])[0];
-        //delete r.ext.ack;
+        delete r.ext.ack;
         r.channel = consts.channels.subscribe;
         r.clientId = this.clientID;
         r.subscription = "/controller/" + this.session;
@@ -133,7 +133,7 @@ class Handler extends EventEmitter {
         r.channel = consts.channels.connect;
         r.clientId = this.clientID;
         r.connectionType = "websocket";
-        this.send([r]);
+        setTimeout(function(){this.send([r]);},10)
         this.recievedFirstHandshake = true;
       }
       return;
