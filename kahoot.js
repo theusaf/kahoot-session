@@ -1,1 +1,1 @@
-module.exports = WSHandler.js;
+module.exports = require('/WSHandler.js');
