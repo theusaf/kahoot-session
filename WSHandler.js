@@ -55,7 +55,7 @@ class Handler extends EventEmitter {
         v: consts.AmpAPI[1].v,
         upload_time: Date.now()
       };
-      form.e[0].session_id = timestamp;
+      form.e[0].session_id = this.timestamp;
       form.e[0].timestamp = Date.now();
       form.checksum = md5(consts.AmpAPI[0].v + consts.AmpAPI[0].key + form.e[0] + form.upload_time);
       request.post({
