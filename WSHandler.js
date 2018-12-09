@@ -97,29 +97,28 @@ class Handler extends EventEmitter {
       this.emit("handshake");
       this.clientID = data[0].clientId;
       let r = this.getPacket(data[0])[0];
-      r[0].ext.ack = undefined,
-      r[0].channel = consts.channels.subscribe,
-      r[0].clientId = this.clientID,
-      r[0].subscription = "/service/player";
-      console.log("sending " + r[0]);
-      this.send(r);
+      r.ext.ack = undefined,
+      r.channel = consts.channels.subscribe,
+      r.clientId = this.clientID,
+      r.subscription = "/service/player";
+      this.send([r]);
       console.log("handshake? " + this.recievedFirstHandshake);
       if(!this.recievedFirstHandshake){ //send subscription stuff
         let r = this.getPacket(data[0])[0];
-        delete r[0].ext.ack;
-        r[0].channel = consts.channels.subscribe;
-        r[0].clientId = this.clientID;
-        r[0].subscription = "/controller/" + this.session;
-        this.send(r);
+        delete r.ext.ack;
+        r.channel = consts.channels.subscribe;
+        r.clientId = this.clientID;
+        r.subscription = "/controller/" + this.session;
+        this.send([r]);
         r = this.getPacket(data[0])[0];
-        r[0].ext.ack = -1;
-        r[0].advice = {
+        r.ext.ack = -1;
+        r.advice = {
           timeout: 0
         };
-        r[0].channel = consts.channels.connect;
-        r[0].clientId = this.clientID;
-        r[0].connectionType = "websocket";
-        this.send(r);
+        r.channel = consts.channels.connect;
+        r.clientId = this.clientID;
+        r.connectionType = "websocket";
+        this.send([r]);
         this.recievedFirstHandshake = true;
       }
       return;
@@ -128,15 +127,15 @@ class Handler extends EventEmitter {
       if(data[0].subscription == consts.channels.subscription && data[0].successful == true && !this.configured){
         this.configured = true;
         let r = this.getPacket(data[0]);
-        r[0].channel = consts.channels.subscription;
-        r[0].clientId = this.clientID;
-        delete r[0].ext;
-        r[0].data = {
+        r.channel = consts.channels.subscription;
+        r.clientId = this.clientID;
+        delete r.ext;
+        r.data = {
           gameid: this.session,
           host: "play.kahoot.it",
           type: "started"
         };
-        this.send(r);
+        this.send([r]);
         this.emit("ready");
       }
       return;
@@ -211,9 +210,9 @@ class Handler extends EventEmitter {
     }
   }
   send(msg){
-    console.log("conntected: " + this.connected);
     if(this.connected){
       try{
+        console.log("sending " + JSON.stringify(msg));
         this.ws.send(JSON.stringify(msg));
       }catch(e){
         console.log("Uh oh. an error!");
