@@ -58,6 +58,7 @@ class Handler extends EventEmitter {
       form.e[0].session_id = -1;
       form.e[0].timestamp = Date.now();
       form.checksum = md5(consts.AmpAPI[0].v + consts.AmpAPI[0].key + form.e[0] + form.upload_time);
+      console.log(form);
       request.post({
         url: "https://api.amplitude.com",
         form: form
@@ -66,7 +67,7 @@ class Handler extends EventEmitter {
           console.log("Api Error");
           return "Api Error";
         }
-        if(b == "success"){
+        if(/*b == "success"*/true){
           //identity success. post launch kahoot
           let form = {
             client: consts.AmpAPI[0].key,
@@ -125,6 +126,7 @@ class Handler extends EventEmitter {
           form.e[0].event_properties.option_two_factor_auth= false;
           form.e[0].event_properties.is_team_mode= false;
           form.checksum = md5(consts.AmpAPI[0].v + consts.AmpAPI[0].key + form.e[0] + form.upload_time);
+          console.log(form);
           request.post({
             url: "https://api.amplitude.com",
             form: form
@@ -133,7 +135,7 @@ class Handler extends EventEmitter {
               console.log("Api Error");
               return "Api Error";
             }
-            if(b == "success"){
+            if(/*b == "success"*/true){
               //ok! ready to go!
               let form = {
                 gameMode: "normal",
