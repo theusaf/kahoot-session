@@ -229,7 +229,11 @@ class Handler extends EventEmitter {
     if(this.connected){
       try{
         console.log("sending " + JSON.stringify(msg));
-        this.ws.send(JSON.stringify(msg));
+        this.ws.send(JSON.stringify(msg),function ack(err){
+          if(err){
+            console.log("Error sending message: " + err);
+          }
+        });
       }catch(e){
         console.log("Uh oh. an error!");
       }
