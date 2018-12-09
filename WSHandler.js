@@ -58,6 +58,7 @@ class Handler extends EventEmitter {
       });
       //ws stuffs
       this.ws.on("open",()=>{
+        console.log("opened!");
         this.connected = true;
         this.open();
       });
@@ -242,7 +243,6 @@ class Handler extends EventEmitter {
         "websocket","long-polling"
       ]
     }];
-    this.msgID ++;
     this.send(r);
   }
   close(){
