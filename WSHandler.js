@@ -166,12 +166,12 @@ class Handler extends EventEmitter {
                 //end of ws stuff
               });
             }else{
-              console.log("Error: " + b);
+              console.log("Error2: " + b);
               return "error";
             }
           });
         }else{
-          console.log("Error: " + b);
+          console.log("Error1: " + b);
           return "error";
         }
       });
