@@ -23,11 +23,13 @@ Session.start();
 ```js
 Session.end(); //closes the game.
 Session.startQuiz(); //starts the quiz.
-Session.kickPlayer(1 || "1"); //kicks a player with id "1"
+Session.kickPlayer(id); //kicks a player with id
 Session.endQuestion(); //ends the question early.
 Session.nextQuestion(); //sends the next question
 Session.endQuiz(); //ends the quiz
-Session.setSnark("answer"); //wip. not used currently
+Session.setSnark("answer",0,"foo"); //["answer","rank","finish"] (answer is the text when answering questions, rank is the ranking text, and finish is the secondary ranking text) [index/array] (index/array is the text to replace) [text] (value to set item.)
+Session.rankPlayers(); //returns an ordered list of Players
+Session.getPlayerById(id); //gets the player by id
 ```
 ---
 ## Events
@@ -54,6 +56,16 @@ Session.on("questionEnd",players=>{
 Session.on("quizEnd",players=>{
   //runs at end of quiz. Players is a sorted list of players based on score
 });
+```
+---
+## Properties
+```js
+Session.players //list of players
+Session.session //session id
+Session.clientID //client id
+Session.quiz //quiz info
+Session.secret //secret kahoot token
+Session.quizIndex //current quiz index
 ```
 ---
 ### To Do's

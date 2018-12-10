@@ -755,8 +755,45 @@ class Handler extends EventEmitter {
     }
     this.send(rs);
   }
-  setSnark(type){
-
+  setSnark(type,index,text){
+    switch (type) {
+      case "answer":
+        if(typeof(index) == "Object" && typeof(index.push) == "function"){
+          if(index.length >= 1){
+            this.snark == index;
+            return index;
+          }
+          return this.snark;
+        }
+      break;
+      case "rank":
+        if(index < 0){
+          this.success[0] = String(text);
+        }else if(index > 4){
+          this.success[4] = String(text);
+        }else{
+          this.success[index] = String(text);
+        }
+        return this.success2;
+      break;
+      case "finish":
+        if(index < 0){
+          this.success2[0] = String(text);
+        }else if(index > 4){
+          this.success2[4] = String(text);
+        }else{
+          this.success2[index] = String(text);
+        }
+        return this.success2;
+      break;
+      default:
+        return "TypeError: " + String(type) + " is not a valid type";
+    }
+  }
+  getPlayerById(id){
+    return this.players.filter(o=>{
+      return o.id == id;
+    });
   }
 }
 
