@@ -39,7 +39,7 @@ class Handler extends EventEmitter {
       this.emit("questionStart");
     });
     this.on("questionStart",()=>{
-      this.timeout = setTimeout(function(){me.executeQuestion(me)},5000);
+      this.timeout = setTimeout(function(){me.executeQuestion(me)},4000);
     });
     this.timesync = {
       a: [],
@@ -809,7 +809,7 @@ class Handler extends EventEmitter {
     for(let i in this.players){
       this.msgID++;
       let rank = 0;
-      let pl = rankPlayers();
+      let pl = this.rankPlayers();
       for(let h in pl){
         if(pl[h].id == this.players[i].id){
           rank = Number(h) + 1;
