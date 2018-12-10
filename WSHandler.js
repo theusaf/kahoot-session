@@ -27,7 +27,6 @@ class Handler extends EventEmitter {
     this.questionTimestamp = 0;
     this.on("start",()=>{
       setTimeout(()=>{
-        this.questionTimestamp = Date.now();
         this.emit("questionStart");
         this.nextQuestion(true);
       },4000);
@@ -39,8 +38,7 @@ class Handler extends EventEmitter {
       this.emit("questionStart");
     });
     this.on("questionStart",()=>{
-      this.questionTimestamp = Date.now()
-      this.timeout = setTimeout(function(){me.executeQuestion(me)},4000);
+      this.timeout = setTimeout(function(){me.executeQuestion(me);me.questionTimestamp = Date.now();},4000);
     });
     this.timesync = {
       a: [],
