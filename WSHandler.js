@@ -564,7 +564,7 @@ class Handler extends EventEmitter {
     for(let i in this.quiz.questions){
       ans.push(this.quiz.questions[i].choices.length);
     }
-    for(let i in this.quiz.questions[questionIndex].choices){
+    for(let i in this.quiz.questions[this.questionIndex].choices){
       answerMap[String(i)] = Number(i);
     }
     let r = {
