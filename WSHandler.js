@@ -456,7 +456,7 @@ class Handler extends EventEmitter {
     this.players[index].info.text = this.quiz.questions[this.questionIndex].choices[options.choice].answer;
     this.players[index].info.recievedTime = Date.now();
     this.players[index].info.nemesisIsGhost = false;
-    this.players[index].info.totalScore = typeof(this.players[index].info.totalScore) == "undefined" ? this.players[index].info.points : this.players[index].info.totalScore + this.players[index].info.points;
+    this.players[index].info.totalScore = typeof(this.players[index].info.totalScore) == "undefined" ? 0 : this.players[index].info.totalScore;
     this.players[index].info.pointsData = typeof(this.players[index].info.pointsData) == "undefined" ? { //base info...
       streakLevel: 0,
       streakBonus: 0,
@@ -520,7 +520,6 @@ class Handler extends EventEmitter {
       //update scores and ranks.
       if(!me.quiz.questions[me.questionIndex].points){
         //remove the extra points given to them
-        me.players[i].info.totalScore -= me.players[i].info.points;
         me.players[i].info.pointsData.questionPoints = 0;
         me.players[i].info.points = 0;
         continue;
@@ -554,8 +553,6 @@ class Handler extends EventEmitter {
         if(typeof(me.players[i].info.pointsData) == "undefined"){
           me.players[i].info.pointsData = {};
         }
-        me.players[i].info.totalScore = me.players[i].info.totalScore ? me.players[i].info.totalScore : 0;
-        me.players[i].info.totalScore -= (me.players[i].info.streakLevel - 1)*100;
         me.players[i].info.pointsData.questionPoints = 0;
         me.players[i].info.points = 0;
         if(typeof(me.players[i].info.pointsData.answerStreakPoints) == "undefined"){
