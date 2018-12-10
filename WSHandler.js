@@ -564,7 +564,7 @@ class Handler extends EventEmitter {
           ),
           questionPoints: hasPoints ? (
             correct ? (
-              getPoints(Date.now(),options) + (typeof(tp.info.streakLevel) == "undefined" ? 0 : tp.info.streakLevel*100)
+              me.getPoints(Date.now(),options) + (typeof(tp.info.streakLevel) == "undefined" ? 0 : tp.info.streakLevel*100)
             ):(
               0
             )
