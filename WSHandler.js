@@ -472,7 +472,7 @@ class Handler extends EventEmitter {
         totalScore: typeof(tp.info.totalScore) == "undefined" ? 0 : tp.info.totalScore,
         pointsData: {
           totalPointsWithoutBonuses: hasPoints ? typeof(tp.info.totalScore) == "undefined" ? 0 : tp.info.totalScore : 0,
-          totalPointsWithBonuses: typeof(tp.info.totalScore) == "undefined" ? 0 : tp.info.totalScore : 0,
+          totalPointsWithBonuses: hasPoints ? typeof(tp.info.totalScore) == "undefined" ? 0 : tp.info.totalScore : 0,
           questionPoints: 0,
           answerStreakPoints: {
             streakLevel: this.quiz.questions[this.questionIndex].points ? 0 : typeof(tp.info.pointsData) == "undefined" ? 0 : typeof(tp.info.pointsData.answerStreakPoints) == "undefined" ? 0 : tp.info.pointsData.answerStreakPoints.streakLevel,
