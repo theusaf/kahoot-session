@@ -8,7 +8,7 @@
 Basic usage:
 
 ```javascript
-const Game = require('kahoot session');
+const Game = require('kahoot-session');
 
 var Session = new Game('c5429a87-08b5-4aeb-a90c-bd56ebf09540');
 
