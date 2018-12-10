@@ -282,7 +282,7 @@ class Handler extends EventEmitter {
       ans.push(me.quiz.questions[i].choices.length);
     }
     for(let i in me.quiz.questions[me.questionIndex].choices){
-      answerMap[String(i)] = String(i);
+      answerMap[String(i)] = Number(i);
     }
     let r = {
       channel: consts.channels.subscription,
@@ -610,7 +610,7 @@ class Handler extends EventEmitter {
       ans.push(this.quiz.questions[i].choices.length);
     }
     for(let i in this.quiz.questions[this.questionIndex].choices){
-      answerMap[String(i)] = String(i);
+      answerMap[String(i)] = Number(i);
     }
     let r = {
       channel: consts.channels.subscription,
@@ -627,7 +627,8 @@ class Handler extends EventEmitter {
           canAccessStoryBlocks: false,
           gameBlockType: "quiz",
           quizType: "quiz",
-          quizQuestionAnswers: ans
+          quizQuestionAnswers: ans,
+          timeLeft: 4
         })
       }
     };
