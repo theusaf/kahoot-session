@@ -50,6 +50,9 @@ Session.on("open",()=>{
 Session.on("start",question=>{
   //runs on the start of the quiz. Has the question object.
 });
+Session.on("qstart",quest=>{
+  //runs on question start (not the first question tho.) has question object
+});
 Session.on("questionEnd",players=>{
   //runs when the question ends. Players is a sorted list of players based on score
 });
