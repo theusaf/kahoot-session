@@ -31,7 +31,7 @@ class Handler extends EventEmitter {
       },5000);
     });
     this.on("questionStart",()=>{
-      this.timeout = setTimeout(endQuestion,this.quiz.questions[quizIndex].time);
+      this.timeout = setTimeout(this.nextQuestion,this.quiz.questions[quizIndex].time);
     });
     this.timesync = {
       a: [],
