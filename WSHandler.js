@@ -574,12 +574,14 @@ class Handler extends EventEmitter {
         }
       }
       me.players[i].info.rank = place;
-      me.players[i].info.nemesis = {
-        cid: nemesis.id,
-        name: nemesis.name,
-        isGhost: false,
-        totalScore: nemesis.info.totalScore,
-        isKicked: false
+      if(nemesis != null){
+        me.players[i].info.nemesis = {
+          cid: nemesis.id,
+          name: nemesis.name,
+          isGhost: false,
+          totalScore: nemesis.info.totalScore,
+          isKicked: false
+        }
       }
       me.msgID++;
       rs.push({
