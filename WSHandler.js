@@ -454,7 +454,7 @@ class Handler extends EventEmitter {
     if(answerIsNULL){
       tp.info = {
         choice: null,
-        isCorrect: false
+        isCorrect: false,
         correctAnswers: (()=>{
           let objs = this.quiz.questions[this.questionIndex].choices.filter(o=>{
             return o.correct;
