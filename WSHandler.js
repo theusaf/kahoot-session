@@ -249,7 +249,8 @@ class Handler extends EventEmitter {
           })
         }
       };
-      this.send([r]);
+      var me = this;
+      setTimeout(function(){me.send([r])},100);
       this.emit("answer",data[0].data.cid);
       return;
     }
@@ -418,7 +419,7 @@ class Handler extends EventEmitter {
   //{"podiumMedalType":"gold","primaryMessage":"1<sup>st</sup> place","secondaryMessage":"Colossal result!","quizType":"quiz","quizQuestionAnswers":[4,4,4,4,4,4,4,4,2,4]}
   /*{"playerCount":1,"quizId":"c5429a87-08b5-4aeb-a90c-bd56ebf09540","quizType":"quiz","startTime":1544307691369,"hostId":"56936bb8-8653-4130-9cf2-be47a54b42a7","rank":1,"challengeId":null,"correctCount":8,"incorrectCount":2,"unansweredCount":0,"cid":"4","name":"s","isGhost":false,"isKicked":false,"answers":[{"choice":1,"isCorrect":false,"points":0,"receivedTime":1544307706498,"text":"Function","meta":{"lag":58},"pointsQuestion":true},{"choice":1,"isCorrect":true,"points":588,"receivedTime":1544312677300,"text":"Flappy will play a sound","meta":{"lag":27},"pointsQuestion":true},{"choice":1,"isCorrect":true,"points":657,"receivedTime":1544312748854,"text":"The speed of the game will be slow","meta":{"lag":52},"pointsQuestion":true},{"choice":3,"isCorrect":false,"points":0,"receivedTime":1544312799420,"text":"Flap","meta":{"lag":50},"pointsQuestion":true},{"choice":3,"isCorrect":true,"points":882,"receivedTime":1544312839720,"text":"Flapping","meta":{"lag":45},"pointsQuestion":true},{"choice":0,"isCorrect":true,"points":874,"receivedTime":1544312856154,"text":"A large amount","meta":{"lag":47},"pointsQuestion":true},{"choice":3,"isCorrect":true,"points":741,"receivedTime":1544312877157,"text":"A sad sound will play","meta":{"lag":53},"pointsQuestion":true},{"choice":3,"isCorrect":true,"points":907,"receivedTime":1544312907512,"text":"Crunch","meta":{"lag":62},"pointsQuestion":true},{"choice":0,"isCorrect":true,"points":960,"receivedTime":1544312925817,"text":"True","meta":{"lag":70},"pointsQuestion":true},{"choice":0,"isCorrect":true,"points":0,"receivedTime":1544312946175,"text":"Yes","meta":{"lag":69},"pointsQuestion":false}],"meta":{"device":{"userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36","screen":{"width":1280,"height":777}}},"totalScore":6709,"quizQuestionAnswers":[4,4,4,4,4,4,4,4,2,4]}*/
   handleScore(id,options){
-    console.log("handling scores. options are " + options);
+    console.log("handling scores. options are " + JSON.stringify(options));
     //edits the scores of ppl + saves their choice
     //{"choice":1,"isCorrect":false,"correctAnswers":["Event"],"points":0,"totalScore":0,"pointsData":{"totalPointsWithoutBonuses":0,"totalPointsWithBonuses":0,"questionPoints":0,"answerStreakPoints":{"streakLevel":0,"streakBonus":0,"totalStreakPoints":0,"previousStreakLevel":0,"previousStreakBonus":0}},"rank":2,"nemesis":{"cid":"5","name":"sooo","isGhost":false,"totalScore":935,"isKicked":false},"nemesisIsGhost":false,"receivedTime":1544307706498,"text":"Function","meta":{"lag":58},"pointsQuestion":true,"quizType":"quiz","quizQuestionAnswers":[4,4,4,4,4,4,4,4,2,4]}
     let index;
@@ -486,7 +487,6 @@ class Handler extends EventEmitter {
   }
   endQuestion(me){
     var me = me ? me : this;
-    console.log(me.quiz);
     if(me.questionIndex == me.quiz.questions.length){
       me.endQuiz();
     }
