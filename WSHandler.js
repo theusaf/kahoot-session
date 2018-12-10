@@ -42,7 +42,7 @@ class Handler extends EventEmitter {
       },5000);
     });
     this.on("questionStart",()=>{
-      this.timeout = setTimeout(me.executeQuestion,5000);
+      this.timeout = setTimeout(function(){me.executeQuestion(me)},5000);
     });
     this.timesync = {
       a: [],
@@ -273,8 +273,7 @@ class Handler extends EventEmitter {
       return;
     }
   }
-  executeQuestion(){
-    var me = this;
+  executeQuestion(me){
     me.msgID++;
     let answerMap = {};
     let ans = [];
