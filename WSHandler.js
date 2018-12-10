@@ -437,7 +437,7 @@ class Handler extends EventEmitter {
     let place = 0;
     var nemesis = undefined;
     let hasPoints = me.quiz.questions[me.questionIndex].points;
-    let correct = me.quiz.questions[me.questionIndex].choices[options.choice].correct;
+    let correct = answerIsNULL ? false : me.quiz.questions[me.questionIndex].choices[options.choice].correct;
     if(typeof(tp.info) == "undefined"){
       tp.info = {};
     }
