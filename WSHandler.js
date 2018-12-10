@@ -633,6 +633,7 @@ class Handler extends EventEmitter {
       }
       delete this.players.info.choice;
       delete this.players.info.isCorrect;
+      this.players.info.points = 0;
     }
     for(let i in this.quiz.questions){
       ans.push(this.quiz.questions[i].choices.length);
