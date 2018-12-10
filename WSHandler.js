@@ -36,10 +36,7 @@ class Handler extends EventEmitter {
       if(f == "first"){
         return;
       }
-      setTimeout(()=>{
-        this.questionTimestamp = Date.now();
-        this.emit("questionStart");
-      },5000);
+      this.emit("questionStart");
     });
     this.on("questionStart",()=>{
       this.timeout = setTimeout(function(){me.executeQuestion(me)},5000);
@@ -549,7 +546,7 @@ class Handler extends EventEmitter {
         me.players[i].info.points = me.players[i].info.points ? me.players[i].info.points : 0;
         me.players[i].info.points += (this.players[i].info.streakLevel - 1)*100;
         me.players[i].info.totalScore = me.players[i].info.totalScore ? me.players[i].info.totalScore : 0;
-        me.players[i].info.totalScore += this.players[i].info.points;
+        me.players[i].info.totalScore += (this.players[i].info.streakLevel - 1)*100;
         me.players[i].info.pointsData.totalPointsWithBonuses = me.players[i].info.totalScore;
         me.players[i].info.pointsData.totalPointsWithoutBonuses = me.players[i].info.totalScore - (me.players[i].info.streakLevel - 1)*100;
       }else{
@@ -769,7 +766,7 @@ class Handler extends EventEmitter {
     for(let i in this.players){
       this.msgID++;
       let rank = 0;
-      let pl = rankPlayers();
+      let pl = this.rankPlayers();
       for(let h in pl){
         if(pl[h].id == this.players[i].id){
           rank = Number(h) + 1;
