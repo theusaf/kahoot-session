@@ -528,6 +528,11 @@ class Handler extends EventEmitter {
         continue;
       }
       //update scores based on the streaks
+      if(typeof(me.players[i].info) == "undefined"){
+        me.players[i].info = {
+          isCorrect: false
+        }
+      }
       if(me.players[i].info.isCorrect){
         if(typeof(me.players[i].info.pointsData) == "undefined"){
           me.players[i].info.pointsData = {};
