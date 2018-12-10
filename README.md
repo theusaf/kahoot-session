@@ -2,7 +2,7 @@
 #### An script that allows you to create Kahoot! quizzes with more control
 ---
 ### Installation:
-> npm i theusaf/kahoot-session
+> npm i kahoot-session
 
 ---
 Basic usage:
