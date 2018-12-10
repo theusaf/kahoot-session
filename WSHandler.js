@@ -30,7 +30,7 @@ class Handler extends EventEmitter {
         this.questionTimestamp = Date.now();
         this.emit("questionStart");
         this.nextQuestion(true);
-      },5000);
+      },4000);
     });
     this.on("qstart",f=>{
       if(f == "first"){
@@ -39,6 +39,7 @@ class Handler extends EventEmitter {
       this.emit("questionStart");
     });
     this.on("questionStart",()=>{
+      this.questionTimestamp = Date.now()
       this.timeout = setTimeout(function(){me.executeQuestion(me)},4000);
     });
     this.timesync = {
@@ -799,84 +800,6 @@ class Handler extends EventEmitter {
     this.send([r]);
     let rs = [];
     let rs2 = [];
-    /*for(let i in this.players){
-      //update scores and ranks.
-      if(!this.quiz.questions[questionIndex].points){
-        //remove the extra points given to them
-        this.players[i].info.totalScore -= this.players[i].info.points;
-        this.players[i].info.pointsData.questionPoints = 0;
-        this.players[i].info.points = 0;
-        continue;
-      }
-      //update scores based on the streaks
-      if(this.players[i].info.isCorrect){
-        this.players[i].info.pointsData.answerStreakPoints = {
-          streakLevel: this.players[i].info.streakLevel + 1,
-          streakBonus: (this.players[i].info.streakLevel)*100,
-          totalStreakPoints: this.players[i].info.pointsData.answerStreakPoints.totalStreakPoints + (this.players[i].info.streakLevel)*100,
-          previousStreakLevel: this.players[i].info.pointsData.streakLevel,
-          previousStreakBonus: this.players[i].info.pointsData.streakBonus
-        }
-        this.players[i].info.streakLevel ++;
-        this.players[i].info.streakBonus = (this.players[i].info.streakLevel - 1)*100;
-        this.players[i].info.points += (this.players[i].info.streakLevel - 1)*100;
-        this.players[i].info.totalScore += this.players[i].info.points;
-        this.players[i].info.pointsData.totalPointsWithBonuses = this.players[i].info.totalScore;
-        this.players[i].info.pointsData.totalPointsWithoutBonuses = this.players[i].info.totalScore - (this.players[i].info.streakLevel - 1)*100;
-      }else{
-        this.players[i].info.totalScore -= this.players[i].info.points;
-        this.players[i].info.pointsData.questionPoints = 0;
-        this.players[i].info.points = 0;
-        this.players[i].info.pointsData.answerStreakPoints = {
-          streakLevel: 0,
-          streakBonus: 0,
-          totalStreakPoints: this.players[i].info.pointsData.answerStreakPoints.totalStreakPoints,
-          previousStreakLevel: this.players[i].info.pointsData.streakLevel,
-          previousStreakBonus: this.players[i].info.pointsData.streakBonus
-        }
-        this.players[i].info.pointsData.streakLevel = 0;
-        this.players[i].info.pointsData.streakBonus = 0;
-        this.players[i].info.pointsData.totalPointsWithBonuses = this.players[i].info.totalScore;
-        this.players[i].info.pointsData.totalPointsWithoutBonuses = this.players[i].info.totalScore;
-      }
-      //get rank + nemesis
-      let sorted = rankPlayers();
-      let place = 0;
-      let nemesis = undefined;
-      for(let j in sorted){
-        if(sorted[j].id == this.players[i].id){
-          place = Number(j) + 1;
-          if(place == 1){
-            nemsis = null;
-          }else{
-            nemesis = sorted[Number(j) - 1];
-          }
-          break;
-        }
-      }
-      this.players[i].info.rank = place;
-      this.players[i].info.nemesis = {
-        cid: nemsis.id,
-        name: nemesis.name,
-        isGhost: false,
-        totalScore: nemesis.info.totalScore,
-        isKicked: false
-      }
-      this.msgID++;
-      rs.push({
-        channel: consts.channels.subscription,
-        clientId: this.clientID,
-        id: String(this.msgID),
-        data: {
-          cid: this.players[i].id,
-          gameid: this.session,
-          host: "play.kahoot.it",
-          id: 8,
-          type: "message",
-          content: JSON.stringify(this.players[i].info)
-        }
-      });
-    }*/
     //this.send(rs);
     for(let i in this.players){
       this.msgID++;
