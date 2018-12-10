@@ -841,7 +841,7 @@ class Handler extends EventEmitter {
   setSnark(type,index,text){
     switch (type) {
       case "answer":
-        if(typeof(index) == "Object" && typeof(index.push) == "function"){
+        if(typeof(index) == "object" && typeof(index.push) == "function"){
           if(index.length >= 1){
             this.snark == index;
             return index;
