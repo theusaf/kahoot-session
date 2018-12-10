@@ -27,7 +27,7 @@ Session.kickPlayer(id); //kicks a player with id
 Session.endQuestion(); //ends the question early.
 Session.nextQuestion(); //sends the next question
 Session.endQuiz(); //ends the quiz
-Session.setSnark("answer",0,"foo"); //["answer","rank","finish"] (answer is the text when answering questions, rank is the ranking text, and finish is the secondary ranking text) [index/array] (index/array is the text to replace) [text] (value to set item.)
+Session.setSnark(Session,"answer",0,"foo"); //["answer","rank","finish"] (answer is the text when answering questions, rank is the ranking text, and finish is the secondary ranking text) [index/array] (index/array is the text to replace) [text] (value to set item.)
 Session.rankPlayers(); //returns an ordered list of Players
 Session.getPlayerById(id); //gets the player by id
 ```

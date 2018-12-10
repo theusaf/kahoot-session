@@ -613,11 +613,11 @@ class Handler extends EventEmitter {
     //wait for user to call next question
   }
   nextQuestion(isFirst){
+    this.questionIndex++;
     if(this.questionIndex == this.quiz.questions.length){
       this.endQuiz();
     }
     this.msgID++;
-    this.questionIndex++;
     if(isFirst){this.questionIndex--;}
     this.emit("qstart",isFirst ? "first" : this.quiz.questions[this.quizIndex]);
     let answerMap = {};
@@ -838,12 +838,12 @@ class Handler extends EventEmitter {
     }
     this.send(rs);
   }
-  setSnark(type,index,text){
+  setSnark(game,type,index,text){
     switch (type) {
       case "answer":
         if(typeof(index) == "object" && typeof(index.push) == "function"){
           if(index.length >= 1){
-            this.snark == index;
+            game.snark == index;
             return index;
           }
           return this.snark;
@@ -851,23 +851,23 @@ class Handler extends EventEmitter {
       break;
       case "rank":
         if(index < 0){
-          this.success[0] = String(text);
+          game.success[0] = String(text);
         }else if(index > 4){
-          this.success[4] = String(text);
+          game.success[4] = String(text);
         }else{
-          this.success[index] = String(text);
+          game.success[index] = String(text);
         }
-        return this.success2;
+        return game.success2;
       break;
       case "finish":
         if(index < 0){
-          this.success2[0] = String(text);
+          game.success2[0] = String(text);
         }else if(index > 4){
-          this.success2[4] = String(text);
+          game.success2[4] = String(text);
         }else{
-          this.success2[index] = String(text);
+          game.success2[index] = String(text);
         }
-        return this.success2;
+        return game.success2;
       break;
       default:
         return "TypeError: " + String(type) + " is not a valid type";
