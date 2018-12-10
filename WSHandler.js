@@ -420,18 +420,18 @@ class Handler extends EventEmitter {
   handleScore(id,options){
     //edits the scores of ppl + saves their choice
     //{"choice":1,"isCorrect":false,"correctAnswers":["Event"],"points":0,"totalScore":0,"pointsData":{"totalPointsWithoutBonuses":0,"totalPointsWithBonuses":0,"questionPoints":0,"answerStreakPoints":{"streakLevel":0,"streakBonus":0,"totalStreakPoints":0,"previousStreakLevel":0,"previousStreakBonus":0}},"rank":2,"nemesis":{"cid":"5","name":"sooo","isGhost":false,"totalScore":935,"isKicked":false},"nemesisIsGhost":false,"receivedTime":1544307706498,"text":"Function","meta":{"lag":58},"pointsQuestion":true,"quizType":"quiz","quizQuestionAnswers":[4,4,4,4,4,4,4,4,2,4]}
-    this.players[index].answers = typeof(this.players[index].answers) == "undefined" ? [] : this.players[index].answers;
-    this.players[index].answers.push(options);
-    let ans = [];
-    for(let i in this.quiz.questions){
-      ans.push(this.quiz.questions[i].choices.length);
-    }
     let index;
     for(let i in this.players){
       if(this.players[i].id == id){
         index = Number(i);
         return;
       }
+    }
+    this.players[index].answers = typeof(this.players[index].answers) == "undefined" ? [] : this.players[index].answers;
+    this.players[index].answers.push(options);
+    let ans = [];
+    for(let i in this.quiz.questions){
+      ans.push(this.quiz.questions[i].choices.length);
     }
     this.players[index].info.choice= options.choice;
     this.players[index].info.isCorrect= this.quiz.questions[this.questionIndex].choices[options.choice].correct;
