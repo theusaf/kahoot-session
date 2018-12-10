@@ -566,7 +566,7 @@ class Handler extends EventEmitter {
         if(sorted[j].id == me.players[i].id){
           place = Number(j) + 1;
           if(place == 1){
-            nemsis = null;
+            nemesis = null;
           }else{
             nemesis = sorted[Number(j) - 1];
           }
@@ -575,7 +575,7 @@ class Handler extends EventEmitter {
       }
       me.players[i].info.rank = place;
       me.players[i].info.nemesis = {
-        cid: nemsis.id,
+        cid: nemesis.id,
         name: nemesis.name,
         isGhost: false,
         totalScore: nemesis.info.totalScore,
