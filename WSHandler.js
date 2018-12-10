@@ -523,7 +523,7 @@ class Handler extends EventEmitter {
           )
         ) : (
           typeof(tp.info.totalScore) == "undefined" ? 0 : tp.info.totalScore
-        )
+        ),
         pointsData: {
           totalPointsWithoutBonuses: hasPoints ? (
             correct ? (
