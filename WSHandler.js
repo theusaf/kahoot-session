@@ -226,7 +226,7 @@ class Handler extends EventEmitter {
       return;
     }
     if(data[0].channel == "/controller/" + this.session && JSON.parse(data[0].data.content).choice){
-      handleScore(data[0].data.cid,JSON.parse(data[0].data.content));
+      this.handleScore(data[0].data.cid,JSON.parse(data[0].data.content));
       //send response...
       let ans = [];
       this.msgID++;
@@ -596,7 +596,7 @@ class Handler extends EventEmitter {
     me.send(rs);
     //wait for user to call next question
   }
-  nextQuestion(isFirst){
+  nextQuestion(isFirst){}
     if(this.questionIndex == this.quiz.questions.length){
       this.endQuiz();
     }
@@ -606,6 +606,10 @@ class Handler extends EventEmitter {
     this.emit("qstart",isFirst ? "first" : this.quiz.questions[this.quizIndex]);
     let answerMap = {};
     let ans = [];
+    for(let i in this.players){
+      delete this.players.info.choice;
+      delete this.players.info.isCorrect;
+    }
     for(let i in this.quiz.questions){
       ans.push(this.quiz.questions[i].choices.length);
     }
