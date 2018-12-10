@@ -513,9 +513,9 @@ class Handler extends EventEmitter {
         totalScore: correct ? (
           hasPoints ? (
             typeof(tp.info.totalScore) == "undefined" ? (
-              getPoints(Date.now(),options) + (typeof(tp.info.streakLevel) == "undefined" ? 0 : tp.info.streakLevel*100)
+              me.getPoints(Date.now(),options) + (typeof(tp.info.streakLevel) == "undefined" ? 0 : tp.info.streakLevel*100)
             ):(
-              tp.info.totalScore + getPoints(Date.now(),options) + (typeof(tp.info.streakLevel) == "undefined" ? 0 : (
+              tp.info.totalScore + me.getPoints(Date.now(),options) + (typeof(tp.info.streakLevel) == "undefined" ? 0 : (
                 (tp.info.streakLevel * 100)
               ))
             )
