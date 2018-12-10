@@ -302,7 +302,7 @@ class Handler extends EventEmitter {
       }
     };
     me.send([r]);
-    setTimeout(function(){me.endQuestion(me)},me.quiz.questions[me.questionIndex].time);
+    me.timeout2 = setTimeout(function(){me.endQuestion(me)},me.quiz.questions[me.questionIndex].time);
   }
   send(msg){
     if(this.connected){
@@ -490,6 +490,7 @@ class Handler extends EventEmitter {
       me.endQuiz();
     }
     clearTimeout(me.timeout);
+    clearTimeout(me.timeout2);
     let ans = [];
     for(let i in me.quiz.questions){
       ans.push(me.quiz.questions[i].choices.length);
