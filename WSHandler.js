@@ -556,7 +556,7 @@ class Handler extends EventEmitter {
                 )
               )
             ):(
-              typeof(tp.info.pointsData) == "undefined" 0 :
+              typeof(tp.info.pointsData) == "undefined" ? 0 :
               typeof(tp.info.pointsData.totalPointsWithBonuses) == "undefined" ? 0 : tp.info.pointsData.totalPointsWithBonuses
             )
           ):(
