@@ -546,7 +546,7 @@ class Handler extends EventEmitter {
         me.players[i].info.points = me.players[i].info.points ? me.players[i].info.points : 0;
         me.players[i].info.points += (this.players[i].info.streakLevel - 1)*100;
         me.players[i].info.totalScore = me.players[i].info.totalScore ? me.players[i].info.totalScore : 0;
-        me.players[i].info.totalScore += (this.players[i].info.streakLevel - 1)*100;
+        me.players[i].info.totalScore += me.players[i].info.points;
         me.players[i].info.pointsData.totalPointsWithBonuses = me.players[i].info.totalScore;
         me.players[i].info.pointsData.totalPointsWithoutBonuses = me.players[i].info.totalScore - (me.players[i].info.streakLevel - 1)*100;
       }else{
