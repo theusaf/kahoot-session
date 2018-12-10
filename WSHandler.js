@@ -442,7 +442,7 @@ class Handler extends EventEmitter {
     return Math.round(1000 * ((quizTime - ansTime) / quizTime));
   }
   endQuestion(){
-    console.log(quiz);
+    console.log(this.quiz);
     if(this.questionIndex == this.quiz.questions.length){
       this.endQuiz();
     }
