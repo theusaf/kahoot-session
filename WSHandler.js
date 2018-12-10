@@ -557,6 +557,9 @@ class Handler extends EventEmitter {
         me.players[i].info.totalScore -= this.players[i].info.points;
         me.players[i].info.pointsData.questionPoints = 0;
         me.players[i].info.points = 0;
+        if(typeof(me.players[i].info.pointsData.answerStreakPoints) == "undefined"){
+          me.players[i].info.pointsData.answerStreakPoints = {};
+        }
         me.players[i].info.pointsData.answerStreakPoints = {
           streakLevel: 0,
           streakBonus: 0,
