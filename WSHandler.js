@@ -596,7 +596,7 @@ class Handler extends EventEmitter {
     me.send(rs);
     //wait for user to call next question
   }
-  nextQuestion(isFirst){}
+  nextQuestion(isFirst){
     if(this.questionIndex == this.quiz.questions.length){
       this.endQuiz();
     }
