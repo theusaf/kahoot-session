@@ -561,7 +561,7 @@ class Handler extends EventEmitter {
       //get rank + nemesis
       let sorted = me.rankPlayers();
       let place = 0;
-      let nemesis = undefined;
+      var nemesis = undefined;
       for(let j in sorted){
         if(sorted[j].id == me.players[i].id){
           place = Number(j) + 1;
