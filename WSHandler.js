@@ -41,6 +41,18 @@ class Handler extends EventEmitter {
   start(){
     //GET quiz.
     this.timestamp = Date.now();
+    request(consts.quiz_id + this.quizID + consts.quiz_extra + this.timestamp,(e,r,b) => {
+      if(e){
+        throw "Invalid URI / API Error";
+      }
+      try{
+        this.quiz = JSON.parse(b);
+      }catch(e){
+        console.log("JSON Error");
+        this.emit("error",e);
+        return;
+      }
+    });
     let form = {
       gameMode: "normal",
       namerator: false,
