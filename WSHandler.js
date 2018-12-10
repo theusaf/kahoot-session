@@ -242,6 +242,7 @@ class Handler extends EventEmitter {
           host: "play.kahoot.it",
           id: 7,
           type: "message",
+          gameid: this.session,
           content: JSON.stringify({
             primaryMessage: this.snark[Math.floor(Math.random() * this.snark.length)],
             quizType: "quiz",
@@ -249,8 +250,7 @@ class Handler extends EventEmitter {
           })
         }
       };
-      var me = this;
-      setTimeout(function(){me.send([r])},100);
+      this.send([r]);
       this.emit("answer",data[0].data.cid);
       return;
     }
