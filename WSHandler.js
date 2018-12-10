@@ -559,7 +559,7 @@ class Handler extends EventEmitter {
         me.players[i].info.pointsData.totalPointsWithoutBonuses = me.players[i].info.totalScore;
       }
       //get rank + nemesis
-      let sorted = rankPlayers();
+      let sorted = me.rankPlayers();
       let place = 0;
       let nemesis = undefined;
       for(let j in sorted){
