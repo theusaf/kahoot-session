@@ -282,7 +282,7 @@ class Handler extends EventEmitter {
       ans.push(me.quiz.questions[i].choices.length);
     }
     for(let i in me.quiz.questions[me.questionIndex].choices){
-      answerMap[String(i)] = Number(i);
+      answerMap[String(i)] = String(i);
     }
     let r = {
       channel: consts.channels.subscription,
@@ -517,7 +517,7 @@ class Handler extends EventEmitter {
     let rs = [];
     for(let i in me.players){
       //update scores and ranks.
-      if(!me.quiz.questions[questionIndex].points){
+      if(!me.quiz.questions[me.questionIndex].points){
         //remove the extra points given to them
         me.players[i].info.totalScore -= me.players[i].info.points;
         me.players[i].info.pointsData.questionPoints = 0;
@@ -610,7 +610,7 @@ class Handler extends EventEmitter {
       ans.push(this.quiz.questions[i].choices.length);
     }
     for(let i in this.quiz.questions[this.questionIndex].choices){
-      answerMap[String(i)] = Number(i);
+      answerMap[String(i)] = String(i);
     }
     let r = {
       channel: consts.channels.subscription,
