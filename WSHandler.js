@@ -471,7 +471,7 @@ class Handler extends EventEmitter {
         },
         totalScore: typeof(tp.info.totalScore) == "undefined" ? 0 : tp.info.totalScore,
         pointsData: {
-          totalPointsWithoutBonuses: this.quiz.questions[this.questionIndex].points ? typeof(tp.info.totalScore) == "undefined" ? 0 : tp.info.totalScore,
+          totalPointsWithoutBonuses: hasPoints ? typeof(tp.info.totalScore) == "undefined" ? 0 : tp.info.totalScore : 0,
           totalPointsWithBonuses: typeof(tp.info.totalScore) == "undefined" ? 0 : tp.info.totalScore : 0,
           questionPoints: 0,
           answerStreakPoints: {
