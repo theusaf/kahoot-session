@@ -254,7 +254,7 @@ class Handler extends EventEmitter {
       return;
     }
     if(data[0].channel == consts.channels.connect && typeof(data[0].advice) != "undefined"){
-      if(typeof(data[0].advice.reconnect) == "undefiend"){
+      if(typeof(data[0].advice.reconnect) == "undefined"){
         return;
       }
       if(data[0].advice.reconnect == "retry"){
@@ -607,6 +607,9 @@ class Handler extends EventEmitter {
     let answerMap = {};
     let ans = [];
     for(let i in this.players){
+      if(typeof(this.players.info) == "undefined"){
+        continue;
+      }
       delete this.players.info.choice;
       delete this.players.info.isCorrect;
     }
