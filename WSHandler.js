@@ -415,28 +415,29 @@ class Handler extends EventEmitter {
   }
   //{"podiumMedalType":"gold","primaryMessage":"1<sup>st</sup> place","secondaryMessage":"Colossal result!","quizType":"quiz","quizQuestionAnswers":[4,4,4,4,4,4,4,4,2,4]}
   /*{"playerCount":1,"quizId":"c5429a87-08b5-4aeb-a90c-bd56ebf09540","quizType":"quiz","startTime":1544307691369,"hostId":"56936bb8-8653-4130-9cf2-be47a54b42a7","rank":1,"challengeId":null,"correctCount":8,"incorrectCount":2,"unansweredCount":0,"cid":"4","name":"s","isGhost":false,"isKicked":false,"answers":[{"choice":1,"isCorrect":false,"points":0,"receivedTime":1544307706498,"text":"Function","meta":{"lag":58},"pointsQuestion":true},{"choice":1,"isCorrect":true,"points":588,"receivedTime":1544312677300,"text":"Flappy will play a sound","meta":{"lag":27},"pointsQuestion":true},{"choice":1,"isCorrect":true,"points":657,"receivedTime":1544312748854,"text":"The speed of the game will be slow","meta":{"lag":52},"pointsQuestion":true},{"choice":3,"isCorrect":false,"points":0,"receivedTime":1544312799420,"text":"Flap","meta":{"lag":50},"pointsQuestion":true},{"choice":3,"isCorrect":true,"points":882,"receivedTime":1544312839720,"text":"Flapping","meta":{"lag":45},"pointsQuestion":true},{"choice":0,"isCorrect":true,"points":874,"receivedTime":1544312856154,"text":"A large amount","meta":{"lag":47},"pointsQuestion":true},{"choice":3,"isCorrect":true,"points":741,"receivedTime":1544312877157,"text":"A sad sound will play","meta":{"lag":53},"pointsQuestion":true},{"choice":3,"isCorrect":true,"points":907,"receivedTime":1544312907512,"text":"Crunch","meta":{"lag":62},"pointsQuestion":true},{"choice":0,"isCorrect":true,"points":960,"receivedTime":1544312925817,"text":"True","meta":{"lag":70},"pointsQuestion":true},{"choice":0,"isCorrect":true,"points":0,"receivedTime":1544312946175,"text":"Yes","meta":{"lag":69},"pointsQuestion":false}],"meta":{"device":{"userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36","screen":{"width":1280,"height":777}}},"totalScore":6709,"quizQuestionAnswers":[4,4,4,4,4,4,4,4,2,4]}*/
-  handleScore(id,options,answerIsNULL){
+  handleScore(id,options,answerIsNULL,dis){
     //edits the scores of ppl + saves their choice
     //{"choice":1,"isCorrect":false,"correctAnswers":["Event"],"points":0,"totalScore":0,"pointsData":{"totalPointsWithoutBonuses":0,"totalPointsWithBonuses":0,"questionPoints":0,"answerStreakPoints":{"streakLevel":0,"streakBonus":0,"totalStreakPoints":0,"previousStreakLevel":0,"previousStreakBonus":0}},"rank":2,"nemesis":{"cid":"5","name":"sooo","isGhost":false,"totalScore":935,"isKicked":false},"nemesisIsGhost":false,"receivedTime":1544307706498,"text":"Function","meta":{"lag":58},"pointsQuestion":true,"quizType":"quiz","quizQuestionAnswers":[4,4,4,4,4,4,4,4,2,4]}
+    var me = dis ? dis : this;
     let index;
-    for(let i in this.players){
+    for(let i in me.players){
       if(this.players[i].id == id){
         index = Number(i);
         break;
       }
     }
-    this.players[index].answers = typeof(this.players[index].answers) == "undefined" ? [] : this.players[index].answers;
-    this.players[index].answers.push(options);
+    me.players[index].answers = typeof(me.players[index].answers) == "undefined" ? [] : me.players[index].answers;
+    me.players[index].answers.push(options);
     let ans = [];
-    var tp = this.players[index]
-    for(let i in this.quiz.questions){
-      ans.push(this.quiz.questions[i].choices.length);
+    var tp = me.players[index]
+    for(let i in me.quiz.questions){
+      ans.push(me.quiz.questions[i].choices.length);
     }
-    let sorted = this.rankPlayers();
+    let sorted = me.rankPlayers();
     let place = 0;
     var nemesis = undefined;
-    let hasPoints = this.quiz.questions[this.questionIndex].points;
-    let correct = this.quiz.questions[this.questionIndex].choices[options.choice].correct;
+    let hasPoints = me.quiz.questions[me.questionIndex].points;
+    let correct = me.quiz.questions[me.questionIndex].choices[options.choice].correct;
     if(typeof(tp.info) == "undefined"){
       tp.info = {};
     }
@@ -456,7 +457,7 @@ class Handler extends EventEmitter {
         choice: null,
         isCorrect: false,
         correctAnswers: (()=>{
-          let objs = this.quiz.questions[this.questionIndex].choices.filter(o=>{
+          let objs = me.quiz.questions[me.questionIndex].choices.filter(o=>{
             return o.correct;
           });
           let c = [];
@@ -475,7 +476,7 @@ class Handler extends EventEmitter {
           totalPointsWithBonuses: hasPoints ? typeof(tp.info.totalScore) == "undefined" ? 0 : tp.info.totalScore : 0,
           questionPoints: 0,
           answerStreakPoints: {
-            streakLevel: this.quiz.questions[this.questionIndex].points ? 0 : typeof(tp.info.pointsData) == "undefined" ? 0 : typeof(tp.info.pointsData.answerStreakPoints) == "undefined" ? 0 : tp.info.pointsData.answerStreakPoints.streakLevel,
+            streakLevel: me.quiz.questions[me.questionIndex].points ? 0 : typeof(tp.info.pointsData) == "undefined" ? 0 : typeof(tp.info.pointsData.answerStreakPoints) == "undefined" ? 0 : tp.info.pointsData.answerStreakPoints.streakLevel,
             streakBonus: 0,
             totalStreakPoints: typeof(tp.info.pointsData) == "undefined" ? 0 : typeof(tp.info.pointsData.answerStreakPoints == "undefined") ? 0 : tp.info.pointsData.answerStreakPoints.totalStreakPoints,
             previousStreakLevel: typeof(tp.info.pointsData) == "undefined" ? 0 : typeof(tp.info.pointsData.answerStreakPoints == "undefined") ? 0 : tp.info.pointsData.answerStreakPoints.streakLevel,
@@ -487,7 +488,7 @@ class Handler extends EventEmitter {
         nemesisIsGhost: false,
         receivedTime: Date.now(),
         text: "",
-        pointsQuestion: this.quiz.questions[this.questionIndex].points,
+        pointsQuestion: me.quiz.questions[me.questionIndex].points,
         quizType: "quiz",
         quizQuestionAnswers: ans
       };
@@ -496,7 +497,7 @@ class Handler extends EventEmitter {
         choice: options.choice,
         isCorrect: correct,
         correctAnswers: (()=>{
-          let objs = this.quiz.questions[this.questionIndex].choices.filter(o=>{
+          let objs = me.quiz.questions[me.questionIndex].choices.filter(o=>{
             return o.correct;
           });
           let c = [];
@@ -505,7 +506,7 @@ class Handler extends EventEmitter {
           }
           return c;
         })(),
-        points: correct ? hasPoints ? getPoints(Date.now(),options) + (typeof(tp.info.streakLevel) == "undefined" ? 0 : ((tp.info.streakLevel)*100)) : 0 : 0,
+        points: correct ? hasPoints ? me.getPoints(Date.now(),options) + (typeof(tp.info.streakLevel) == "undefined" ? 0 : ((tp.info.streakLevel)*100)) : 0 : 0,
         meta: {
           lag: options.meta.lag
         },
@@ -528,9 +529,9 @@ class Handler extends EventEmitter {
           totalPointsWithoutBonuses: hasPoints ? (
             correct ? (
               typeof(tp.info.pointsData.totalPointsWithoutBonuses) == "undefined" ? (
-                getPoints(Date.now(),options)
+                me.getPoints(Date.now(),options)
               ):(
-                tp.info.pointsData.totalPointsWithoutBonuses + getPoints(Date.now(),options)
+                tp.info.pointsData.totalPointsWithoutBonuses + me.getPoints(Date.now(),options)
               )
             ):(
               typeof(tp.info.pointsData) == "undefined" ? 0 : typeof(tp.info.pointsData.totalPointsWithoutBonuses) == "undefined" ? 0 : tp.info.pointsData.totalPointsWithoutBonuses
@@ -619,17 +620,17 @@ class Handler extends EventEmitter {
         nemesisIsGhost: false,
         receivedTime: Date.now(),
         text: "",
-        pointsQuestion: this.quiz.questions[this.questionIndex].points,
+        pointsQuestion: me.quiz.questions[me.questionIndex].points,
         quizType: "quiz",
         quizQuestionAnswers: ans
       };
     }
     //nemesis and other score stuff will be updated after time.
     //streaks increase score by 100 (per streak).
-    if(this.players[index].info.isCorrect){
-      this.players[index].correctCount = typeof(this.players[index].correctCount) == "undefined" ? 1 : this.players[index].correctCount + 1;
+    if(me.players[index].info.isCorrect){
+      me.players[index].correctCount = typeof(me.players[index].correctCount) == "undefined" ? 1 : me.players[index].correctCount + 1;
     }else{
-      this.players[index].incorrectCount = typeof(this.players[index].incorrectCount) == "undefined" ? 1 : this.players[index].incorrectCount + 1;
+      me.players[index].incorrectCount = typeof(me.players[index].incorrectCount) == "undefined" ? 1 : me.players[index].incorrectCount + 1;
     }
   }
   getPoints(time,options){
