@@ -48,7 +48,7 @@ Session.on("open",()=>{
   //runs when quiz is first made
 });
 Session.on("start",question=>{
-  //runs on the start of the quiz/question. Has the question object.
+  //runs on the start of the quiz. Has the question object.
 });
 Session.on("questionEnd",players=>{
   //runs when the question ends. Players is a sorted list of players based on score

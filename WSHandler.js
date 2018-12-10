@@ -29,11 +29,20 @@ class Handler extends EventEmitter {
       setTimeout(()=>{
         this.questionTimestamp = Date.now();
         this.emit("questionStart");
-        this.nextQuestion();
+        this.nextQuestion(true);
+      },5000);
+    });
+    this.on("qstart",f=>{
+      if(f == "first"){
+        return;
+      }
+      setTimeout(()=>{
+        this.questionTimestamp = Date.now();
+        this.emit("questionStart");
       },5000);
     });
     this.on("questionStart",()=>{
-      this.timeout = setTimeout(me.endQuestion,me.quiz.questions[me.questionIndex].time);
+      this.timeout = setTimeout(me.executeQuestion,5000);
     });
     this.timesync = {
       a: [],
@@ -263,6 +272,39 @@ class Handler extends EventEmitter {
       this.send([r]);
       return;
     }
+  }
+  executeQuestion(){
+    var me = this;
+    me.msgID++;
+    let answerMap = {};
+    let ans = [];
+    for(let i in me.quiz.questions){
+      ans.push(me.quiz.questions[i].choices.length);
+    }
+    for(let i in me.quiz.questions[me.questionIndex].choices){
+      answerMap[String(i)] = Number(i);
+    }
+    let r = {
+      channel: consts.channels.subscription,
+      clientId: me.clientID,
+      id: String(me.msgID),
+      data: {
+        gameid: me.session,
+        host: "play.kahoot.it",
+        id: 2,
+        type: "message",
+        content: JSON.stringify({
+          questionIndex: me.questionIndex,
+          answerMap: answerMap,
+          canAccessStoryBlocks: false,
+          gameBlockType: "quiz",
+          quizType: "quiz",
+          quizQuestionAnswers: ans
+        })
+      }
+    };
+    me.send([r]);
+    setTimeout(me.endQuestion,me.quiz.questions[me.questionIndex].time);
   }
   send(msg){
     if(this.connected){
@@ -553,13 +595,14 @@ class Handler extends EventEmitter {
     this.send(rs);
     //wait for user to call next question
   }
-  nextQuestion(){
+  nextQuestion(isFirst){
     if(this.questionIndex == this.quiz.questions.length){
       this.endQuiz();
     }
-    this.emit("start",this.quiz.questions[this.quizIndex]);
     this.msgID++;
     this.questionIndex++;
+    if(isFirst){this.questionIndex--;}
+    this.emit("qstart",isFirst ? "first" : this.quiz.questions[this.quizIndex]);
     let answerMap = {};
     let ans = [];
     for(let i in this.quiz.questions){
