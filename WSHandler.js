@@ -131,7 +131,7 @@ class Handler extends EventEmitter {
     }];
   }
   message(msg){
-    //console.log("message recieved: " + msg);
+    console.log("message recieved: " + msg);
     let data = JSON.parse(msg);
     if(data[0].channel == consts.channels.handshake && data[0].clientId){
       this.emit("handshake",data[0].clientId);
