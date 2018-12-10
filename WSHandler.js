@@ -274,6 +274,7 @@ class Handler extends EventEmitter {
     }
   }
   executeQuestion(me){
+    var me = me ? me : this;
     me.msgID++;
     let answerMap = {};
     let ans = [];
@@ -303,7 +304,7 @@ class Handler extends EventEmitter {
       }
     };
     me.send([r]);
-    setTimeout(me.endQuestion,me.quiz.questions[me.questionIndex].time);
+    setTimeout(function(){me.endQuestion(me)},me.quiz.questions[me.questionIndex].time);
   }
   send(msg){
     if(this.connected){
@@ -482,83 +483,84 @@ class Handler extends EventEmitter {
     let ansTime = time - this.questionTimestamp;
     return Math.round(1000 * ((quizTime - ansTime) / quizTime));
   }
-  endQuestion(){
-    console.log(this.quiz);
-    if(this.questionIndex == this.quiz.questions.length){
-      this.endQuiz();
+  endQuestion(me){
+    var me = me ? me : this;
+    console.log(me.quiz);
+    if(me.questionIndex == me.quiz.questions.length){
+      me.endQuiz();
     }
-    clearTimeout(this.timeout);
+    clearTimeout(me.timeout);
     let ans = [];
-    for(let i in this.quiz.questions){
-      ans.push(this.quiz.questions[i].choices.length);
+    for(let i in me.quiz.questions){
+      ans.push(me.quiz.questions[i].choices.length);
     }
-    this.msgID++;
+    me.msgID++;
     let r = {
       channel: consts.channels.subscription,
-      clientId: this.clientID,
-      id: String(this.msgID),
+      clientId: me.clientID,
+      id: String(me.msgID),
       data: {
-        gameid: this.session,
+        gameid: me.session,
         host: "play.kahoot.it",
         id: 4,
         type: "message",
         content: JSON.stringify({
-          questionNumber: this.questionIndex,
+          questionNumber: me.questionIndex,
           quizType: "quiz",
           quizQuestionAnswers: ans
         })
       }
     };
-    this.send([r]);
-    this.emit("questionEnd",this.rankPlayers());
+    me.send([r]);
+    me.emit("questionEnd",me.rankPlayers());
     //send results..
     let rs = [];
-    for(let i in this.players){
+    for(let i in me.players){
       //update scores and ranks.
-      if(!this.quiz.questions[questionIndex].points){
+      if(!me.quiz.questions[questionIndex].points){
         //remove the extra points given to them
-        this.players[i].info.totalScore -= this.players[i].info.points;
-        this.players[i].info.pointsData.questionPoints = 0;
-        this.players[i].info.points = 0;
+        me.players[i].info.totalScore -= me.players[i].info.points;
+        me.players[i].info.pointsData.questionPoints = 0;
+        me.players[i].info.points = 0;
         continue;
       }
       //update scores based on the streaks
-      if(this.players[i].info.isCorrect){
-        this.players[i].info.pointsData.answerStreakPoints = {
-          streakLevel: this.players[i].info.streakLevel + 1,
-          streakBonus: (this.players[i].info.streakLevel)*100,
-          totalStreakPoints: this.players[i].info.pointsData.answerStreakPoints.totalStreakPoints + (this.players[i].info.streakLevel)*100,
-          previousStreakLevel: this.players[i].info.pointsData.streakLevel,
-          previousStreakBonus: this.players[i].info.pointsData.streakBonus
+      if(me.players[i].info.isCorrect){
+        me.players[i].info.pointsData.answerStreakPoints = {
+          streakLevel: me.players[i].info.streakLevel + 1,
+          streakBonus: (me.players[i].info.streakLevel)*100,
+          totalStreakPoints: me.players[i].info.pointsData.answerStreakPoints.totalStreakPoints + (me.players[i].info.streakLevel)*100,
+          previousStreakLevel: me.players[i].info.pointsData.streakLevel,
+          previousStreakBonus: me.players[i].info.pointsData.streakBonus
         }
-        this.players[i].info.streakLevel ++;
-        this.players[i].info.streakBonus = (this.players[i].info.streakLevel - 1)*100;
-        this.players[i].info.points += (this.players[i].info.streakLevel - 1)*100;
-        this.players[i].info.totalScore += this.players[i].info.points;
-        this.players[i].info.pointsData.totalPointsWithBonuses = this.players[i].info.totalScore;
-        this.players[i].info.pointsData.totalPointsWithoutBonuses = this.players[i].info.totalScore - (this.players[i].info.streakLevel - 1)*100;
+        me.players[i].info.streakLevel ++;
+        me.players[i].info.streakBonus = (this.players[i].info.streakLevel - 1)*100;
+        me.players[i].info.points += (this.players[i].info.streakLevel - 1)*100;
+        me.players[i].info.totalScore += this.players[i].info.points;
+        me.players[i].info.pointsData.totalPointsWithBonuses = me.players[i].info.totalScore;
+        me.players[i].info.pointsData.totalPointsWithoutBonuses = me.players[i].info.totalScore - (me.players[i].info.streakLevel - 1)*100;
       }else{
-        this.players[i].info.totalScore -= this.players[i].info.points;
-        this.players[i].info.pointsData.questionPoints = 0;
-        this.players[i].info.points = 0;
-        this.players[i].info.pointsData.answerStreakPoints = {
+        me.players[i].info.totalScore -= this.players[i].info.points;
+        me.players[i].info.pointsData.questionPoints = 0;
+        me.players[i].info.points = 0;
+        me.players[i].info.pointsData.answerStreakPoints = {
           streakLevel: 0,
           streakBonus: 0,
-          totalStreakPoints: this.players[i].info.pointsData.answerStreakPoints.totalStreakPoints,
-          previousStreakLevel: this.players[i].info.pointsData.streakLevel,
-          previousStreakBonus: this.players[i].info.pointsData.streakBonus
+          totalStreakPoints: me.players[i].info.pointsData.answerStreakPoints.totalStreakPoints,
+          previousStreakLevel: me.players[i].info.pointsData.streakLevel,
+          previousStreakBonus: me.players[i].info.pointsData.streakBonus
         }
-        this.players[i].info.pointsData.streakLevel = 0;
-        this.players[i].info.pointsData.streakBonus = 0;
-        this.players[i].info.pointsData.totalPointsWithBonuses = this.players[i].info.totalScore;
-        this.players[i].info.pointsData.totalPointsWithoutBonuses = this.players[i].info.totalScore;
+        me.players[i].info.pointsData.streakLevel = 0;
+        me.players[i].info.pointsData.streakBonus = 0;
+        me.players[i].info.pointsData.totalPointsWithBonuses = me.players[i].info.totalScore;
+        me.players[i].info.pointsData.totalPointsWithoutBonuses = me.players[i].info.totalScore;
       }
       //get rank + nemesis
       let sorted = rankPlayers();
       let place = 0;
       let nemesis = undefined;
       for(let j in sorted){
-        if(sorted[j].id == this.players[i].id){
+        if(sorted[j].id == me.players[i].id){
           place = Number(j) + 1;
           if(place == 1){
             nemsis = null;
@@ -568,30 +570,30 @@ class Handler extends EventEmitter {
           break;
         }
       }
-      this.players[i].info.rank = place;
-      this.players[i].info.nemesis = {
+      me.players[i].info.rank = place;
+      me.players[i].info.nemesis = {
         cid: nemsis.id,
         name: nemesis.name,
         isGhost: false,
         totalScore: nemesis.info.totalScore,
         isKicked: false
       }
-      this.msgID++;
+      me.msgID++;
       rs.push({
         channel: consts.channels.subscription,
-        clientId: this.clientID,
-        id: String(this.msgID),
+        clientId: me.clientID,
+        id: String(me.msgID),
         data: {
-          cid: this.players[i].id,
-          gameid: this.session,
+          cid: me.players[i].id,
+          gameid: me.session,
           host: "play.kahoot.it",
           id: 8,
           type: "message",
-          content: JSON.stringify(this.players[i].info)
+          content: JSON.stringify(me.players[i].info)
         }
       });
     }
-    this.send(rs);
+    me.send(rs);
     //wait for user to call next question
   }
   nextQuestion(isFirst){
