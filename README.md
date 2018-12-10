@@ -70,7 +70,3 @@ Session.quiz //quiz info
 Session.secret //secret kahoot token
 Session.quizIndex //current quiz index
 ```
----
-### To Do's
-- allow usage of urls instead of id in constructor
-- allow other types of kahoots besides quizzes
