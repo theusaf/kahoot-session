@@ -426,6 +426,7 @@ class Handler extends EventEmitter {
     for(let i in this.players){
       if(this.players[i].id == id){
         index = Number(i);
+        console.log("Found player!");
         return;
       }
     }
@@ -434,6 +435,9 @@ class Handler extends EventEmitter {
     let ans = [];
     for(let i in this.quiz.questions){
       ans.push(this.quiz.questions[i].choices.length);
+    }
+    if(typeof(this.players[index].info) == "undefined"){
+      this.players[index].info = {};
     }
     this.players[index].info.choice= options.choice;
     this.players[index].info.isCorrect= this.quiz.questions[this.questionIndex].choices[options.choice].correct;
