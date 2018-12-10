@@ -614,8 +614,9 @@ class Handler extends EventEmitter {
   }
   nextQuestion(isFirst){
     this.questionIndex++;
-    if(this.questionIndex == this.quiz.questions.length){
+    if(this.questionIndex >= this.quiz.questions.length){
       this.endQuiz();
+      return;
     }
     this.msgID++;
     if(isFirst){this.questionIndex--;}
@@ -843,10 +844,10 @@ class Handler extends EventEmitter {
       case "answer":
         if(typeof(index) == "object" && typeof(index.push) == "function"){
           if(index.length >= 1){
-            game.snark == index;
+            game.snark = index;
             return index;
           }
-          return this.snark;
+          return game.snark;
         }
       break;
       case "rank":
