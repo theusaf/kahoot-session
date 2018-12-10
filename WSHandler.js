@@ -673,11 +673,11 @@ class Handler extends EventEmitter {
     for(let i in me.players){
       //determine if we need to set base score?
       if(typeof(me.players[i].info) == "undefined"){
-        me.handleScore(me.players[i].id,{},true);
+        me.handleScore(me.players[i].id,{},true,me);
       }else if(typeof(me.players[i].info.pointsData) == "undefined"){
-        me.handleScore(me.players[i].id,{},true);
+        me.handleScore(me.players[i].id,{},true,me);
       }else if(typeof(me.players[i].info.pointsData.answerStreakPoints) == "undefined"){
-        me.handleScore(me.players[i].id,{},true);
+        me.handleScore(me.players[i].id,{},true,me);
       }
 
       //get rank + nemesis
