@@ -75,7 +75,7 @@ class Handler extends EventEmitter {
     },(e,r,b) => {
       this.session = Number(b);
       this.secret = r.headers['x-kahoot-session-token'];
-      console.log(this.session + "," + this.secret);
+      //console.log(this.session + "," + this.secret);
       //now create the web socket.
       this.ws = new WebSocket(consts.wss_endpoint+"/"+this.session+"/"+this.secret,{
         origin: "https://play.kahoot.it",
@@ -85,7 +85,7 @@ class Handler extends EventEmitter {
       });
       //ws stuffs
       this.ws.on("open",()=>{
-        console.log("opened!");
+        //console.log("opened!");
         this.connected = true;
         this.open();
       });
@@ -132,7 +132,7 @@ class Handler extends EventEmitter {
     }];
   }
   message(msg){
-    console.log("message recieved: " + msg);
+    //console.log("message recieved: " + msg);
     let data = JSON.parse(msg);
     if(data[0].channel == consts.channels.handshake && data[0].clientId){
       this.emit("handshake",data[0].clientId);
@@ -143,7 +143,7 @@ class Handler extends EventEmitter {
       r.clientId = this.clientID,
       r.subscription = "/service/player";
       this.send([r]);
-      console.log("handshake? " + this.recievedFirstHandshake);
+      //console.log("handshake? " + this.recievedFirstHandshake);
       if(!this.recievedFirstHandshake){ //send subscription stuff
         let r = this.getPacket(data[0])[0];
         delete r.ext.ack;
@@ -166,7 +166,7 @@ class Handler extends EventEmitter {
     }
     if(data[0].channel == consts.channels.subscribe){
       if(data[0].subscription == consts.channels.subscription && data[0].successful == true && !this.configured){
-        console.log("sending final setup thing");
+        //console.log("sending final setup thing");
         this.configured = true;
         let r = this.getPacket(data[0])[0];
         r.channel = consts.channels.subscription;
@@ -307,7 +307,7 @@ class Handler extends EventEmitter {
   send(msg){
     if(this.connected){
       try{
-        console.log("sending " + JSON.stringify(msg));
+        //console.log("sending " + JSON.stringify(msg));
         this.ws.send(JSON.stringify(msg),function ack(err){
           if(err){
             console.log("Error sending message: " + err);
