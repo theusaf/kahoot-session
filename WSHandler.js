@@ -415,7 +415,7 @@ class Handler extends EventEmitter {
   }
   //{"podiumMedalType":"gold","primaryMessage":"1<sup>st</sup> place","secondaryMessage":"Colossal result!","quizType":"quiz","quizQuestionAnswers":[4,4,4,4,4,4,4,4,2,4]}
   /*{"playerCount":1,"quizId":"c5429a87-08b5-4aeb-a90c-bd56ebf09540","quizType":"quiz","startTime":1544307691369,"hostId":"56936bb8-8653-4130-9cf2-be47a54b42a7","rank":1,"challengeId":null,"correctCount":8,"incorrectCount":2,"unansweredCount":0,"cid":"4","name":"s","isGhost":false,"isKicked":false,"answers":[{"choice":1,"isCorrect":false,"points":0,"receivedTime":1544307706498,"text":"Function","meta":{"lag":58},"pointsQuestion":true},{"choice":1,"isCorrect":true,"points":588,"receivedTime":1544312677300,"text":"Flappy will play a sound","meta":{"lag":27},"pointsQuestion":true},{"choice":1,"isCorrect":true,"points":657,"receivedTime":1544312748854,"text":"The speed of the game will be slow","meta":{"lag":52},"pointsQuestion":true},{"choice":3,"isCorrect":false,"points":0,"receivedTime":1544312799420,"text":"Flap","meta":{"lag":50},"pointsQuestion":true},{"choice":3,"isCorrect":true,"points":882,"receivedTime":1544312839720,"text":"Flapping","meta":{"lag":45},"pointsQuestion":true},{"choice":0,"isCorrect":true,"points":874,"receivedTime":1544312856154,"text":"A large amount","meta":{"lag":47},"pointsQuestion":true},{"choice":3,"isCorrect":true,"points":741,"receivedTime":1544312877157,"text":"A sad sound will play","meta":{"lag":53},"pointsQuestion":true},{"choice":3,"isCorrect":true,"points":907,"receivedTime":1544312907512,"text":"Crunch","meta":{"lag":62},"pointsQuestion":true},{"choice":0,"isCorrect":true,"points":960,"receivedTime":1544312925817,"text":"True","meta":{"lag":70},"pointsQuestion":true},{"choice":0,"isCorrect":true,"points":0,"receivedTime":1544312946175,"text":"Yes","meta":{"lag":69},"pointsQuestion":false}],"meta":{"device":{"userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36","screen":{"width":1280,"height":777}}},"totalScore":6709,"quizQuestionAnswers":[4,4,4,4,4,4,4,4,2,4]}*/
-  handleScore(id,options){
+  handleScore(id,options,answerIsNULL){
     //edits the scores of ppl + saves their choice
     //{"choice":1,"isCorrect":false,"correctAnswers":["Event"],"points":0,"totalScore":0,"pointsData":{"totalPointsWithoutBonuses":0,"totalPointsWithBonuses":0,"questionPoints":0,"answerStreakPoints":{"streakLevel":0,"streakBonus":0,"totalStreakPoints":0,"previousStreakLevel":0,"previousStreakBonus":0}},"rank":2,"nemesis":{"cid":"5","name":"sooo","isGhost":false,"totalScore":935,"isKicked":false},"nemesisIsGhost":false,"receivedTime":1544307706498,"text":"Function","meta":{"lag":58},"pointsQuestion":true,"quizType":"quiz","quizQuestionAnswers":[4,4,4,4,4,4,4,4,2,4]}
     let index;
@@ -428,49 +428,202 @@ class Handler extends EventEmitter {
     this.players[index].answers = typeof(this.players[index].answers) == "undefined" ? [] : this.players[index].answers;
     this.players[index].answers.push(options);
     let ans = [];
+    var tp = this.players[index]
     for(let i in this.quiz.questions){
       ans.push(this.quiz.questions[i].choices.length);
     }
-    if(typeof(this.players[index].info) == "undefined"){
-      this.players[index].info = {};
+    let sorted = this.rankPlayers();
+    let place = 0;
+    var nemesis = undefined;
+    let hasPoints = this.quiz.questions[this.questionIndex].points;
+    let correct = this.quiz.questions[this.questionIndex].choices[options.choice].correct;
+    if(typeof(tp.info) == "undefined"){
+      tp.info = {};
     }
-    this.players[index].info.choice= options.choice;
-    this.players[index].info.isCorrect= this.quiz.questions[this.questionIndex].choices[options.choice].correct;
-    this.players[index].info.correctAnswers= (()=>{
-      let objs = this.quiz.questions[this.questionIndex].choices.filter(o=>{
-        return o.correct;
-      });
-      let c = [];
-      for(let i in objs){
-        c.push(objs[i].answer);
+    for(let j in sorted){
+      if(sorted[j].id == tp.id){
+        place = Number(j) + 1;
+        if(place == 1){
+          nemesis = null;
+        }else{
+          nemesis = sorted[Number(j) - 1];
+        }
+        break;
       }
-      return c;
-    })();
-    this.players[index].info.points= this.getPoints(Date.now(),options);
-    this.players[index].info.meta= {
-      lag: options.meta.lag
-    };
-    this.players[index].info.pointsQuestion= this.quiz.questions[this.questionIndex].points;
-    this.players[index].info.quizType= "quiz";
-    this.players[index].info.quizQuestionAnswers= ans;
-    this.players[index].info.text = this.quiz.questions[this.questionIndex].choices[options.choice].answer;
-    this.players[index].info.recievedTime = Date.now();
-    this.players[index].info.nemesisIsGhost = false;
-    this.players[index].info.totalScore = typeof(this.players[index].info.totalScore) == "undefined" ? 0 : this.players[index].info.totalScore;
-    this.players[index].info.pointsData = typeof(this.players[index].info.pointsData) == "undefined" ? { //base info...
-      streakLevel: 0,
-      streakBonus: 0,
-      totalPointsWithoutBonuses: this.players[index].info.totalScore,
-      totalPointsWithBonuses: this.players[index].info.totalScore,
-      questionPoints: this.players[index].info.totalScore,
-      answerStreakPoints: {
-        streakLevel: 0,
-        streakBonus: 0,
-        totalStreakPoints: 0,
-        previousStreakLevel: 0,
-        previousStreakBonus: 0
-      }
-    } : this.players[index].info.pointsData;
+    }
+    if(answerIsNULL){
+      tp.info = {
+        choice: null,
+        isCorrect: false
+        correctAnswers: (()=>{
+          let objs = this.quiz.questions[this.questionIndex].choices.filter(o=>{
+            return o.correct;
+          });
+          let c = [];
+          for(let i in objs){
+            c.push(objs[i].answer);
+          }
+          return c;
+        })(),
+        points: 0,
+        meta: {
+          lag: 0
+        },
+        totalScore: typeof(tp.info.totalScore) == "undefined" ? 0 : tp.info.totalScore,
+        pointsData: {
+          totalPointsWithoutBonuses: this.quiz.questions[this.questionIndex].points ? typeof(tp.info.totalScore) == "undefined" ? 0 : tp.info.totalScore,
+          totalPointsWithBonuses: typeof(tp.info.totalScore) == "undefined" ? 0 : tp.info.totalScore : 0,
+          questionPoints: 0,
+          answerStreakPoints: {
+            streakLevel: this.quiz.questions[this.questionIndex].points ? 0 : typeof(tp.info.pointsData) == "undefined" ? 0 : typeof(tp.info.pointsData.answerStreakPoints) == "undefined" ? 0 : tp.info.pointsData.answerStreakPoints.streakLevel,
+            streakBonus: 0,
+            totalStreakPoints: typeof(tp.info.pointsData) == "undefined" ? 0 : typeof(tp.info.pointsData.answerStreakPoints == "undefined") ? 0 : tp.info.pointsData.answerStreakPoints.totalStreakPoints,
+            previousStreakLevel: typeof(tp.info.pointsData) == "undefined" ? 0 : typeof(tp.info.pointsData.answerStreakPoints == "undefined") ? 0 : tp.info.pointsData.answerStreakPoints.streakLevel,
+            previousStreakBonus: typeof(tp.info.pointsData) == "undefined" ? 0 : typeof(tp.info.pointsData.answerStreakPoints == "undefined") ? 0 : tp.info.pointsData.answerStreakPoints.streakBonus
+          }
+        },
+        rank: place,
+        nemesis: nemesis,
+        nemesisIsGhost: false,
+        receivedTime: Date.now(),
+        text: "",
+        pointsQuestion: this.quiz.questions[this.questionIndex].points,
+        quizType: "quiz",
+        quizQuestionAnswers: ans
+      };
+    }else{
+      tp.info = {
+        choice: options.choice,
+        isCorrect: correct;
+        correctAnswers: (()=>{
+          let objs = this.quiz.questions[this.questionIndex].choices.filter(o=>{
+            return o.correct;
+          });
+          let c = [];
+          for(let i in objs){
+            c.push(objs[i].answer);
+          }
+          return c;
+        })(),
+        points: correct ? hasPoints ? getPoints(Date.now(),options) + (typeof(tp.info.streakLevel) == "undefined" ? 0 : ((tp.info.streakLevel)*100)) : 0 : 0,
+        meta: {
+          lag: options.meta.lag
+        },
+        totalScore: correct ? (
+          hasPoints ? (
+            typeof(tp.info.totalScore) == "undefined" ? (
+              getPoints(Date.now(),options) + (typeof(tp.info.streakLevel) == "undefined" ? 0 : tp.info.streakLevel*100)
+            ):(
+              tp.info.totalScore + getPoints(Date.now(),options) + (typeof(tp.info.streakLevel) == "undefined" ? 0 : (
+                (tp.info.streakLevel * 100)
+              ))
+            )
+          ) : (
+            typeof(tp.info.totalScore) == "undefined" ? 0 : tp.info.totalScore
+          )
+        ) : (
+          typeof(tp.info.totalScore) == "undefined" ? 0 : tp.info.totalScore
+        )
+        pointsData: {
+          totalPointsWithoutBonuses: hasPoints ? (
+            correct ? (
+              typeof(tp.info.pointsData.totalPointsWithoutBonuses) == "undefined" ? (
+                getPoints(Date.now(),options)
+              ):(
+                tp.info.pointsData.totalPointsWithoutBonuses + getPoints(Date.now(),options)
+              )
+            ):(
+              typeof(tp.info.pointsData.totalPointsWithoutBonuses) == "undefined" ? 0 : tp.info.pointsData.totalPointsWithoutBonuses
+            )
+          ):(
+            typeof(tp.info.pointsData.totalPointsWithoutBonuses) == "undefined" ? 0 : tp.info.pointsData.totalPointsWithoutBonuses
+          ),
+          totalPointsWithBonuses: hasPoints ? (
+            correct ? (
+              typeof(tp.info.pointsData.totalPointsWithBonuses) == "undefined" ? (
+                getPoints(Date.now(),options) + typeof(tp.info.streakLevel) == "undefined" ? (
+                  0
+                ):(
+                  tp.info.streakLevel * 100
+                )
+              ):(
+                tp.info.pointsData.totalPointsWithBonuses + getPoints(Date.now(),options) + typeof(tp.info.streakLevel) == "undefined" ? (
+                  0
+                ):(
+                  tp.info.streakLevel * 100
+                )
+              )
+            ):(
+              typeof(tp.info.pointsData.totalPointsWithBonuses) == "undefined" ? 0 : tp.info.pointsData.totalPointsWithBonuses
+            )
+          ):(
+            typeof(tp.info.pointsData.totalPointsWithBonuses) == "undefined" ? 0 : tp.info.pointsData.totalPointsWithBonuses
+          ),
+          questionPoints: hasPoints ? (
+            correct ? (
+              getPoints(Date.now(),options) + (typeof(tp.info.streakLevel) == "undefined" ? 0 : tp.info.streakLevel*100)
+            ):(
+              0
+            )
+          ):0,
+          answerStreakPoints: {
+            streakLevel: hasPoints ? (
+              correct ? (
+                typeof(tp.info.pointsData.answerStreakPoints.streakLevel) == "undefined" ? 1 : tp.info.pointsData.answerStreakPoints.streakLevel + 1
+              ):(
+                0
+              )
+            ):(
+              typeof(tp.info.pointsData) == "undefined" ? (
+                typeof(tp.info.pointsData.answerStreakPoints) == "undefined" ? (
+                  typeof(tp.info.pointsData.answerStreakPoints.streakLevel) == "undefined" ? (
+                    0
+                  ):(
+                    tp.info.pointsData.answerStreakPoints.streakLevel
+                  )
+                ):(
+                  0
+                )
+              ):(
+                0
+              )
+            ),
+            streakBonus: hasPoints ? (
+              correct ? (
+                typeof(tp.info.pointsData.answerStreakPoints.streakBonus) == "undefined" ? 100 : tp.info.pointsData.answerStreakPoints.streakBonus + 100
+              ):(
+                0
+              )
+            ):(
+              typeof(tp.info.pointsData) == "undefined" ? (
+                typeof(tp.info.pointsData.answerStreakPoints) == "undefined" ? (
+                  typeof(tp.info.pointsData.answerStreakPoints.streakBonus) == "undefined" ? (
+                    0
+                  ):(
+                    tp.info.pointsData.answerStreakPoints.streakBonus
+                  )
+                ):(
+                  0
+                )
+              ):(
+                0
+              )
+            ),
+            totalStreakPoints: typeof(tp.info.pointsData) == "undefined" ? 0 : typeof(tp.info.pointsData.answerStreakPoints == "undefined") ? 0 : tp.info.pointsData.answerStreakPoints.totalStreakPoints,
+            previousStreakLevel: typeof(tp.info.pointsData) == "undefined" ? 0 : typeof(tp.info.pointsData.answerStreakPoints == "undefined") ? 0 : tp.info.pointsData.answerStreakPoints.streakLevel,
+            previousStreakBonus: typeof(tp.info.pointsData) == "undefined" ? 0 : typeof(tp.info.pointsData.answerStreakPoints == "undefined") ? 0 : tp.info.pointsData.answerStreakPoints.streakBonus
+          }
+        },
+        rank: place,
+        nemesis: nemesis,
+        nemesisIsGhost: false,
+        receivedTime: Date.now(),
+        text: "",
+        pointsQuestion: this.quiz.questions[this.questionIndex].points,
+        quizType: "quiz",
+        quizQuestionAnswers: ans
+      };
+    }
     //nemesis and other score stuff will be updated after time.
     //streaks increase score by 100 (per streak).
     if(this.players[index].info.isCorrect){
@@ -517,59 +670,15 @@ class Handler extends EventEmitter {
     //send results..
     let rs = [];
     for(let i in me.players){
-      //update scores and ranks.
-      if(!me.quiz.questions[me.questionIndex].points){
-        //remove the extra points given to them
-        me.players[i].info.pointsData.questionPoints = 0;
-        me.players[i].info.points = 0;
-        continue;
-      }
-      //update scores based on the streaks
+      //determine if we need to set base score?
       if(typeof(me.players[i].info) == "undefined"){
-        me.players[i].info = {
-          isCorrect: false
-        }
+        handleScore(me.players[i].id,{},true);
+      }else if(typeof(me.players[i].info.pointsData) == "undefined"){
+        handleScore(me.players[i].id,{},true);
+      }else if(typeof(me.players[i].info.pointsData.answerStreakPoints) == "undefined"){
+        handleScore(me.players[i].id,{},true);
       }
-      if(me.players[i].info.isCorrect){
-        if(typeof(me.players[i].info.pointsData) == "undefined"){
-          me.players[i].info.pointsData = {};
-        }
-        me.players[i].info.pointsData.answerStreakPoints = {
-          streakLevel: me.players[i].info.streakLevel + 1,
-          streakBonus: (me.players[i].info.streakLevel)*100,
-          totalStreakPoints: me.players[i].info.pointsData.answerStreakPoints.totalStreakPoints + (me.players[i].info.streakLevel)*100,
-          previousStreakLevel: me.players[i].info.pointsData.streakLevel,
-          previousStreakBonus: me.players[i].info.pointsData.streakBonus
-        }
-        me.players[i].info.streakLevel = me.players[i].info.streakLevel ? me.players[i].info.streakLevel + 1 : 1;
-        me.players[i].info.streakBonus = (this.players[i].info.streakLevel - 1)*100;
-        me.players[i].info.points = me.players[i].info.points ? me.players[i].info.points : 0;
-        me.players[i].info.points += (this.players[i].info.streakLevel - 1)*100;
-        me.players[i].info.totalScore = me.players[i].info.totalScore ? me.players[i].info.totalScore : 0;
-        me.players[i].info.totalScore += me.players[i].info.points;
-        me.players[i].info.pointsData.totalPointsWithBonuses = me.players[i].info.totalScore;
-        me.players[i].info.pointsData.totalPointsWithoutBonuses = me.players[i].info.totalScore - (me.players[i].info.streakLevel - 1)*100;
-      }else{
-        if(typeof(me.players[i].info.pointsData) == "undefined"){
-          me.players[i].info.pointsData = {};
-        }
-        me.players[i].info.pointsData.questionPoints = 0;
-        me.players[i].info.points = 0;
-        if(typeof(me.players[i].info.pointsData.answerStreakPoints) == "undefined"){
-          me.players[i].info.pointsData.answerStreakPoints = {};
-        }
-        me.players[i].info.pointsData.answerStreakPoints = {
-          streakLevel: 0,
-          streakBonus: 0,
-          totalStreakPoints: me.players[i].info.pointsData.answerStreakPoints.totalStreakPoints,
-          previousStreakLevel: me.players[i].info.pointsData.streakLevel,
-          previousStreakBonus: me.players[i].info.pointsData.streakBonus
-        }
-        me.players[i].info.pointsData.streakLevel = 0;
-        me.players[i].info.pointsData.streakBonus = 0;
-        me.players[i].info.pointsData.totalPointsWithBonuses = me.players[i].info.totalScore;
-        me.players[i].info.pointsData.totalPointsWithoutBonuses = me.players[i].info.totalScore;
-      }
+
       //get rank + nemesis
       let sorted = me.rankPlayers();
       let place = 0;
