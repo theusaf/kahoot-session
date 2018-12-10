@@ -529,6 +529,9 @@ class Handler extends EventEmitter {
       }
       //update scores based on the streaks
       if(me.players[i].info.isCorrect){
+        if(typeof(me.players[i].info.pointsData) == "undefined"){
+          me.players[i].info.pointsData = {};
+        }
         me.players[i].info.pointsData.answerStreakPoints = {
           streakLevel: me.players[i].info.streakLevel + 1,
           streakBonus: (me.players[i].info.streakLevel)*100,
@@ -536,13 +539,19 @@ class Handler extends EventEmitter {
           previousStreakLevel: me.players[i].info.pointsData.streakLevel,
           previousStreakBonus: me.players[i].info.pointsData.streakBonus
         }
-        me.players[i].info.streakLevel ++;
+        me.players[i].info.streakLevel = me.players[i].info.streakLevel ? me.players[i].info.streakLevel + 1 : 1;
         me.players[i].info.streakBonus = (this.players[i].info.streakLevel - 1)*100;
+        me.players[i].info.points = me.players[i].info.points ? me.players[i].info.points : 0;
         me.players[i].info.points += (this.players[i].info.streakLevel - 1)*100;
+        me.players[i].info.totalScore = me.players[i].info.totalScore ? me.players[i].info.totalScore : 0;
         me.players[i].info.totalScore += this.players[i].info.points;
         me.players[i].info.pointsData.totalPointsWithBonuses = me.players[i].info.totalScore;
         me.players[i].info.pointsData.totalPointsWithoutBonuses = me.players[i].info.totalScore - (me.players[i].info.streakLevel - 1)*100;
       }else{
+        if(typeof(me.players[i].info.pointsData) == "undefined"){
+          me.players[i].info.pointsData = {};
+        }
+        me.players[i].info.totalScore = me.players[i].info.totalScore ? me.players[i].info.totalScore : 0;
         me.players[i].info.totalScore -= this.players[i].info.points;
         me.players[i].info.pointsData.questionPoints = 0;
         me.players[i].info.points = 0;
