@@ -494,7 +494,7 @@ class Handler extends EventEmitter {
     }else{
       tp.info = {
         choice: options.choice,
-        isCorrect: correct;
+        isCorrect: correct,
         correctAnswers: (()=>{
           let objs = this.quiz.questions[this.questionIndex].choices.filter(o=>{
             return o.correct;
