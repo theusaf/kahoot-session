@@ -543,13 +543,13 @@ class Handler extends EventEmitter {
             correct ? (
               typeof(tp.info.pointsData) == "undefined" ? 0 :
               typeof(tp.info.pointsData.totalPointsWithBonuses) == "undefined" ? (
-                getPoints(Date.now(),options) + typeof(tp.info.streakLevel) == "undefined" ? (
+                me.getPoints(Date.now(),options) + typeof(tp.info.streakLevel) == "undefined" ? (
                   0
                 ):(
                   tp.info.streakLevel * 100
                 )
               ):(
-                tp.info.pointsData.totalPointsWithBonuses + getPoints(Date.now(),options) + typeof(tp.info.streakLevel) == "undefined" ? (
+                tp.info.pointsData.totalPointsWithBonuses + me.getPoints(Date.now(),options) + typeof(tp.info.streakLevel) == "undefined" ? (
                   0
                 ):(
                   tp.info.streakLevel * 100
