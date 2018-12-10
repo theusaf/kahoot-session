@@ -533,7 +533,7 @@ class Handler extends EventEmitter {
                 tp.info.pointsData.totalPointsWithoutBonuses + getPoints(Date.now(),options)
               )
             ):(
-              typeof(tp.info.pointsData.totalPointsWithoutBonuses) == "undefined" ? 0 : tp.info.pointsData.totalPointsWithoutBonuses
+              typeof(tp.info.pointsData) == "undefined" ? 0 : typeof(tp.info.pointsData.totalPointsWithoutBonuses) == "undefined" ? 0 : tp.info.pointsData.totalPointsWithoutBonuses
             )
           ):(
             typeof(tp.info.pointsData.totalPointsWithoutBonuses) == "undefined" ? 0 : tp.info.pointsData.totalPointsWithoutBonuses
