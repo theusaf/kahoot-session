@@ -572,7 +572,15 @@ class Handler extends EventEmitter {
           answerStreakPoints: {
             streakLevel: hasPoints ? (
               correct ? (
-                typeof(tp.info.pointsData.answerStreakPoints.streakLevel) == "undefined" ? 1 : tp.info.pointsData.answerStreakPoints.streakLevel + 1
+                typeof(tp.info.pointsData) == "undefined" ? (
+                  1
+                ):(
+                  typeof(tp.info.pointsData.answerStreakPoints) == "undefined" ? (
+                    1
+                  ):(
+                    typeof(tp.info.pointsData.answerStreakPoints.streakLevel) == "undefined" ? 1 : tp.info.pointsData.answerStreakPoints.streakLevel + 1
+                  )
+                )
               ):(
                 0
               )
