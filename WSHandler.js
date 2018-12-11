@@ -750,6 +750,7 @@ class Handler extends EventEmitter {
     this.msgID++;
     if(isFirst){this.questionIndex--;}
     this.emit("qstart",isFirst ? "first" : this.quiz.questions[this.quizIndex]);
+    this.emit("questionStart",this.quiz.questions[this.quizIndex]);
     let answerMap = {};
     let ans = [];
     for(let i in this.players){

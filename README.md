@@ -47,11 +47,9 @@ Session.on("close",()=>{
 Session.on("open",()=>{
   //runs when quiz is first made
 });
-Session.on("start",question=>{
+Session.on("questionStart",question=>{
   //runs on the start of the quiz. Has the question object.
-});
-Session.on("qstart",quest=>{
-  //runs on question start (not the first question tho.) has question object
+  //events qstart and start are similar events, but should be replaced with this.
 });
 Session.on("questionEnd",players=>{
   //runs when the question ends. Players is a sorted list of players based on score
