@@ -131,7 +131,7 @@ class Handler extends EventEmitter {
     }];
   }
   message(msg){
-    console.log("message recieved: " + msg);
+    //console.log("message recieved: " + msg);
     let data = JSON.parse(msg);
     if(data[0].channel == consts.channels.handshake && data[0].clientId){
       this.emit("handshake",data[0].clientId);
@@ -221,7 +221,7 @@ class Handler extends EventEmitter {
       });
       return;
     }
-    if(data[0].channel == "/controller/" + this.session && JSON.parse(data[0].data.content).choice){
+    if(data[0].channel == "/controller/" + this.session && data[0].data.content.search(/(\"choice\":)/img) != -1){
       this.handleScore(data[0].data.cid,JSON.parse(data[0].data.content));
       //send response...
       let ans = [];
