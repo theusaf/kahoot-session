@@ -409,7 +409,7 @@ class Handler extends EventEmitter {
   }
   rankPlayers(){
     return JSON.parse(JSON.stringify(this.players)).sort(function(a,b){
-      return b.totalScore - a.totalScore;
+      return a.totalScore - b.totalScore;
     });
   }
   //{"podiumMedalType":"gold","primaryMessage":"1<sup>st</sup> place","secondaryMessage":"Colossal result!","quizType":"quiz","quizQuestionAnswers":[4,4,4,4,4,4,4,4,2,4]}
