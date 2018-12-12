@@ -57,6 +57,14 @@ Session.on("questionEnd",players=>{
 Session.on("quizEnd",players=>{
   //runs at end of quiz. Players is a sorted list of players based on score
 });
+Session.on("join",player=>{
+  //runs when a player joins.
+  //player has id and name
+});
+Session.on("leave",player=>{
+  //runs when a player leaves
+  //player had id and name
+});
 ```
 ---
 ## Properties

@@ -1,6 +1,6 @@
 {
   "name": "kahoot-session",
-  "version": "1.2.3",
+  "version": "1.2.4.1",
   "description": "Creates a kahoot game and stuff.",
   "main": "kahoot.js",
   "scripts": {
@@ -18,7 +18,7 @@
     "type": "git",
     "url": "git://github.com/theusaf/kahoot-session.git"
   },
-  "tags": [
+  "keywords": [
     "kahoot",
     "session",
     "quiz",
