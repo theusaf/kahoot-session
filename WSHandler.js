@@ -375,7 +375,7 @@ class Handler extends EventEmitter {
           })
         }
       };
-      this.emit("start",this.quiz.questions[this.questionIndex]);
+      this.emit("start",this.quiz);
       this.send([r]);
     }else{
       return "Start the quiz first using kahoot.start()";

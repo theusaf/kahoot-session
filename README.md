@@ -34,6 +34,9 @@ Session.getPlayerById(id); //gets the player by id
 ---
 ## Events
 ```js
+Session.on("start",quiz=>{
+  //when quiz starts. has quiz object.
+});
 Session.on("handshake",id=>{
   //technical event. Id is the "clientId"
 });
