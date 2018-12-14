@@ -34,6 +34,9 @@ Session.getPlayerById(id); //gets the player by id
 ---
 ## Events
 ```js
+Session.on("answer",id=>{
+  //when somebody answers the quiz. id is the id of the player who sent the answer.
+});
 Session.on("start",quiz=>{
   //when quiz starts. has quiz object.
 });
