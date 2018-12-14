@@ -2,7 +2,6 @@ const WebSocket = require('ws');
 const EventEmitter = require('events');
 const request = require('request');
 const consts = require('./consts.js');
-const md5 = require('md5');
 
 class Handler extends EventEmitter {
   constructor(id,options){
@@ -301,7 +300,8 @@ class Handler extends EventEmitter {
       }
     };
     me.send([r]);
-    me.timeout2 = setTimeout(function(){me.endQuestion(me)},me.quiz.questions[me.questionIndex].time);
+    let extraTimeout = (me.quiz.questions[me.questionIndex].video.startTime - me.quiz.questions[me.questionIndex].video.endTime) * 1000;
+    me.timeout2 = setTimeout(function(){me.endQuestion(me)},me.quiz.questions[me.questionIndex].time + extraTimeout);
   }
   send(msg){
     if(this.connected){
@@ -648,7 +648,8 @@ class Handler extends EventEmitter {
     }
   }
   getPoints(time,options){
-    let quizTime = this.quiz.questions[this.questionIndex].time;
+    let extraTimeout = (this.quiz.questions[this.questionIndex].video.startTime - this.quiz.questions[this.questionIndex].video.endTime);
+    let quizTime = this.quiz.questions[this.questionIndex].time + extraTimeout;
     let ansTime = time - this.questionTimestamp;
     return Math.round(1000 * ((quizTime - ansTime) / quizTime));
   }

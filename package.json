@@ -1,6 +1,6 @@
 {
   "name": "kahoot-session",
-  "version": "1.2.7",
+  "version": "1.2.8",
   "description": "Creates a kahoot game and stuff.",
   "main": "kahoot.js",
   "scripts": {
@@ -9,7 +9,6 @@
   "author": "theusaf",
   "license": "ISC",
   "dependencies": {
-    "md5": "^2.2.1",
     "request": "^2.88.0",
     "ws": "^6.1.2"
   },
