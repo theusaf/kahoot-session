@@ -300,7 +300,7 @@ class Handler extends EventEmitter {
       }
     };
     me.send([r]);
-    let extraTimeout = (me.quiz.questions[me.questionIndex].video.startTime - me.quiz.questions[me.questionIndex].video.endTime) * 1000;
+    let extraTimeout = (me.quiz.questions[me.questionIndex].video.endTime - me.quiz.questions[me.questionIndex].video.startTime) * 1000;
     me.timeout2 = setTimeout(function(){me.endQuestion(me)},me.quiz.questions[me.questionIndex].time + extraTimeout);
   }
   send(msg){
@@ -648,7 +648,7 @@ class Handler extends EventEmitter {
     }
   }
   getPoints(time,options){
-    let extraTimeout = (this.quiz.questions[this.questionIndex].video.startTime - this.quiz.questions[this.questionIndex].video.endTime);
+    let extraTimeout = (this.quiz.questions[this.questionIndex].video.endTime - this.quiz.questions[this.questionIndex].video.startTime);
     let quizTime = this.quiz.questions[this.questionIndex].time + extraTimeout;
     let ansTime = time - this.questionTimestamp;
     return Math.round(1000 * ((quizTime - ansTime) / quizTime));
