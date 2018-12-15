@@ -26,7 +26,7 @@ class Handler extends EventEmitter {
     this.questionTimestamp = 0;
     this.on("start",()=>{
       setTimeout(()=>{
-        this.emit("questionStart");
+        //this.emit("questionStart");
         this.nextQuestion(true);
       },4000);
     });
@@ -34,7 +34,7 @@ class Handler extends EventEmitter {
       if(f == "first"){
         return;
       }
-      this.emit("questionStart");
+      //this.emit("questionStart");
     });
     this.on("questionStart",()=>{
       this.timeout = setTimeout(function(){me.executeQuestion(me);me.questionTimestamp = Date.now();},4000);
