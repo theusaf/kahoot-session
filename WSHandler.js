@@ -648,7 +648,7 @@ class Handler extends EventEmitter {
     }
   }
   getPoints(time,options){
-    let extraTimeout = (this.quiz.questions[this.questionIndex].video.endTime - this.quiz.questions[this.questionIndex].video.startTime);
+    let extraTimeout = 1000 * (this.quiz.questions[this.questionIndex].video.endTime - this.quiz.questions[this.questionIndex].video.startTime);
     let quizTime = this.quiz.questions[this.questionIndex].time + extraTimeout;
     let ansTime = time - this.questionTimestamp;
     return Math.round(1000 * ((quizTime - ansTime) / quizTime));
