@@ -3,225 +3,328 @@ const EventEmitter = require('events');
 const request = require('request');
 const consts = require('./consts.js');
 
-class Handler extends EventEmitter {
+class newHandler extends EventEmitter{
   constructor(id,options){
     super();
-    var me = this;
+    let me = this;
     this.quizID = id;
     this.options = options;
+    if(!this.options){
+      this.options = {};
+    }
     this.msgID = 0;
     this.clientID = null;
     this.session = null;
     this.secret = null;
+    this.antibot = {
+      cachedData: [],
+      cachedUsernames: [],
+      confirmedPlayers: []
+    };
     this.quiz = {};
+    this.configured;
     this.timestamp = 0;
     this.connected = false;
-    this.recievedFirstHandshake = false;
     this.players = [];
-    this.configured = false;
     this.questionIndex = 0;
     this.snark = ["Are you sure about that?"];
     this.success = ["1st","2nd","3rd","Top 5!","Oof"];
     this.success2 = ["Hooray!","Nice!","So close!","You tried...","Next time..."];
     this.questionTimestamp = 0;
-    this.on("start",()=>{
-      setTimeout(()=>{
-        //this.emit("questionStart");
-        this.nextQuestion(true);
-      },4000);
-    });
-    this.on("qstart",f=>{
-      if(f == "first"){
-        return;
-      }
-      //this.emit("questionStart");
-    });
-    this.on("questionStart",()=>{
-      this.timeout = setTimeout(function(){me.executeQuestion(me);me.questionTimestamp = Date.now();},4000);
-    });
-    this.timesync = {
+    this.shookHands = false;
+    this.timesyncdata = {
       a: [],
       b: []
     }
+    this.on("start",()=>{
+      setTimeout(()=>{
+        this.nextQuestion(true);
+      },4000);
+    });
+    this.on("questionStart",()=>{
+      let me = this;
+      this.timeout = setTimeout(()=>{
+        me.executeQuestion(me);
+        me.questionTimestamp = Date.now();
+      },4000);
+    });
   }
   start(){
-    //GET quiz.
     this.timestamp = Date.now();
-    request(consts.quiz_id + this.quizID + consts.quiz_extra + this.timestamp,(e,r,b) => {
+    request(consts.quiz_id + this.quizID + consts.quiz_extra + this.timestamp,(e,r,b)=>{
       if(e){
-        throw "Invalid URI / API Error";
-      }
-      try{
-        this.quiz = JSON.parse(b);
-      }catch(e){
-        console.log("JSON Error");
+        console.log("Invalid URI / API Error.");
         this.emit("error",e);
         return;
+      }try{
+        this.quiz = JSON.parse(b);
+      }catch(e){
+        console.log("Failed to parse quiz data.");
+        this.emit("error",e);
       }
     });
-    let form = {
-      gameMode: "normal",
-      namerator: false,
-      twoFactorAuth: false
-    };
     request.post({
-      url: `https://play.kahoot.it/reserve/session/?${Date.now()}`,
-      multipart: [{
-        'content-type': 'application/json',
-        body: JSON.stringify(form)
-      }]
-    },(e,r,b) => {
+      url: `https://play.kahoot.it/reserve/session?${this.timestamp}`,
+      multipart: [{'content-type': 'application/json',body: JSON.stringify({
+        namerator: this.options.namerator ? this.options.namerator : false,
+        gameMode: "normal",
+        twoFactorAuth: this.options.twoFactorAuth ? this.options.twoFactorAuth : false
+      })}]
+    },(e,r,b)=>{
       this.session = Number(b);
       this.secret = r.headers['x-kahoot-session-token'];
-      //console.log(this.session + "," + this.secret);
-      //now create the web socket.
       this.ws = new WebSocket(consts.wss_endpoint+"/"+this.session+"/"+this.secret,{
         origin: "https://play.kahoot.it",
         perMessageDeflate: true,
         maxPayload: 50000000,
         threshold: 0
       });
-      //ws stuffs
       this.ws.on("open",()=>{
-        //console.log("opened!");
         this.connected = true;
         this.open();
       });
-      this.ws.on("message",msg => {
-        this.message(msg);
+      this.ws.on("message",msg=>{
+        this.message(msg)
       });
       this.ws.on("close",()=>{
         this.close();
         this.connected = false;
       });
       this.ws.on("error",err=>{
-        console.log("Error! " + err);
+        console.log("WebSocket Error " + err);
+        this.emit("error",err);
       });
-      //end of ws stuff
     });
   }
-  getPacket(packet){
-    let l = (Date.now() - packet.ext.timesync.tc - packet.ext.timesync.p) / 2;
-    let o = packet.ext.timesync.ts - packet.ext.timesync.tc - l;
-    this.timesync.a.push(l);
-    this.timesync.b.push(o);
-    if(this.timesync.a.length > 10){
-      this.timesync.a.shift();
-      this.timesync.b.shift();
-    }
-    var p,g,g,d;
-    for(var d = this.timesync.a.length, p = 0, h=0,g=0;g<d;++g){
-      p+=this.timesync.a[g];
-      h+=this.timesync.b[g];
-    }
-    this.msgID++;
-    return [{
-      channel: packet.channel,
-      clientId: this.clientID,
-      ext: {
-        ack: packet.ext.ack,
-        timesync: {
-          l: parseInt((p/d).toFixed()),
-          o: parseInt((h/d).toFixed()),
-          tc: Date.now()
+  antiBotDetect(player){
+    const percent = this.options.antiBotPercent ? this.options.antiBotPercent : 0.6;
+    function similarity(s1, s2) {
+      if(!s2){
+        return 0;
+      }
+      if(s1){
+        if(!isNaN(s2) && !isNaN(s1) && s1.length == s2.length){
+          return 1;
         }
-      },
-      id: String(this.msgID)
-    }];
+      }
+      if(this.options.namerator){
+        let caps = s2.length - s2.replace(/[A-Z]/g, '').length;
+          if(caps !== 2){ /*has less than 2 or more than 2 capitals*/
+            return -1;
+          }
+          if (s2.substr(0,1).replace(/[A-Z]/g,'').length === 1){ /*first char is not a capital*/
+            return -1;
+          }
+          if (s2.substr(1,2).replace(/[A-Z]/g,'').length != 2){ /*next few char have capitals*/
+            return -1;
+          }
+          if(s2.substr(s2.length - 2,2).replace(/[A-Z]/g,'').length !== 2){ /*last few char have a capital*/
+            return -1;
+          }
+          if(s2.replace(/[a-z]/ig,'').length > 0){ /*has non-letter chars*/
+            return -1;
+          }
+        }
+        if(!s1){
+          return;
+        }
+        s1 = s1.toLowerCase();
+        s2 = s2.toLowerCase();
+        var longer = s1;
+        var shorter = s2;
+        if (s1.length < s2.length) {
+          longer = s2;
+          shorter = s1;
+        }
+        var longerLength = longer.length;
+        if (longerLength == 0) {
+          return 1.0;
+        }
+        return (longerLength - editDistance(longer, shorter)) / parseFloat(longerLength);
+      }
+    function editDistance(s1, s2) {
+      s1 = s1.toLowerCase();
+      s2 = s2.toLowerCase();
+      var costs = new Array();
+      for (var i = 0; i <= s1.length; i++) {
+        var lastValue = i;
+        for (var j = 0; j <= s2.length; j++) {
+          if (i == 0){
+            costs[j] = j;
+          } else {
+            if (j > 0) {
+              var newValue = costs[j - 1];
+              if (s1.charAt(i - 1) != s2.charAt(j - 1)){
+                newValue = Math.min(Math.min(newValue, lastValue),costs[j]) + 1;
+              }
+              costs[j - 1] = lastValue;
+              lastValue = newValue;
+            }
+          }
+        }
+        if (i > 0){
+          costs[s2.length] = lastValue;
+        }
+      }
+      return costs[s2.length];
+    }
+    function determineEvil(player){
+      if(this.antibot.cachedUsernames.length == 0){
+        if(similarity(null,player.name) == -1){
+          this.kickPlayer(player.cid);
+          return `Bot ${player.name} has been banished`
+        }
+        this.antibot.cachedUsernames.push({name: player.name, id: player.cid, time: 10, banned: false});
+      }else{
+        var removed = false;
+        for(var i in this.antibot.cachedUsernames){
+          if(this.antibot.confirmedPlayers.includes(this.antibot.cachedUsernames[i].name)){
+            continue;
+        }
+        if(similarity(this.antibot.cachedUsernames[i].name,player.name) == -1){
+          removed = true;
+          this.kickPlayer(player.cid);
+          return `Bot ${player.name} has been banished`;
+        }
+        if(similarity(this.antibot.cachedUsernames[i].name,player.name) >= percent){
+          removed = true;
+          this.kickPlayer(player.cid);
+          if(!this.antibot.cachedUsernames[i].banned){
+            this.antibot.cachedUsernames[i].banned = true;
+            this.antibot.cachedUsernames[i].time = 10;
+            this.kickPlayer(this.antibot.cachedUsernames[i].id);
+          }
+          return `Bots ${player.name} and ${this.antibot.cachedUsernames[i].name} have been banished`;
+        }
+      }
+      if(!removed){
+        this.antibot.cachedUsernames.push({name: player.name, id: player.cid, time: 10, banned: false});
+      }
+    }
+  }
+    function specialBotDetector(type,data){
+    switch (type) {
+      case 'joined':
+        if(!this.antibot.cachedData[data.cid] && !isNaN(data.cid) && Object.keys(data).length <= 4){ //if the id has not been cached yet or is an invalid id, and they are not a bot :p
+          this.antibot.cachedData[data.cid] = {
+            time: 0,
+            tries: 0
+          };
+        }else{
+          this.kickPlayer(data.cid);
+          return `Bot ${data.name} has been banished, clearly a bot from kahootsmash or something`;
+        }
+        break;
+      }
+    }
+    var timer = setInterval(function(){
+      for(let i in this.antibot.cachedUsernames){
+        if(this.antibot.cachedUsernames[i].time <= 0 && !this.antibot.cachedUsernames[i].banned && !this.antibot.confirmedPlayers.includes(this.antibot.cachedUsernames[i].name)){
+          this.antibot.confirmedPlayers.push(this.antibot.cachedUsernames[i].name);
+          continue;
+        }
+        if(this.antibot.cachedUsernames[i].time <= -20){
+          this.antibot.cachedUsernames.splice(i,1);
+          continue;
+        }
+        this.antibot.cachedUsernames[i].time--;
+      }
+    },1000);
+    return specialBotDetector("joined",player) != undefined || determineEvil(player) != undefined;
   }
   message(msg){
-    //console.log("message recieved: " + msg);
-    let data = JSON.parse(msg);
-    if(data[0].channel == consts.channels.handshake && data[0].clientId){
-      this.emit("handshake",data[0].clientId);
-      this.clientID = data[0].clientId;
-      let r = this.getPacket(data[0])[0];
-      r.ext.ack = undefined,
+    //console.log(`^${msg}`);
+    let data = JSON.parse(msg)[0];
+    if(data.channel == consts.channels.handshake){
+      this.emit("handshake",data.clientId);
+      this.clientID = data.clientId;
+      let r = this.getPacket(data);
+      delete r.ext.ack;
       r.channel = consts.channels.subscribe,
-      r.clientId = this.clientID,
-      r.subscription = "/service/player";
-      this.send([r]);
-      //console.log("handshake? " + this.recievedFirstHandshake);
-      if(!this.recievedFirstHandshake){ //send subscription stuff
-        let r = this.getPacket(data[0])[0];
-        delete r.ext.ack;
-        r.channel = consts.channels.subscribe;
-        r.clientId = this.clientID;
-        r.subscription = "/controller/" + this.session;
-        this.send([r]);
-        r = this.getPacket(data[0])[0];
-        r.ext.ack = -1;
-        r.advice = {
-          timeout: 0
-        };
-        r.channel = consts.channels.connect;
-        r.clientId = this.clientID;
-        r.connectionType = "websocket";
-        this.send([r]);
-        this.recievedFirstHandshake = true;
-      }
+      r.subscription = "/service/player"
+      this.timesync = r.timesync;
+      this.send(r);
+      r.subscription = "/controller/" + this.session;
+      this.send(r);
+      delete r.subscription;
+      delete r.advice;
+      r.ext.ack = -1;
+      r.advice = {
+        timeout: 0
+      };
+      r.channel = consts.channels.connect;
+      r.connectionType = "websocket";
+      this.send(r);
       return;
     }
-    if(data[0].channel == consts.channels.subscribe){
-      if(data[0].subscription == consts.channels.subscription && data[0].successful == true && !this.configured){
-        //console.log("sending final setup thing");
-        this.configured = true;
-        let r = this.getPacket(data[0])[0];
-        r.channel = consts.channels.subscription;
-        r.clientId = this.clientID;
-        delete r.ext;
-        r.data = {
-          gameid: this.session,
-          host: "play.kahoot.it",
-          type: "started"
-        };
-        this.send([r]);
-        this.emit("ready",this.session);
-      }
-      return;
-    }
-    if(data[0].channel == "/controller/" + this.session && data[0].data.type == "joined"){ //a player joind
-      this.msgID++;
+    if(data.channel == consts.channels.subscribe && data.subscription == consts.channels.subscription && data.successful && !this.configured){
+      this.configured = true;
       let r = {
         channel: consts.channels.subscription,
         clientId: this.clientID,
-        id: String(this.msgID),
         data: {
-          cid: data[0].data.cid,
+          gameid: this.session,
+          host: "play.kahoot.it",
+          type: "started"
+        }
+      }
+      this.send(r);
+      this.emit("ready",this.session);
+      return;
+    }
+    if(data.channel == "/controller/" + this.session && data.data.type == "joined"){
+      if(this.options.useAntiBot){
+        this.players.push({
+          name: data.data.name,
+          id: data.data.cid
+        });
+        if(this.antiBotDetect(this.data)){
+          return;
+        }
+      }
+      let r = {
+        channel: consts.channels.subscription,
+        clientId: this.clientID,
+        data: {
+          cid: data.data.cid,
           content: JSON.stringify({
-            playerName: data[0].data.name,
-            quizType: "quiz"
+            playerName: data.data.name,
+            quizType: this.quiz.type
           }),
           gameid: this.session,
           host: "play.kahoot.it",
           id: 14,
           type: "message"
         }
-      };
-      this.send([r]);
-      //add player to list
-      this.players.push({
-        name: data[0].data.name,
-        id: data[0].data.cid,
-        score: 0
-      });
-      this.emit("join",{name: data[0].data.name,id:data[0].data.cid});
+      }
+      this.send(r);
+      if(!this.options.useAntiBot){
+        this.players.push({
+          name: data.data.name,
+          id: data.data.cid
+        });
+      }
+      this.emit("join",{name: data.data.name,id:data.data.cid});
       return;
     }
-    if(data[0].channel == "/controller/" + this.session && data[0].data.type == "left"){
+    if(data.channel == "/controller/" + this.session && data.data.type == "left"){
       this.emit("leave",{
         name: this.players.filter(o=>{
-          return o.id == data[0].data.cid;
-        })[0].name,
-        id: data[0].data.cid
+          return o.id == data.data.cid;
+        }).name,
+        id: data.data.cid
       });
       this.players = this.players.filter(o=>{
-        return o.id != data[0].data.cid
+        return o.id != data.data.cid
       });
       return;
     }
-    if(data[0].channel == "/controller/" + this.session && data[0].data.content.search(/(\"choice\":)/img) != -1){
-      this.handleScore(data[0].data.cid,JSON.parse(data[0].data.content));
+    if(data.channel == "/controller/" + this.session && data.data.content.search(/(\"choice\":)/img) != -1){
+      if(this.options.manuallyHandleAnswers){
+        this.emit("answer",data.data);
+        return;
+      }
+      this.handleScore(data.data.cid,JSON.parse(data.data.content));
       //send response...
       let ans = [];
       this.msgID++;
@@ -231,9 +334,8 @@ class Handler extends EventEmitter {
       let r = {
         channel: consts.channels.subscription,
         clientId: this.clientID,
-        id: String(this.msgID),
         data: {
-          cid: String(data[0].data.cid),
+          cid: String(data.data.cid),
           host: "play.kahoot.it",
           id: 7,
           type: "message",
@@ -245,33 +347,74 @@ class Handler extends EventEmitter {
           })
         }
       };
-      this.send([r]);
-      this.emit("answer",data[0].data.cid);
+      this.send(r);
+      this.emit("answer",data.data.cid);
       return;
     }
-    if(data[0].channel == consts.channels.connect && typeof(data[0].advice) != "undefined"){
-      if(typeof(data[0].advice.reconnect) == "undefined"){
-        return;
-      }
-      if(data[0].advice.reconnect == "retry"){
-        let r = this.getPacket(data[0])[0];
-        r.clientId = this.clientID;
-        r.connectionType = "websocket";
-        this.send([r]);
-      }
-      return;
-    }
-    if(data[0].channel == consts.channels.connect && typeof(data[0].advice) == "undefined"){
+    if(data.channel == consts.channels.connect && typeof(data.advice) == "undefined" && !data.subscription){
       //ping + pong system.
-      let r = this.getPacket(data[0])[0];
+      let r = {
+        channel: data.channel,
+        clientId: this.clientID,
+        ext: {
+          ack: data.ext.ack,
+          timesync: this.timesync
+        }
+      };
+      if(data.ext.timesync){
+        let r = this.getPacket(data)[0];
+      }
+      r.connectionType = "websocket"
       r.clientId = this.clientID;
-      this.send([r]);
+      this.send(r);
       return;
     }
+    if(data.channel == consts.channels.connect && data.advice && data.advice.reconnect && data.advice.reconnect == "retry"){
+      let r = {
+        ext: {
+          ack: data.ext.ack,
+          timesync: this.timesync
+        },
+        channel: consts.channels.connect,
+        connectionType: "websocket",
+        clientId: this.clientID
+      };
+      if(data.subscription){
+        r.subscription = data.subscription;
+      }
+      this.send(r);
+    }
+  }
+  getPacket(p){
+    let l = (Date.now() - p.ext.timesync.tc - p.ext.timesync.p) / 2;
+    let o = p.ext.timesync.ts - p.ext.timesync.tc - l;
+    this.timesyncdata.a.push(l);
+    this.timesyncdata.b.push(o);
+    if(this.timesyncdata.a.length > 10){
+      this.timesyncdata.a.shift();
+      this.timesyncdata.b.shift();
+    }
+    var pz,g,h,d;
+    for(d = this.timesyncdata.a.length,pz=0,h=0,g=0;g<d;++g){
+      pz+=this.timesyncdata.a[g],
+      h+=this.timesyncdata.b[g]
+    }
+    return {
+      channel: p.channel,
+      clientId: this.clientID,
+      ext: {
+        ack: p.ext.ack,
+        timesync: {
+          l: parseInt((pz/d).toFixed()),
+          o: parseInt((pz/d).toFixed()),
+          tc: Date.now()
+        }
+      },
+      id: String(this.msgID)
+    };
   }
   executeQuestion(me){
     var me = me ? me : this;
-    me.msgID++;
     let answerMap = {};
     let ans = [];
     for(let i in me.quiz.questions){
@@ -283,7 +426,6 @@ class Handler extends EventEmitter {
     let r = {
       channel: consts.channels.subscription,
       clientId: me.clientID,
-      id: String(me.msgID),
       data: {
         gameid: me.session,
         host: "play.kahoot.it",
@@ -293,37 +435,56 @@ class Handler extends EventEmitter {
           questionIndex: me.questionIndex,
           answerMap: answerMap,
           canAccessStoryBlocks: false,
-          gameBlockType: "quiz",
-          quizType: "quiz",
+          gameBlockType: me.quiz.type,
+          quizType: me.quiz.type,
           quizQuestionAnswers: ans
         })
       }
     };
-    me.send([r]);
+    me.send(r);
     let extraTimeout = (me.quiz.questions[me.questionIndex].video.endTime - me.quiz.questions[me.questionIndex].video.startTime) * 1000;
-    me.timeout2 = setTimeout(function(){me.endQuestion(me)},me.quiz.questions[me.questionIndex].time + extraTimeout);
+    me.timeout2 = setTimeout(()=>{
+      me.endQuestion(me);
+    }, me.quiz.questions[me.questionIndex].time + extraTimeout);
   }
   send(msg){
-    if(this.connected){
-      try{
-        //console.log("sending " + JSON.stringify(msg));
+    //console.log(`\\${JSON.stringify(msg)}`);
+    if(typeof(msg.push) == "function"){
+      for(let i in msg){
+        msg[i].id = String(this.msgID);
+        this.msgID++;
+      }
+    }else{
+      msg.id = String(this.msgID);
+    }
+    try{
+      if(typeof(msg.push) == "function"){
         this.ws.send(JSON.stringify(msg),function ack(err){
           if(err){
-            console.log("Error sending message: " + err);
+            console.log("Websocket send error " + err);
+            this.emit("error",err);
           }
         });
-      }catch(e){
-        console.log("Uh oh. an error!");
+        return;
       }
+      this.ws.send(JSON.stringify([msg]),function ack(err){
+        if(err){
+          console.log("Websocket send error " + err);
+          this.emit("error",err);
+        }
+      });
+    }catch(e){
+      console.log("Websocket connection error " + e);
+      this.emit("error",e);
     }
+    this.msgID++;
   }
   end(){
     this.emit("close");
   }
   open(){
     this.emit("open");
-    this.connected = true;
-    let r = [{
+    let r = {
       advice: {
         interval: 0,
         timeout: 60000
@@ -337,24 +498,20 @@ class Handler extends EventEmitter {
           tc: Date.now()
         }
       },
-      id: "1",
       minumum_version: "1.0",
       version: "1.0",
       supportedConnectionTypes: [
         "websocket","long-polling"
       ]
-    }];
+    };
     this.send(r);
-    this.msgID++;
   }
   close(){
-    this.connected = false;
     this.emit("close");
     this.ws.close();
   }
   startQuiz(){
-    if(this.connected && this.configured){
-      this.msgID++;
+    if(this.configured){
       let ans = [];
       for(let i in this.quiz.questions){
         ans.push(this.quiz.questions[i].choices.length);
@@ -362,7 +519,6 @@ class Handler extends EventEmitter {
       let r = {
         channel: consts.channels.subscription,
         clientId: this.clientID,
-        id: String(this.msgID),
         data: {
           host: "play.kahoot.it",
           id: 9,
@@ -370,31 +526,28 @@ class Handler extends EventEmitter {
           type: "message",
           content: JSON.stringify({
             quizName: this.quiz.title,
-            quizType: "quiz",
+            quizType: this.quiz.type,
             quizQuestionAnswers: ans
           })
         }
       };
       this.emit("start",this.quiz);
-      this.send([r]);
+      this.send(r);
     }else{
-      return "Start the quiz first using kahoot.start()";
+      console.log("Start the quiz using kahoot.start()");
+      this.emit("error","Quiz was not started yet");
     }
   }
   kickPlayer(id){
-    if(this.players.filter(o=>{
-      return o.id == id;
-    }).length == 1){
-      this.msgID++;
+    if(this.getPlayerById(id)){
       let r = {
         channel: consts.channels.subscription,
         clientId: this.clientID,
-        id: String(this.msgID),
         data: {
           cid: String(id),
           content: JSON.stringify({
             kickCode: 1,
-            quizType: "quiz"
+            quizType: this.quiz.type
           }),
           gameid: this.session,
           host: "play.kahoot.it",
@@ -402,18 +555,16 @@ class Handler extends EventEmitter {
           type: "message"
         }
       };
-      this.send([r]);
-    }else{
-      return "Player not found...";
+      this.send(r);
     }
   }
   rankPlayers(){
     return JSON.parse(JSON.stringify(this.players)).sort(function(a,b){
-      return a.totalScore - b.totalScore;
+      return a.info.totalScore - b.info.totalScore;
     });
   }
   handleScore(id,options,answerIsNULL,dis){
-    var me = dis ? dis : this;
+    let me = dis ? dis : this;
     let index;
     for(let i in me.players){
       if(this.players[i].id == id){
@@ -647,7 +798,7 @@ class Handler extends EventEmitter {
       me.players[index].incorrectCount = typeof(me.players[index].incorrectCount) == "undefined" ? 1 : me.players[index].incorrectCount + 1;
     }
   }
-  getPoints(time,options){
+  getPoints(time){
     let extraTimeout = 1000 * (this.quiz.questions[this.questionIndex].video.endTime - this.quiz.questions[this.questionIndex].video.startTime);
     let quizTime = this.quiz.questions[this.questionIndex].time + extraTimeout;
     let ansTime = time - this.questionTimestamp;
@@ -664,11 +815,9 @@ class Handler extends EventEmitter {
     for(let i in me.quiz.questions){
       ans.push(me.quiz.questions[i].choices.length);
     }
-    me.msgID++;
     let r = {
       channel: consts.channels.subscription,
       clientId: me.clientID,
-      id: String(me.msgID),
       data: {
         gameid: me.session,
         host: "play.kahoot.it",
@@ -681,9 +830,9 @@ class Handler extends EventEmitter {
         })
       }
     };
-    me.send([r]);
+    me.send(r);
     me.emit("questionEnd",me.rankPlayers());
-    //send results..
+    //send results
     let rs = [];
     for(let i in me.players){
       //determine if we need to set base score?
@@ -697,7 +846,7 @@ class Handler extends EventEmitter {
       if(typeof(me.players[i].info.choice) == "undefined"){
         me.handleScore(me.players[i].id,{},true,me);
       }
-      //get rank + nemesis
+      //get rank and nemesis
       let sorted = me.rankPlayers();
       let place = 0;
       var nemesis = undefined;
@@ -722,11 +871,9 @@ class Handler extends EventEmitter {
           isKicked: false
         }
       }
-      me.msgID++;
       rs.push({
         channel: consts.channels.subscription,
         clientId: me.clientID,
-        id: String(me.msgID),
         data: {
           cid: me.players[i].id,
           gameid: me.session,
@@ -738,55 +885,57 @@ class Handler extends EventEmitter {
       });
     }
     me.send(rs);
-    //wait for user to call next question
+    if(me.options.autoNextQuestion){
+      setTimeout(()=>{
+        me.nextQuestion(false,me);
+      },5000);
+    }
   }
-  nextQuestion(isFirst){
-    this.questionIndex++;
-    if(this.questionIndex >= this.quiz.questions.length){
-      this.endQuiz();
+  nextQuestion(isFirst,me){
+    var me = me ? me : this;
+    me.questionIndex++;
+    if(me.questionIndex >= me.quiz.questions.length){
+      me.endQuiz();
       return;
     }
-    this.msgID++;
-    if(isFirst){this.questionIndex--;}
-    this.emit("qstart",isFirst ? "first" : this.quiz.questions[this.quizIndex]);
-    this.emit("questionStart",this.quiz.questions[this.questionIndex]);
+    if(isFirst){me.questionIndex--;}
+    me.emit("questionStart",me.quiz.questions[me.questionIndex]);
     let answerMap = {};
     let ans = [];
-    for(let i in this.players){
-      if(typeof(this.players.info) == "undefined"){
+    for(let i in me.players){
+      if(typeof(me.players[i].info) == "undefined"){
         continue;
       }
-      delete this.players.info.choice;
-      delete this.players.info.isCorrect;
-      this.players.info.points = 0;
+      delete me.players[i].info.choice;
+      delete me.players[i].info.isCorrect;
+      me.players[i].info.points = 0;
     }
-    for(let i in this.quiz.questions){
-      ans.push(this.quiz.questions[i].choices.length);
+    for(let i in me.quiz.questions){
+      ans.push(me.quiz.questions[i].choices.length);
     }
-    for(let i in this.quiz.questions[this.questionIndex].choices){
+    for(let i in me.quiz.questions[me.questionIndex].choices){
       answerMap[String(i)] = Number(i);
     }
     let r = {
       channel: consts.channels.subscription,
-      clientId: this.clientID,
-      id: String(this.msgID),
+      clientId: me.clientID,
       data: {
         id: 1,
         type: "message",
         host: "play.kahoot.it",
-        gameid: this.session,
+        gameid: me.session,
         content: JSON.stringify({
-          questionIndex: this.questionIndex,
+          questionIndex: me.questionIndex,
           answerMap: answerMap,
           canAccessStoryBlocks: false,
-          gameBlockType: "quiz",
-          quizType: "quiz",
+          gameBlockType: me.quiz.type,
+          quizType: me.quiz.type,
           quizQuestionAnswers: ans,
           timeLeft: 4
         })
       }
     };
-    this.send([r]);
+    me.send(r);
   }
   endQuiz(){
     let ans = [];
@@ -795,29 +944,8 @@ class Handler extends EventEmitter {
     }
     this.emit("quizEnd",this.rankPlayers());
     //send end message.
-    this.msgID++;
-    let r = {
-      channel: consts.channels.subscription,
-      clientId: this.clientID,
-      id: String(this.msgID),
-      data: {
-        id: 4,
-        type: "message",
-        host: "play.kahoot.it",
-        gameid: this.session,
-        content: JSON.stringify({
-          questionNumber: this.questionIndex,
-          quizType: "quiz",
-          quizQuestionAnswers: ans
-        })
-      }
-    };
-    this.send([r]);
-    let rs = [];
     let rs2 = [];
-    //this.send(rs);
     for(let i in this.players){
-      this.msgID++;
       let rank = 0;
       let pl = this.rankPlayers();
       for(let h in pl){
@@ -828,7 +956,6 @@ class Handler extends EventEmitter {
       let r = {
         channel: consts.channels.subscription,
         clientId: this.clientID,
-        id: this.msgID,
         data: {
           cid: this.players[i].id,
           gameid: this.session,
@@ -859,6 +986,7 @@ class Handler extends EventEmitter {
       rs2.push(r);
     }
     this.send(rs2);
+    let rs = [];
     for(let i in this.players){
       this.msgID++;
       let rank = 0;
@@ -923,14 +1051,14 @@ class Handler extends EventEmitter {
         return game.success2;
       break;
       default:
-        return "TypeError: " + String(type) + " is not a valid type";
+        throw "TypeError: " + String(type) + " is not a valid type";
     }
   }
   getPlayerById(id){
     return this.players.filter(o=>{
       return o.id == id;
-    });
+    })[0];
   }
 }
 
-module.exports = Handler;
+module.exports = newHandler;
