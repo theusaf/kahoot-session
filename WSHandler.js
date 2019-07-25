@@ -559,8 +559,21 @@ class newHandler extends EventEmitter{
     }
   }
   rankPlayers(){
+    //credit to leemetme for the bug fix
     return JSON.parse(JSON.stringify(this.players)).sort(function(a,b){
-      return a.info.totalScore - b.info.totalScore;
+      if ("info" in a){
+        // Great.
+      } else {
+        a.info = {}
+        a.info.totalScore = 0
+      }
+      if ("info" in b){
+        // Great.
+      } else {
+        b.info = {}
+        b.info.totalScore = 0
+      }
+      return b.info.totalScore - a.info.totalScore;
     });
   }
   handleScore(id,options,answerIsNULL,dis){
