@@ -51,18 +51,23 @@ class newHandler extends EventEmitter{
   }
   start(){
     this.timestamp = Date.now();
-    request(consts.quiz_id + this.quizID + consts.quiz_extra + this.timestamp,(e,r,b)=>{
-      if(e){
-        console.log("Invalid URI / API Error.");
-        this.emit("error",e);
-        return;
-      }try{
-        this.quiz = JSON.parse(b);
-      }catch(e){
-        console.log("Failed to parse quiz data.");
-        this.emit("error",e);
-      }
-    });
+    if(typeof(this.quizID) == "string"){
+      request(consts.quiz_id + this.quizID + consts.quiz_extra + this.timestamp,(e,r,b)=>{
+        if(e){
+          console.log("Invalid URI / API Error.");
+          this.emit("error",e);
+          return;
+        }try{
+          this.quiz = JSON.parse(b);
+        }catch(e){
+          console.log("Failed to parse quiz data.");
+          this.emit("error",e);
+        }
+      });
+    }else{
+      this.quiz = this.quizID;
+      this.quizID = this.quizID.uuid;
+    }
     request.post({
       url: `https://play.kahoot.it/reserve/session?${this.timestamp}`,
       multipart: [{'content-type': 'application/json',body: JSON.stringify({
@@ -510,32 +515,37 @@ class newHandler extends EventEmitter{
     this.emit("close");
     this.ws.close();
   }
-  startQuiz(){
-    if(this.configured){
+  startQuiz(me){
+    if(me){
+      me = me;
+    }else{
+      me = this;
+    }
+    if(me.configured){
       let ans = [];
-      for(let i in this.quiz.questions){
-        ans.push(this.quiz.questions[i].choices.length);
+      for(let i in me.quiz.questions){
+        ans.push(me.quiz.questions[i].choices.length);
       }
       let r = {
         channel: consts.channels.subscription,
-        clientId: this.clientID,
+        clientId: me.clientID,
         data: {
           host: "play.kahoot.it",
           id: 9,
           gameid: this.session,
           type: "message",
           content: JSON.stringify({
-            quizName: this.quiz.title,
-            quizType: this.quiz.type,
+            quizName: me.quiz.title,
+            quizType: me.quiz.type,
             quizQuestionAnswers: ans
           })
         }
       };
-      this.emit("start",this.quiz);
-      this.send(r);
+      me.emit("start",this.quiz);
+      me.send(r);
     }else{
       console.log("Start the quiz using kahoot.start()");
-      this.emit("error","Quiz was not started yet");
+      me.emit("error","Quiz was not started yet");
     }
   }
   kickPlayer(id){
@@ -1073,5 +1083,93 @@ class newHandler extends EventEmitter{
     })[0];
   }
 }
+
+class Quiz{
+  constructor(name,options){
+    if(typeof(options) == "undefined"){
+      options = {};
+    }
+    this.uuid = "no-uuid";
+    this.creator = "kahoot-session",
+    this.metadata = {
+      duplicationProtection: false,
+      lastEdit: {
+        editTimestamp: 0,
+        editorUserId: "kahoot-session",
+        editorUsername: "kahoot-session"
+      }
+    };
+    this.folderId = "null";
+    this.cover = "null";
+    this.resources = "null";
+    this.modified = 0;
+    this.visibility = 0;
+    this.title = name;
+    this.slug = name.replace(/[\n|\ ]+/mg,"-");
+    this.creator_primary_usage = "server";
+    this.coverMetadata = {
+      id: "null"
+    };
+    this.questions = [];
+    this.language = options.language ? options.language : "English";
+    this.audience = options.audience ? options.audience : "Social";
+    this.description = options.description ? options.description : "Hello World";
+    this.type = options.type ? options.type : "quiz";
+    this.quizType = this.type;
+  }
+  addQuestion(q){
+    let question = new Question(q,this);
+    this.questions.push(question);
+    return question;
+  }
+};
+
+class Question{
+  constructor(question,quiz){
+    this.__proto__.quiz = quiz;
+    this.question = question ? question : "No Question Provided.";
+    this.choices = [];
+    this.numberOfAnswers = 0;
+    this.points = true;
+    this.questionFormat = 0;
+    this.resources = null;
+    this.time = 20000;
+    this.type = "quiz";
+    this.image = null;
+    this.imageMetadata = {};
+    this.video = {
+      id: "",
+      endTime: 0,
+      fullUrl: "",
+      service: "youtube",
+      startTime: 0
+    }
+  }
+  getQuiz(){
+    return this.__proto__.quiz;
+  }
+  addChoice(choice,correct){
+    if(typeof(choice) == "string" && typeof(correct) == "boolean"){
+      if(this.choices.length == 4){
+        throw "ERROR: CHOICE LENGTH FULL";
+      }
+      this.choices.push({answer: choice,correct:correct});
+      this.numberOfAnswers = this.choices.length;
+    }else{
+      throw "ERROR: MISSING/INCORRECT ARGUMENTS";
+    }
+    return this;
+  }
+  setTime(time){
+    this.time = Number(time);
+    return this;
+  }
+  setPoints(bool){
+    this.points = Boolean(bool);
+    return this;
+  }
+}
+
+newHandler.Quiz = Quiz;
 
 module.exports = newHandler;
