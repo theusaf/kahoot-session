@@ -210,7 +210,7 @@ class newHandler extends EventEmitter{
     function specialBotDetector(type,data){
     switch (type) {
       case 'joined':
-        if(!this.antibot.cachedData[data.cid] && !isNaN(data.cid) && Object.keys(data).length <= 4){ //if the id has not been cached yet or is an invalid id, and they are not a bot :p
+        if(!this.antibot.cachedData[data.cid] && !isNaN(data.cid) && Object.keys(data).length <= 5){ //if the id has not been cached yet or is an invalid id, and they are not a bot :p
           this.antibot.cachedData[data.cid] = {
             time: 0,
             tries: 0
