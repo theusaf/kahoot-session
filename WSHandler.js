@@ -35,7 +35,8 @@ class newHandler extends EventEmitter{
     this.timesyncdata = {
       a: [],
       b: []
-    }
+    };
+    this.ts = {};
     this.on("start",()=>{
       setTimeout(()=>{
         this.nextQuestion(true);
@@ -259,40 +260,17 @@ class newHandler extends EventEmitter{
   message(msg){
     //console.log(`^${msg}`);
     let data = JSON.parse(msg)[0];
+    // Startup
     if(data.channel == consts.channels.handshake){
       this.emit("handshake",data.clientId);
       this.clientID = data.clientId;
       let r = this.getPacket(data);
-      delete r.ext.ack;
-      r.channel = consts.channels.subscribe,
-      r.subscription = "/service/player"
-      this.timesync = r.timesync;
-      this.send(r);
-      r.subscription = "/controller/" + this.session;
-      this.send(r);
-      delete r.subscription;
-      delete r.advice;
-      r.ext.ack = -1;
-      r.advice = {
-        timeout: 0
-      };
-      r.channel = consts.channels.connect;
-      r.connectionType = "websocket";
+      r.advice = {timeout: 0};
       this.send(r);
       return;
     }
-    if(data.channel == consts.channels.subscribe && data.subscription == consts.channels.subscription && data.successful && !this.configured){
+    if(data.channel == consts.channels.subscribe && data.data && data.data.type == "start" && !this.configured){
       this.configured = true;
-      let r = {
-        channel: consts.channels.subscription,
-        clientId: this.clientID,
-        data: {
-          gameid: this.session,
-          host: "play.kahoot.it",
-          type: "started"
-        }
-      }
-      this.send(r);
       this.emit("ready",this.session);
       return;
     }
@@ -393,38 +371,45 @@ class newHandler extends EventEmitter{
       this.emit("answer",data.data.cid);
       return;
     }
+    //ping + pong system.
     if(data.channel == consts.channels.connect && typeof(data.advice) == "undefined" && !data.subscription){
-      //ping + pong system.
       let r = {
         channel: data.channel,
         clientId: this.clientID,
         ext: {
           ack: data.ext.ack,
-          timesync: this.timesync
+          timesync: this.ts
         }
       };
       if(data.ext.timesync){
-        let r = this.getPacket(data)[0];
+        let r = this.getPacket(data);
       }
+      r.ext.timesync.tc = Date.now();
       r.connectionType = "websocket"
       r.clientId = this.clientID;
       this.send(r);
       return;
     }
+    // ready to start
     if(data.channel == consts.channels.connect && data.advice && data.advice.reconnect && data.advice.reconnect == "retry"){
       let r = {
-        ext: {
-          ack: data.ext.ack,
-          timesync: this.timesync
-        },
-        channel: consts.channels.connect,
+        ext: {},
+        channel: consts.channels.subscription,
         connectionType: "websocket",
-        clientId: this.clientID
+        clientId: this.clientID,
+        data: {
+          type: "started",
+          gameid: this.session,
+          host: "play.kahoot.it"
+        }
       };
-      if(data.subscription){
-        r.subscription = data.subscription;
-      }
       this.send(r);
+      r.channel = "meta/connect";
+      delete r.data;
+      r.ext = {
+        ack: 1,
+        timesync: this.ts
+      };
     }
   }
   getPacket(p){
@@ -441,6 +426,11 @@ class newHandler extends EventEmitter{
       pz+=this.timesyncdata.a[g],
       h+=this.timesyncdata.b[g]
     }
+    this.ts = {
+      l: parseInt((pz/d).toFixed()),
+      o: parseInt((pz/d).toFixed()),
+      tc: Date.now()
+    };
     return {
       channel: p.channel,
       clientId: this.clientID,
