@@ -17,9 +17,10 @@ class newHandler extends EventEmitter{
     this.session = null;
     this.secret = null;
     this.antibot = {
-      cachedData: [],
+      cachedData: {},
       cachedUsernames: [],
-      confirmedPlayers: []
+      confirmedPlayers: [],
+      loggedPlayers: {}
     };
     this.quiz = {};
     this.configured;
@@ -174,6 +175,13 @@ class newHandler extends EventEmitter{
       return costs[s2.length];
     }
     function determineEvil(player){
+      // Disabled in V 2.5.5
+      /*if(this.antibot.loggedPlayers[player.cid] === true){
+        let packet = createKickPacket(player.cid);
+        socket.send(JSON.stringify(packet));
+        this.antibot.loggedPlayers[player.cid] = false;
+        throw "[ANTIBOT] - Evil intentions discovered";
+      }*/
       if(this.antibot.cachedUsernames.length == 0){
         if(similarity(null,player.name) == -1){
           this.kickPlayer(player.cid);
@@ -185,37 +193,40 @@ class newHandler extends EventEmitter{
         for(var i in this.antibot.cachedUsernames){
           if(this.antibot.confirmedPlayers.includes(this.antibot.cachedUsernames[i].name)){
             continue;
-        }
-        if(similarity(this.antibot.cachedUsernames[i].name,player.name) == -1){
-          removed = true;
-          this.kickPlayer(player.cid);
-          return `Bot ${player.name} has been banished`;
-        }
-        if(similarity(this.antibot.cachedUsernames[i].name,player.name) >= percent){
-          removed = true;
-          this.kickPlayer(player.cid);
-          if(!this.antibot.cachedUsernames[i].banned){
-            this.antibot.cachedUsernames[i].banned = true;
-            this.antibot.cachedUsernames[i].time = 10;
-            this.kickPlayer(this.antibot.cachedUsernames[i].id);
           }
-          return `Bots ${player.name} and ${this.antibot.cachedUsernames[i].name} have been banished`;
+          if(similarity(this.antibot.cachedUsernames[i].name,player.name) == -1){
+            removed = true;
+            this.kickPlayer(player.cid);
+            return `Bot ${player.name} has been banished`;
+          }
+          if(similarity(this.antibot.cachedUsernames[i].name,player.name) >= percent){
+            removed = true;
+            this.kickPlayer(player.cid);
+            if(!this.antibot.cachedUsernames[i].banned){
+              this.antibot.cachedUsernames[i].banned = true;
+              this.antibot.cachedUsernames[i].time = 10;
+              this.kickPlayer(this.antibot.cachedUsernames[i].id);
+            }
+            return `Bots ${player.name} and ${this.antibot.cachedUsernames[i].name} have been banished`;
+          }
         }
-      }
-      if(!removed){
-        this.antibot.cachedUsernames.push({name: player.name, id: player.cid, time: 10, banned: false});
+        if(!removed){
+          this.antibot.cachedUsernames.push({name: player.name, id: player.cid, time: 10, banned: false});
+          this.antibot.loggedPlayers[player.cid] = true;
+        }
       }
     }
-  }
     function specialBotDetector(type,data){
     switch (type) {
       case 'joined':
         if(!this.antibot.cachedData[data.cid] && !isNaN(data.cid) && Object.keys(data).length <= 5){ //if the id has not been cached yet or is an invalid id, and they are not a bot :p
           this.antibot.cachedData[data.cid] = {
-            time: 0,
             tries: 0
           };
         }else{
+          /*if(this.antibot.loggedPlayers[data.cid] === false){
+            break;
+          }*/
           this.kickPlayer(data.cid);
           return `Bot ${data.name} has been banished, clearly a bot from kahootsmash or something`;
         }
@@ -235,6 +246,11 @@ class newHandler extends EventEmitter{
         this.antibot.cachedUsernames[i].time--;
       }
     },1000);
+    const TFATimer = setInterval(()=>{
+        for(let i in this.antibot.cachedData){
+            this.antibot.cachedData[i].tries = 0;
+        }
+    },10000);
     return specialBotDetector("joined",player) != undefined || determineEvil(player) != undefined;
   }
   message(msg){
@@ -277,7 +293,7 @@ class newHandler extends EventEmitter{
       this.emit("ready",this.session);
       return;
     }
-    if(data.channel == "/controller/" + this.session && data.data.type == "joined"){
+    if(data.data ? data.data.type == "joined" : false){
       if(this.options.useAntiBot){
         this.players.push({
           name: data.data.name,
@@ -312,7 +328,14 @@ class newHandler extends EventEmitter{
       this.emit("join",{name: data.data.name,id:data.data.cid});
       return;
     }
-    if(data.channel == "/controller/" + this.session && data.data.type == "left"){
+    if(data.data ? data.data.type == "left" : false){
+      //Disabled in V2.5.5
+      /*if(this.antibot.loggedPlayers[data.data.cid] === false){ //if the antibot detected the evildoer
+        //As of V 2.5.2, this has been abandoned since it doesn't actually work :p
+        this.antibot.loggedPlayers[data.data.cid] = true;
+        throw "[ANTIBOT] - Preventing removal of real player.";
+      }
+      this.antibot.loggedPlayers[data.data.cid] = false;*/
       this.emit("leave",{
         name: this.players.filter(o=>{
           return o.id == data.data.cid;
@@ -323,6 +346,17 @@ class newHandler extends EventEmitter{
         return o.id != data.data.cid
       });
       return;
+    }
+    if(data.data ? data.data.id == 50 : false){
+      if(!this.options.useAntiBot){
+        return;
+      }
+      this.antibot.cachedData[data.data.cid].tries++;
+      if(this.antibot.cachedData[data.data.cid].tries > 3){
+        this.kickPlayer(data.data.cid);
+        const name = this.antibot.cachedUsernames.filter(o=>{return o.id == data.data.cid}).length ? this.antibot.cachedUsernames.filter(o=>{return o.id == data.data.cid})[0].name : "bot";
+        console.log(`[ANTIBOT] - Bot ${name} banished. Seen spamming 2FA`);
+      }
     }
     if(data.channel == "/controller/" + this.session && data.data.content.search(/(\"choice\":)/img) != -1){
       if(this.options.manuallyHandleAnswers){
@@ -1044,7 +1078,7 @@ class newHandler extends EventEmitter{
   }
   setSnark(game,type,index,text){
     switch (type) {
-      case "answer":
+      /*case "answer":
         if(typeof(index) == "object" && typeof(index.push) == "function"){
           if(index.length >= 1){
             game.snark = index;
@@ -1052,7 +1086,7 @@ class newHandler extends EventEmitter{
           }
           return game.snark;
         }
-      break;
+      break;*/
       case "rank":
         if(index < 0){
           game.success[0] = String(text);
