@@ -11,7 +11,7 @@ class newHandler extends EventEmitter{
     if(!this.options){
       this.options = {};
     }
-    this.msgID = 0;
+    this.msgID = 1;
     this.clientID = null;
     this.session = null;
     this.secret = null;
@@ -81,6 +81,7 @@ class newHandler extends EventEmitter{
         participantId: false
       })}]
     },(e,r,b)=>{
+      console.log(b + "\n");
       this.session = Number(b);
       this.secret = r.headers['x-kahoot-session-token'];
       this.ws = new WebSocket(consts.wss_endpoint+"/"+this.session+"/"+this.secret,{
@@ -258,7 +259,7 @@ class newHandler extends EventEmitter{
     return specialBotDetector("joined",player) != undefined || determineEvil(player) != undefined;
   }
   message(msg){
-    //console.log(`^${msg}`);
+    console.log(`^${msg}`);
     let data = JSON.parse(msg)[0];
     // Startup
     if(data.channel == consts.channels.handshake){
@@ -266,6 +267,7 @@ class newHandler extends EventEmitter{
       this.clientID = data.clientId;
       let r = this.getPacket(data);
       r.advice = {timeout: 0};
+      r.channel = consts.channels.connect;
       this.send(r);
       return;
     }
@@ -410,6 +412,7 @@ class newHandler extends EventEmitter{
         ack: 1,
         timesync: this.ts
       };
+      this.send(r);
     }
   }
   getPacket(p){
@@ -480,7 +483,6 @@ class newHandler extends EventEmitter{
     }, me.quiz.questions[me.questionIndex].time + extraTimeout);
   }
   send(msg){
-    //console.log(`\\${JSON.stringify(msg)}`);
     if(typeof(msg.push) == "function"){
       for(let i in msg){
         msg[i].id = String(this.msgID);
@@ -489,6 +491,7 @@ class newHandler extends EventEmitter{
     }else{
       msg.id = String(this.msgID);
     }
+    console.log(`\\${JSON.stringify(msg)}`);
     try{
       if(typeof(msg.push) == "function"){
         this.ws.send(JSON.stringify(msg),function ack(err){
@@ -533,7 +536,7 @@ class newHandler extends EventEmitter{
       minumum_version: "1.0",
       version: "1.0",
       supportedConnectionTypes: [
-        "websocket","long-polling"
+        "websocket","long-polling", "callback-polling"
       ]
     };
     this.send(r);
