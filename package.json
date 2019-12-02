@@ -1,6 +1,6 @@
 {
   "name": "kahoot-session",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "Creates a kahoot game and stuff.",
   "main": "kahoot.js",
   "scripts": {

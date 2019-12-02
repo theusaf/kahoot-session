@@ -37,7 +37,7 @@ Session.kickPlayer(id); //kicks a player with id
 Session.endQuestion(); //ends the question early.
 Session.nextQuestion(); //sends the next question
 Session.endQuiz(); //ends the quiz
-Session.setSnark(Session,"answer",0,"foo"); //["answer","rank","finish"] (answer is the text when answering questions, rank is the ranking text, and finish is the secondary ranking text) [index/array] (index/array is the text to replace) [text] (value to set item.)
+Session.setSnark(Session,"answer",0,"foo"); //"rank","finish"] (rank is the ranking text, and finish is the secondary ranking text) [index/array] (index/array is the text to replace) [text] (value to set item.)
 Session.rankPlayers(); //returns an ordered list of Players
 Session.getPlayerById(id); //gets the player by id
 ```
@@ -92,7 +92,6 @@ Session.clientID //client id
 Session.quiz //quiz info
 Session.secret //secret kahoot token
 Session.quizIndex //current quiz index
-Session.snark //an array of text to send after the player answers
 Session.success //an array of text to send at the end of the quiz. (the top text) ["1st","2nd","3rd","top 5","below top 5"]
 Session.success2 //an array of text to send at the end of the quiz (the bottom text) ["you won!","almost","good try","made it to the leaderboard at least","good job, nice try"]
 ```

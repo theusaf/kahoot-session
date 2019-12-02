@@ -6,7 +6,6 @@ const consts = require('./consts.js');
 class newHandler extends EventEmitter{
   constructor(id,options){
     super();
-    let me = this;
     this.quizID = id;
     this.options = options;
     if(!this.options){
@@ -28,7 +27,7 @@ class newHandler extends EventEmitter{
     this.connected = false;
     this.players = [];
     this.questionIndex = 0;
-    this.snark = ["Are you sure about that?"];
+    //this.snark = ["Are you sure about that?"];
     this.success = ["1st","2nd","3rd","Top 5!","Oof"];
     this.success2 = ["Hooray!","Nice!","So close!","You tried...","Next time..."];
     this.questionTimestamp = 0;
@@ -74,7 +73,11 @@ class newHandler extends EventEmitter{
       multipart: [{'content-type': 'application/json',body: JSON.stringify({
         namerator: this.options.namerator ? this.options.namerator : false,
         gameMode: "normal",
-        twoFactorAuth: this.options.twoFactorAuth ? this.options.twoFactorAuth : false
+        twoFactorAuth: this.options.twoFactorAuth ? this.options.twoFactorAuth : false,
+        smartPractice: false,
+        themeId: false,
+        orgId: "",
+        participantId: false
       })}]
     },(e,r,b)=>{
       this.session = Number(b);
