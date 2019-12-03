@@ -431,7 +431,7 @@ class newHandler extends EventEmitter{
     }
     this.ts = {
       l: parseInt((pz/d).toFixed()),
-      o: parseInt((pz/d).toFixed()),
+      o: parseInt((h/d).toFixed()),
       tc: Date.now()
     };
     return {
