@@ -81,7 +81,7 @@ class newHandler extends EventEmitter{
         participantId: false
       })}]
     },(e,r,b)=>{
-      console.log(b + "\n");
+      //console.log(b + "\n");
       this.session = Number(b);
       this.secret = r.headers['x-kahoot-session-token'];
       this.ws = new WebSocket(consts.wss_endpoint+"/"+this.session+"/"+this.secret,{
@@ -259,7 +259,7 @@ class newHandler extends EventEmitter{
     return specialBotDetector("joined",player) != undefined || determineEvil(player) != undefined;
   }
   message(msg){
-    console.log(`^${msg}`);
+    //console.log(`^${msg}`);
     let data = JSON.parse(msg)[0];
     // Startup
     if(data.channel == consts.channels.handshake){
@@ -271,7 +271,7 @@ class newHandler extends EventEmitter{
       this.send(r);
       return;
     }
-    if(data.channel == consts.channels.subscribe && data.data && data.data.type == "start" && !this.configured){
+    if(data.channel == consts.channels.subscription && data.data && data.data.type == "start" && !this.configured){
       this.configured = true;
       this.emit("ready",this.session);
       return;
@@ -406,7 +406,7 @@ class newHandler extends EventEmitter{
         }
       };
       this.send(r);
-      r.channel = "meta/connect";
+      r.channel = "/meta/connect";
       delete r.data;
       r.ext = {
         ack: 1,
@@ -491,7 +491,7 @@ class newHandler extends EventEmitter{
     }else{
       msg.id = String(this.msgID);
     }
-    console.log(`\\${JSON.stringify(msg)}`);
+    //console.log(`\\${JSON.stringify(msg)}`);
     try{
       if(typeof(msg.push) == "function"){
         this.ws.send(JSON.stringify(msg),function ack(err){
