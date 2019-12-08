@@ -363,7 +363,7 @@ class newHandler extends EventEmitter{
           type: "message",
           gameid: this.session,
           content: JSON.stringify({
-            primaryMessage: this.snark[Math.floor(Math.random() * this.snark.length)],
+            //primaryMessage: this.snark[Math.floor(Math.random() * this.snark.length)],
             quizType: "quiz",
             quizQuestionAnswers: ans
           })
