@@ -947,11 +947,11 @@ class newHandler extends EventEmitter{
   nextQuestion(isFirst,me){
     var me = me ? me : this;
     me.questionIndex++;
+    if(isFirst){me.questionIndex--;}
     if(me.questionIndex >= me.quiz.questions.length){
       me.endQuiz();
       return;
     }
-    if(isFirst){me.questionIndex--;}
     me.emit("questionStart",me.quiz.questions[me.questionIndex]);
     let answerMap = {};
     let ans = [];
