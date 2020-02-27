@@ -27,9 +27,6 @@ class newHandler extends EventEmitter{
     this.connected = false;
     this.players = [];
     this.questionIndex = 0;
-    //this.snark = ["Are you sure about that?"];
-    this.success = ["1st","2nd","3rd","Top 5!","Oof"];
-    this.success2 = ["Hooray!","Nice!","So close!","You tried...","Next time..."];
     this.questionTimestamp = 0;
     this.shookHands = false;
     this.timesyncdata = {
@@ -312,13 +309,6 @@ class newHandler extends EventEmitter{
       return;
     }
     if(data.data ? data.data.type == "left" : false){
-      //Disabled in V2.5.5
-      /*if(this.antibot.loggedPlayers[data.data.cid] === false){ //if the antibot detected the evildoer
-        //As of V 2.5.2, this has been abandoned since it doesn't actually work :p
-        this.antibot.loggedPlayers[data.data.cid] = true;
-        throw "[ANTIBOT] - Preventing removal of real player.";
-      }
-      this.antibot.loggedPlayers[data.data.cid] = false;*/
       this.emit("leave",{
         name: this.players.filter(o=>{
           return o.id == data.data.cid;
@@ -363,7 +353,6 @@ class newHandler extends EventEmitter{
           type: "message",
           gameid: this.session,
           content: JSON.stringify({
-            //primaryMessage: this.snark[Math.floor(Math.random() * this.snark.length)],
             quizType: "quiz",
             quizQuestionAnswers: ans
           })
@@ -494,7 +483,7 @@ class newHandler extends EventEmitter{
     //console.log(`\\${JSON.stringify(msg)}`);
     try{
       if(typeof(msg.push) == "function"){
-        this.ws.send(JSON.stringify(msg),function ack(err){
+        this.ws.send(JSON.stringify(msg),err=>{
           if(err){
             console.log("Websocket send error " + err);
             this.emit("error",err);
@@ -502,7 +491,7 @@ class newHandler extends EventEmitter{
         });
         return;
       }
-      this.ws.send(JSON.stringify([msg]),function ack(err){
+      this.ws.send(JSON.stringify([msg]),err=>{
         if(err){
           console.log("Websocket send error " + err);
           this.emit("error",err);
@@ -600,7 +589,7 @@ class newHandler extends EventEmitter{
   }
   rankPlayers(){
     //credit to leemetme for the bug fix
-    return JSON.parse(JSON.stringify(this.players)).sort(function(a,b){
+    return JSON.parse(JSON.stringify(this.players)).sort((a,b)=>{
       if ("info" in a){
         // Great.
       } else {
@@ -1071,41 +1060,6 @@ class newHandler extends EventEmitter{
       rs.push(r);
     }
     this.send(rs);
-  }
-  setSnark(game,type,index,text){
-    switch (type) {
-      /*case "answer":
-        if(typeof(index) == "object" && typeof(index.push) == "function"){
-          if(index.length >= 1){
-            game.snark = index;
-            return index;
-          }
-          return game.snark;
-        }
-      break;*/
-      case "rank":
-        if(index < 0){
-          game.success[0] = String(text);
-        }else if(index > 4){
-          game.success[4] = String(text);
-        }else{
-          game.success[index] = String(text);
-        }
-        return game.success2;
-      break;
-      case "finish":
-        if(index < 0){
-          game.success2[0] = String(text);
-        }else if(index > 4){
-          game.success2[4] = String(text);
-        }else{
-          game.success2[index] = String(text);
-        }
-        return game.success2;
-      break;
-      default:
-        throw "TypeError: " + String(type) + " is not a valid type";
-    }
   }
   getPlayerById(id){
     return this.players.filter(o=>{
