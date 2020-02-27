@@ -363,7 +363,7 @@ class newHandler extends EventEmitter{
           type: "message",
           gameid: this.session,
           content: JSON.stringify({
-            primaryMessage: this.snark[Math.floor(Math.random() * this.snark.length)],
+            //primaryMessage: this.snark[Math.floor(Math.random() * this.snark.length)],
             quizType: "quiz",
             quizQuestionAnswers: ans
           })
@@ -947,11 +947,11 @@ class newHandler extends EventEmitter{
   nextQuestion(isFirst,me){
     var me = me ? me : this;
     me.questionIndex++;
+    if(isFirst){me.questionIndex--;}
     if(me.questionIndex >= me.quiz.questions.length){
       me.endQuiz();
       return;
     }
-    if(isFirst){me.questionIndex--;}
     me.emit("questionStart",me.quiz.questions[me.questionIndex]);
     let answerMap = {};
     let ans = [];
