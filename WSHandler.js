@@ -337,28 +337,7 @@ class newHandler extends EventEmitter{
         return;
       }
       this.handleScore(data.data.cid,JSON.parse(data.data.content));
-      //send response...
       let ans = [];
-      this.msgID++;
-      for(let i in this.quiz.questions){
-        ans.push(this.quiz.questions[i].choices.length);
-      }
-      let r = {
-        channel: consts.channels.subscription,
-        clientId: this.clientID,
-        data: {
-          cid: String(data.data.cid),
-          host: "play.kahoot.it",
-          id: 7,
-          type: "message",
-          gameid: this.session,
-          content: JSON.stringify({
-            quizType: "quiz",
-            quizQuestionAnswers: ans
-          })
-        }
-      };
-      this.send(r);
       this.emit("answer",data.data.cid);
       return;
     }
@@ -606,7 +585,7 @@ class newHandler extends EventEmitter{
     });
   }
   handleScore(id,options,answerIsNULL,dis){
-    let me = dis ? dis : this;
+    let me = dis || this;
     let index;
     for(let i in me.players){
       if(this.players[i].id == id){
