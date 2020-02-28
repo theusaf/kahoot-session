@@ -10,7 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "request": "^2.88.2",
-    "ws": "^6.2.1"
+    "ws": "^6.2.1",
+    "@theusaf/kahoot-antibot": "git+https://github.com/theusaf/kahoot-antibot.git#nodejs"
   },
   "homepage": "https://github.com/theusaf/kahoot-session",
   "repository": {
