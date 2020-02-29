@@ -32,12 +32,11 @@ antiBotPercent: (0-1) //the percent number for names to match in order to be ban
 ## More Functions
 ```js
 Session.end(); //closes the game.
-Session.startQuiz(Session); //starts the quiz.
+Session.startQuiz(); //starts the quiz.
 Session.kickPlayer(id); //kicks a player with id
 Session.endQuestion(); //ends the question early.
 Session.nextQuestion(); //sends the next question
 Session.endQuiz(); //ends the quiz
-Session.setSnark(Session,"answer",0,"foo"); //"rank","finish"] (rank is the ranking text, and finish is the secondary ranking text) [index/array] (index/array is the text to replace) [text] (value to set item.)
 Session.rankPlayers(); //returns an ordered list of Players
 Session.getPlayerById(id); //gets the player by id
 ```

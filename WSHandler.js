@@ -254,7 +254,7 @@ class Handler extends EventEmitter{
 			id: String(this.msgID)
 		};
 	}
-	executeQuestion(me){
+	executeQuestion(){
 		let answerMap = {};
 		let ans = [];
 		for(let i in this.quiz.questions){
@@ -284,7 +284,7 @@ class Handler extends EventEmitter{
 		this.send(r);
 		let extraTimeout = (this.quiz.questions[this.questionIndex].video.endTime - this.quiz.questions[this.questionIndex].video.startTime) * 1000;
 		this.timeout2 = setTimeout(()=>{
-			this.endQuestion(me);
+			this.endQuestion(this);
 		}, this.quiz.questions[this.questionIndex].time + extraTimeout);
 	}
 	send(msg){
@@ -351,7 +351,7 @@ class Handler extends EventEmitter{
 		this.emit("close");
 		this.ws.close();
 	}
-	startQuiz(me){
+	startQuiz(){
 		if(this.configured){
 			let ans = [];
 			for(let i in this.quiz.questions){
@@ -417,7 +417,7 @@ class Handler extends EventEmitter{
 			return b.info.totalScore - a.info.totalScore;
 		});
 	}
-	handleScore(id,options,answerIsNULL,dis){
+	handleScore(id,options,answerIsNULL){
 		let index;
 		for(let i in this.players){
 			if(this.players[i].id == id){
@@ -447,10 +447,10 @@ class Handler extends EventEmitter{
 					nemesis = null;
 				}else{
 					nemesis = {
-            isGhost: false,
-            name: sorted[j].name,
-            score: sorted[j].info && sorted[j].info.totalScore
-          };
+						isGhost: false,
+						name: sorted[j].name,
+						score: sorted[j].info && sorted[j].info.totalScore
+					};
 				}
 				break;
 			}
@@ -496,14 +496,14 @@ class Handler extends EventEmitter{
 				quizQuestionAnswers: ans
 			};
 		}else{
-      let streakPoints = 0;
-      if(tp.info && tp.info.pointsData && tp.info.pointsData.answerStreakPoints && tp.info.pointsData.answerStreakPoints.streakLevel){
-        if(tp.info.pointsData.answerStreakPoints.streakLevel >= 6){
-          streakPoints = 500;
-        }else{
-          streakPoints = tp.info.pointsData.answerStreakPoints.streakLevel * 100;
-        }
-      }
+			let streakPoints = 0;
+			if(tp.info && tp.info.pointsData && tp.info.pointsData.answerStreakPoints && tp.info.pointsData.answerStreakPoints.streakLevel){
+				if(tp.info.pointsData.answerStreakPoints.streakLevel >= 6){
+					streakPoints = 500;
+				}else{
+					streakPoints = tp.info.pointsData.answerStreakPoints.streakLevel * 100;
+				}
+			}
 			tp.info = {
 				choice: options.choice,
 				isCorrect: correct,
@@ -669,8 +669,7 @@ class Handler extends EventEmitter{
 		let ansTime = time - this.questionTimestamp;
 		return Math.round(1000 * ((quizTime - ansTime) / quizTime));
 	}
-	endQuestion(me){
-		me = me || this;
+	endQuestion(){
 		if(this.questionIndex == this.quiz.questions.length){
 			this.endQuiz();
 		}
@@ -702,14 +701,14 @@ class Handler extends EventEmitter{
 		for(let i in this.players){
 			//determine if we need to set base score?
 			if(typeof(this.players[i].info) == "undefined"){
-				this.handleScore(this.players[i].id,{},true,me);
+				this.handleScore(this.players[i].id,{},true);
 			}else if(typeof(this.players[i].info.pointsData) == "undefined"){
-				this.handleScore(this.players[i].id,{},true,me);
+				this.handleScore(this.players[i].id,{},true);
 			}else if(typeof(this.players[i].info.pointsData.answerStreakPoints) == "undefined"){
-				this.handleScore(this.players[i].id,{},true,me);
+				this.handleScore(this.players[i].id,{},true);
 			}
 			if(typeof(this.players[i].info.choice) == "undefined"){
-				this.handleScore(this.players[i].id,{},true,me);
+				this.handleScore(this.players[i].id,{},true);
 			}
 			//get rank and nemesis
 			let sorted = this.rankPlayers();
@@ -750,11 +749,11 @@ class Handler extends EventEmitter{
 		this.send(rs);
 		if(this.options.autoNextQuestion){
 			setTimeout(()=>{
-				this.nextQuestion(false,me);
+				this.nextQuestion(false);
 			},5000);
 		}
 	}
-	nextQuestion(isFirst,me){
+	nextQuestion(isFirst){
 		this.questionIndex++;
 		if(isFirst){this.questionIndex--;}
 		if(this.questionIndex >= this.quiz.questions.length){
