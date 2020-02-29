@@ -11,7 +11,7 @@
   "dependencies": {
     "request": "^2.88.2",
     "ws": "^6.2.1",
-    "@theusaf/kahoot-antibot": "git+https://github.com/theusaf/kahoot-antibot.git#fdcde7e"
+    "@theusaf/kahoot-antibot": "git+https://github.com/theusaf/kahoot-antibot.git#160a000"
   },
   "homepage": "https://github.com/theusaf/kahoot-session",
   "repository": {

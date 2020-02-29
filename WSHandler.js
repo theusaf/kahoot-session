@@ -51,6 +51,7 @@ class Handler extends EventEmitter{
 			b: []
 		};
 		this.ts = {};
+    this.answersReceived = 0;
 		this.on("start",()=>{
 			setTimeout(()=>{
 				this.nextQuestion(true);
@@ -129,7 +130,8 @@ class Handler extends EventEmitter{
 		});
 	}
 	message(msg){
-		if(this.antibot.handle(msg,"recieve",this.ws) === true){
+		if(this.options.useAntiBot && this.antibot.handle(msg,"recieve",this.ws) === true){
+      console.log("Antibot blocked something.");
 			return;
 		}
 		//console.log(`^${msg}`);
@@ -185,7 +187,17 @@ class Handler extends EventEmitter{
 			});
 			return;
 		}
-		if(data.channel == "/controller/" + this.session && data.data.content.search(/("choice":)/img) != -1){
+		if(data.channel == "/controller/" + this.session && data.data && data.data.content && typeof(JSON.parse(data.data.content).choice) != "undefined"){
+			if(this.options.manuallyHandleAnswers){
+				this.emit("answer",data.data);
+				return;
+			}
+			this.handleScore(data.data.cid,JSON.parse(data.data.content));
+			this.emit("answer",data.data.cid);
+			return;
+		}
+    // open_ended support
+    if(data.channel == "/controller/" + this.session && data.data && data.data.content && typeof(JSON.parse(data.data.content).text) != "undefined"){
 			if(this.options.manuallyHandleAnswers){
 				this.emit("answer",data.data);
 				return;
@@ -273,7 +285,7 @@ class Handler extends EventEmitter{
 		let answerMap = {};
 		let ans = [];
 		for(let i in this.quiz.questions){
-			ans.push(this.quiz.questions[i].choices.length);
+			ans.push(this.quiz.questions[i].choices ? this.quiz.questions[i].choices.length : null);
 		}
 		for(let i in this.quiz.questions[this.questionIndex].choices){
 			answerMap[String(i)] = Number(i);
@@ -306,7 +318,9 @@ class Handler extends EventEmitter{
 				this.msgID++;
 			}
 		}else{
-			this.antibot.handle(msg,"send",this.ws);
+      if(this.options.useAntiBot){
+        this.antibot.handle(JSON.stringify([msg]),"send",this.ws);
+      }
 			msg.id = String(this.msgID);
 		}
 		//console.log(`\\${JSON.stringify(msg)}`);
@@ -367,7 +381,7 @@ class Handler extends EventEmitter{
 		if(this.configured){
 			let ans = [];
 			for(let i in this.quiz.questions){
-				ans.push(this.quiz.questions[i].choices.length);
+				ans.push(this.quiz.questions[i].choices ? this.quiz.questions[i].choices.length : null);
 			}
 			let r = {
 				channel: consts.channels.subscription,
@@ -452,8 +466,11 @@ class Handler extends EventEmitter{
 		if(this.quiz.questions[this.questionIndex].type == "open_ended"){
 			correct = false;
 			const c = this.quiz.questions[this.questionIndex].choices;
-			for (let i = 0; i < c.length; i++) {
-				if(c[i].toLowerCase() == options.choice.toLowerCase()){
+      for (let i = 0; i < c.length; i++) {
+        if(!options.choice){
+          break;
+        }
+				if(c[i].answer.toLowerCase() == options.text.toLowerCase()){
 					correct = true;
 					break;
 				}
@@ -694,6 +711,9 @@ class Handler extends EventEmitter{
 		}else{
 			this.players[index].incorrectCount = typeof(this.players[index].incorrectCount) == "undefined" ? 1 : this.players[index].incorrectCount + 1;
 		}
+    if(++this.answersReceived >= this.players.length){
+      this.endQuestion();
+    }
 	}
 	getPoints(time){
 		let extraTimeout = 1000 * (this.quiz.questions[this.questionIndex].video.endTime - this.quiz.questions[this.questionIndex].video.startTime);
@@ -709,7 +729,7 @@ class Handler extends EventEmitter{
 		clearTimeout(this.timeout2);
 		let ans = [];
 		for(let i in this.quiz.questions){
-			ans.push(this.quiz.questions[i].choices.length);
+			ans.push(this.quiz.questions[i].choices ? this.quiz.questions[i].choices.length : null);
 		}
 		let r = {
 			channel: consts.channels.subscription,
@@ -812,7 +832,7 @@ class Handler extends EventEmitter{
 			this.players[i].info.points = 0;
 		}
 		for(let i in this.quiz.questions){
-			ans.push(this.quiz.questions[i].choices.length);
+			ans.push(this.quiz.questions[i].choices ? this.quiz.questions[i].choices.length : null);
 		}
 		for(let i in this.quiz.questions[this.questionIndex].choices){
 			answerMap[String(i)] = Number(i);
@@ -838,7 +858,7 @@ class Handler extends EventEmitter{
 	endQuiz(){
 		let ans = [];
 		for(let i in this.quiz.questions){
-			ans.push(this.quiz.questions[i].choices.length);
+			ans.push(this.quiz.questions[i].choices ? this.quiz.questions[i].choices.length : null);
 		}
 		this.emit("quizEnd",this.rankPlayers());
 		//send end message.

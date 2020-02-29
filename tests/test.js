@@ -6,7 +6,7 @@ const quiz = new game.Quiz("Testing123");
 quiz.addQuestion("What is the meaning of life").setTime(10000).addChoice("42",true).addChoice("24",false).addChoice("lmao",false).addChoice("gg",false).getQuiz().addQuestion("Why is Gamora").setTime(10000).addChoice("yes",false).addChoice("no",false).addChoice("shut up",true).addChoice("haha",false).getQuiz().addQuestion("Can you see the love tonight").setTime(10000).addChoice("no",true).addChoice("yes",true).addChoice("lmao",false).addChoice("gg",false);
 
 //const Session = new game(quiz,{autoNextQuestion:true});
-const Session = new game("3f27e4e3-410d-4bc6-9588-01392ef4d741",{autoNextQuestion:true});
+const Session = new game("ac401413-7183-45e2-b1ea-66e90dcfa8cf",{autoNextQuestion:true,useAntiBot:true});
 Session.start();
 
 Session.on("answer",id=>{

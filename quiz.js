@@ -1,6 +1,6 @@
 const path = require("path");
-const Question = require(path.join(__dirname,"quiz.js"));
-module.exports = class Quiz{
+const Question = require(path.join(__dirname,"question.js"));
+module.exports = class{
 	constructor(name,options){
 		if(typeof(options) == "undefined"){
 			options = {};

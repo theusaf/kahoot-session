@@ -1,4 +1,4 @@
-module.exports = class Question{
+module.exports = class{
 	constructor(question,quiz){
 		this.__proto__.quiz = quiz;
 		this.question = question ? question : "No Question Provided.";
