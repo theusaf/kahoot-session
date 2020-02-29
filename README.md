@@ -164,3 +164,9 @@ addChoice(choice, correct) //adds a question choice, with the answer (choice) an
 setTime(time){ //sets the time of the question. returns the question.
 setPoints(bool) //whether the question gives points. returns the question.
 ```
+---
+# TODO
+- Allow support for feedback
+- Support all quizzes
+- Clean up the code and make sure there are no bugs
+- Make the code 100% like kahoot's code

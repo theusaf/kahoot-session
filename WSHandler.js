@@ -273,10 +273,7 @@ class Handler extends EventEmitter{
 				type: "message",
 				content: JSON.stringify({
 					questionIndex: this.questionIndex,
-					answerMap: answerMap,
-					canAccessStoryBlocks: false,
-					gameBlockType: this.quiz.type,
-					quizType: this.quiz.type,
+					gameBlockType: this.quiz.questions[this.questionIndex].type,
 					quizQuestionAnswers: ans
 				})
 			}
@@ -688,9 +685,7 @@ class Handler extends EventEmitter{
 				id: 4,
 				type: "message",
 				content: JSON.stringify({
-					questionNumber: this.questionIndex,
-					quizType: "quiz",
-					quizQuestionAnswers: ans
+					questionNumber: this.questionIndex
 				})
 			}
 		};
@@ -787,10 +782,7 @@ class Handler extends EventEmitter{
 				gameid: this.session,
 				content: JSON.stringify({
 					questionIndex: this.questionIndex,
-					answerMap: answerMap,
-					canAccessStoryBlocks: false,
-					gameBlockType: this.quiz.type,
-					quizType: this.quiz.type,
+					gameBlockType: this.quiz.questions[this.questionIndex].type,
 					quizQuestionAnswers: ans,
 					timeLeft: 4
 				})
@@ -837,9 +829,9 @@ class Handler extends EventEmitter{
 						cid: this.players[i].id,
 						name: this.players[i].name,
 						isGhost: false,
-						answers: this.players[i].answers,
-						quizQuestionAnswers: ans,
-						totalScore: this.players[i].info.totalScore
+            isKicked: false,
+						totalScore: this.players[i].info.totalScore,
+            isOnlyNonPointGameBlockKahoot: false
 					})
 				}
 			};
@@ -867,11 +859,7 @@ class Handler extends EventEmitter{
 					id: 13,
 					type: "message",
 					content: JSON.stringify({
-						podiumMedalType: rank <= 3 ? consts.podium[rank - 1] : consts.podium[3],
-						primaryMessage: rank <= 5 ? this.success[rank - 1] : this.success[5],
-						secondaryMessage: rank <= 5 ? this.success2[rank - 1]: this.success2[5],
-						quizType: "quiz",
-						quizQuestionAnswers: ans
+						podiumMedalType: rank <= 3 ? consts.podium[rank - 1] : consts.podium[3]
 					})
 				}
 			};
