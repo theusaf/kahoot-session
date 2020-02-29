@@ -43,7 +43,7 @@ class Handler extends EventEmitter{
 		});
 		this.on("questionStart",()=>{
 			this.timeout = setTimeout(()=>{
-				this.executeQuestion(this);
+				this.executeQuestion();
 				this.questionTimestamp = Date.now();
 			},4000);
 		});
@@ -284,7 +284,7 @@ class Handler extends EventEmitter{
 		this.send(r);
 		let extraTimeout = (this.quiz.questions[this.questionIndex].video.endTime - this.quiz.questions[this.questionIndex].video.startTime) * 1000;
 		this.timeout2 = setTimeout(()=>{
-			this.endQuestion(this);
+			this.endQuestion();
 		}, this.quiz.questions[this.questionIndex].time + extraTimeout);
 	}
 	send(msg){
