@@ -5,6 +5,21 @@ const request = require("request");
 const consts = require(path.join(__dirname,"consts.js"));
 const antibot = require("@theusaf/kahoot-antibot");
 
+function shuffle(array) {
+	var currentIndex = array.length, temporaryValue, randomIndex;
+	// While there remain elements to shuffle...
+	while (0 !== currentIndex) {
+		// Pick a remaining element...
+		randomIndex = Math.floor(Math.random() * currentIndex);
+		currentIndex -= 1;
+		// And swap it with the current element.
+		temporaryValue = array[currentIndex];
+		array[currentIndex] = array[randomIndex];
+		array[randomIndex] = temporaryValue;
+	}
+	return array;
+}
+
 class Handler extends EventEmitter{
 	constructor(id,options){
 		super();
@@ -427,13 +442,33 @@ class Handler extends EventEmitter{
 		let ans = [];
 		var tp = this.players[index];
 		for(let i in this.quiz.questions){
-			ans.push(this.quiz.questions[i].choices.length);
+			ans.push(this.quiz.questions[i].choices ? this.quiz.questions[i].choices.length : null);
 		}
 		let sorted = this.rankPlayers();
 		let place = 0;
 		let nemesis = undefined;
-		let hasPoints = this.quiz.questions[this.questionIndex].points;
-		let correct = answerIsNULL ? false : this.quiz.questions[this.questionIndex].choices[options.choice].correct;
+		let hasPoints = this.quiz.questions[this.questionIndex].points || this.quiz.questions[this.questionIndex].type == "open_ended";
+		let correct;
+		if(this.quiz.questions[this.questionIndex].type == "open_ended"){
+			correct = false;
+			const c = this.quiz.questions[this.questionIndex].choices;
+			for (let i = 0; i < c.length; i++) {
+				if(c[i].toLowerCase() == options.choice.toLowerCase()){
+					correct = true;
+					break;
+				}
+			}
+		}else if(this.quiz.questions[this.questionIndex].type == "jumble"){
+			correct = true;
+			for (let i = 0; i < options.choice.length; i++) {
+				if(options.choice[i] != this.jumbleData[i]){
+					correct = false;
+					break;
+				}
+			}
+		}else{
+			correct = answerIsNULL ? false : this.quiz.questions[this.questionIndex].choices[options.choice].correct;
+		}
 		if(typeof(tp.info) == "undefined"){
 			tp.info = {};
 		}
@@ -691,15 +726,20 @@ class Handler extends EventEmitter{
 		};
 		this.send(r);
 		this.emit("questionEnd",this.rankPlayers());
+		// detect if question doesn't need to send response. (slideshows)
+		if(this.quiz.questions[this.questionIndex].type == "content"){
+			if(this.options.autoNextQuestion){
+				setTimeout(()=>{
+					this.nextQuestion(false);
+				},5000);
+			}
+			return;
+		}
 		//send results
 		let rs = [];
 		for(let i in this.players){
 			//determine if we need to set base score?
-			if(typeof(this.players[i].info) == "undefined"){
-				this.handleScore(this.players[i].id,{},true);
-			}else if(typeof(this.players[i].info.pointsData) == "undefined"){
-				this.handleScore(this.players[i].id,{},true);
-			}else if(typeof(this.players[i].info.pointsData.answerStreakPoints) == "undefined"){
+			if(!this.players[i].info || !this.players[i].info.pointsData || !this.players[i].info.pointsData.answerStreakPoints){
 				this.handleScore(this.players[i].id,{},true);
 			}
 			if(typeof(this.players[i].info.choice) == "undefined"){
@@ -754,6 +794,11 @@ class Handler extends EventEmitter{
 		if(this.questionIndex >= this.quiz.questions.length){
 			this.endQuiz();
 			return;
+		}
+		// jumbles
+		if(this.quiz.questions[this.questionIndex].type == "jumble"){
+			this.jumbleData = Array.from(this.quiz.questions[this.questionIndex].choices);
+			shuffle(this.quiz.questions[this.questionIndex].choices);
 		}
 		this.emit("questionStart",this.quiz.questions[this.questionIndex]);
 		let answerMap = {};
@@ -829,9 +874,9 @@ class Handler extends EventEmitter{
 						cid: this.players[i].id,
 						name: this.players[i].name,
 						isGhost: false,
-            isKicked: false,
+						isKicked: false,
 						totalScore: this.players[i].info.totalScore,
-            isOnlyNonPointGameBlockKahoot: false
+						isOnlyNonPointGameBlockKahoot: false
 					})
 				}
 			};
