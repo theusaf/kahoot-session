@@ -51,7 +51,7 @@ class Handler extends EventEmitter{
 			b: []
 		};
 		this.ts = {};
-    this.answersReceived = 0;
+		this.answersReceived = 0;
 		this.on("start",()=>{
 			setTimeout(()=>{
 				this.nextQuestion(true);
@@ -131,7 +131,7 @@ class Handler extends EventEmitter{
 	}
 	message(msg){
 		if(this.options.useAntiBot && this.antibot.handle(msg,"recieve",this.ws) === true){
-      console.log("Antibot blocked something.");
+			console.log("Antibot blocked something.");
 			return;
 		}
 		//console.log(`^${msg}`);
@@ -196,8 +196,8 @@ class Handler extends EventEmitter{
 			this.emit("answer",data.data.cid);
 			return;
 		}
-    // open_ended support
-    if(data.channel == "/controller/" + this.session && data.data && data.data.content && typeof(JSON.parse(data.data.content).text) != "undefined"){
+		// open_ended support
+		if(data.channel == "/controller/" + this.session && data.data && data.data.content && typeof(JSON.parse(data.data.content).text) != "undefined"){
 			if(this.options.manuallyHandleAnswers){
 				this.emit("answer",data.data);
 				return;
@@ -318,9 +318,9 @@ class Handler extends EventEmitter{
 				this.msgID++;
 			}
 		}else{
-      if(this.options.useAntiBot){
-        this.antibot.handle(JSON.stringify([msg]),"send",this.ws);
-      }
+			if(this.options.useAntiBot){
+				this.antibot.handle(JSON.stringify([msg]),"send",this.ws);
+			}
 			msg.id = String(this.msgID);
 		}
 		//console.log(`\\${JSON.stringify(msg)}`);
@@ -443,7 +443,40 @@ class Handler extends EventEmitter{
 			return b.info.totalScore - a.info.totalScore;
 		});
 	}
+	scoreProtection(type,options){
+		if(type == "open_ended"){
+			if(!options.text && options.choice){
+				return true;
+			}
+			return false;
+		}
+		if(type == "quiz"){
+			if(!options.choice && options.text){
+				return true;
+			}
+			return false;
+		}
+		if(type == "jumble"){
+			if((!options.choice || options.text)){
+				return true;
+			}
+			if(typeof(options.choice.push) != "function"){
+				return true;
+			}
+			return false;
+		}
+		if(type == "content"){
+			return true;
+		}
+		if(!options.choice){
+			return true;
+		}
+		return false;
+	}
 	handleScore(id,options,answerIsNULL){
+		if(this.scoreProtection(this.quiz.questions[this.questionIndex].type,options) && !answerIsNULL){
+			return;
+		}
 		let index;
 		for(let i in this.players){
 			if(this.players[i].id == id){
@@ -466,10 +499,10 @@ class Handler extends EventEmitter{
 		if(this.quiz.questions[this.questionIndex].type == "open_ended"){
 			correct = false;
 			const c = this.quiz.questions[this.questionIndex].choices;
-      for (let i = 0; i < c.length; i++) {
-        if(!options.choice){
-          break;
-        }
+			for (let i = 0; i < c.length; i++) {
+				if(!options.text){
+					break;
+				}
 				if(c[i].answer.toLowerCase() == options.text.toLowerCase()){
 					correct = true;
 					break;
@@ -554,7 +587,7 @@ class Handler extends EventEmitter{
 				}
 			}
 			tp.info = {
-				choice: options.choice,
+				choice: options.text || options.choice,
 				isCorrect: correct,
 				correctAnswers: (()=>{
 					let objs = this.quiz.questions[this.questionIndex].choices.filter(o=>{
@@ -573,7 +606,7 @@ class Handler extends EventEmitter{
 				totalScore: correct ? (
 					hasPoints ? (
 						typeof(tp.info.totalScore) == "undefined" ? (
-							this.getPoints(Date.now(),options) + (typeof(tp.info.streakLevel) == "undefined" ? 0 : tp.info.streakLevel*100)
+							this.getPoints(Date.now(),options) + streakPoints
 						):(
 							tp.info.totalScore + this.getPoints(Date.now(),options) + (typeof(tp.info.streakLevel) == "undefined" ? 0 : (
 								(tp.info.streakLevel * 100)
@@ -604,17 +637,9 @@ class Handler extends EventEmitter{
 						correct ? (
 							typeof(tp.info.pointsData) == "undefined" ? 0 :
 								typeof(tp.info.pointsData.totalPointsWithBonuses) == "undefined" ? (
-									this.getPoints(Date.now(),options) + typeof(tp.info.streakLevel) == "undefined" ? (
-										0
-									):(
-										tp.info.streakLevel * 100
-									)
+									this.getPoints(Date.now(),options) + streakPoints
 								):(
-									tp.info.pointsData.totalPointsWithBonuses + this.getPoints(Date.now(),options) + typeof(tp.info.streakLevel) == "undefined" ? (
-										0
-									):(
-										tp.info.streakLevel * 100
-									)
+									tp.info.pointsData.totalPointsWithBonuses + this.getPoints(Date.now(),options) + streakPoints
 								)
 						):(
 							typeof(tp.info.pointsData) == "undefined" ? 0 :
@@ -625,7 +650,7 @@ class Handler extends EventEmitter{
 					),
 					questionPoints: hasPoints ? (
 						correct ? (
-							this.getPoints(Date.now(),options) + (typeof(tp.info.streakLevel) == "undefined" ? 0 : tp.info.streakLevel*100)
+							this.getPoints(Date.now(),options) + streakPoints
 						):(
 							0
 						)
@@ -711,9 +736,9 @@ class Handler extends EventEmitter{
 		}else{
 			this.players[index].incorrectCount = typeof(this.players[index].incorrectCount) == "undefined" ? 1 : this.players[index].incorrectCount + 1;
 		}
-    if(++this.answersReceived >= this.players.length){
-      this.endQuestion();
-    }
+		if(++this.answersReceived >= this.players.length){
+			this.endQuestion();
+		}
 	}
 	getPoints(time){
 		let extraTimeout = 1000 * (this.quiz.questions[this.questionIndex].video.endTime - this.quiz.questions[this.questionIndex].video.startTime);
@@ -747,14 +772,17 @@ class Handler extends EventEmitter{
 		this.send(r);
 		this.emit("questionEnd",this.rankPlayers());
 		// detect if question doesn't need to send response. (slideshows)
-		if(this.quiz.questions[this.questionIndex].type == "content"){
-			if(this.options.autoNextQuestion){
-				setTimeout(()=>{
-					this.nextQuestion(false);
-				},5000);
+		try{
+			if(this.quiz.questions[this.questionIndex].type == "content"){
+				if(this.options.autoNextQuestion){
+					setTimeout(()=>{
+						this.nextQuestion(false);
+					},5000);
+				}
+				return;
 			}
-			return;
 		}
+		catch(err){}
 		//send results
 		let rs = [];
 		for(let i in this.players){
