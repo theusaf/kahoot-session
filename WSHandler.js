@@ -517,8 +517,8 @@ class Handler extends EventEmitter{
 				}
 			}
 		}else if(this.quiz.questions[this.questionIndex].type == "survey"){
-      correct = true;
-    }else{
+			correct = true;
+		}else{
 			correct = answerIsNULL ? false : this.quiz.questions[this.questionIndex].choices[options.choice].correct;
 		}
 		if(typeof(tp.info) == "undefined"){
