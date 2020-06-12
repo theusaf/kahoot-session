@@ -52,6 +52,7 @@ class Handler extends EventEmitter{
 		};
 		this.ts = {};
 		this.answersReceived = 0;
+		this.TFACode = shuffle([0,1,2,3]);
 		this.on("start",()=>{
 			setTimeout(()=>{
 				this.nextQuestion(true);
@@ -62,6 +63,27 @@ class Handler extends EventEmitter{
 				this.executeQuestion();
 				this.questionTimestamp = Date.now();
 			},4000);
+		});
+		this.on("ready",()=>{
+			if(!this.options.twoFactorAuth){
+				return;
+			}
+			this.TFA = setInterval(()=>{
+				shuffle(this.TFACode);
+				this.emit("TFA",this.TFACode);
+				this.send({
+					channel: "/service/player",
+					clientId: this.clientID,
+					ext: {},
+					data: {
+						content: '"quiz"',
+						gameid: this.session,
+						host: "play.kahoot.it",
+						id: 53,
+						type: "message"
+					}
+				});
+			},this.options.TFATime || 7000);
 		});
 		options.antibot = options.antibot || {};
 		this.antibot = new antibot({
@@ -93,15 +115,18 @@ class Handler extends EventEmitter{
 		}
 		request.post({
 			url: `https://play.kahoot.it/reserve/session?${this.timestamp}`,
-			multipart: [{"content-type": "application/json",body: JSON.stringify({
+			body: JSON.stringify({
 				namerator: this.options.namerator ? this.options.namerator : false,
-				gameMode: "normal",
-				twoFactorAuth: this.options.twoFactorAuth ? this.options.twoFactorAuth : false,
+				gameMode: (this.options.mode && "team") || "normal",
+				twoFactorAuth: this.options.twoFactorAuth || false,
 				smartPractice: false,
 				themeId: false,
 				orgId: "",
 				participantId: false
-			})}]
+			}),
+			headers: {
+				"Content-Type": "application/json"
+			}
 		},(e,r,b)=>{
 			//console.log(b + "\n");
 			this.session = Number(b);
@@ -145,12 +170,12 @@ class Handler extends EventEmitter{
 			r.channel = consts.channels.connect;
 			this.send(r);
 			return;
-		}
+		}else
 		if(data.channel == consts.channels.subscription && data.data && data.data.type == "start" && !this.configured){
 			this.configured = true;
 			this.emit("ready",this.session);
 			return;
-		}
+		}else
 		if(data.data && data.data.type == "joined"){
 			let r = {
 				channel: consts.channels.subscription,
@@ -159,7 +184,9 @@ class Handler extends EventEmitter{
 					cid: data.data.cid,
 					content: JSON.stringify({
 						playerName: data.data.name,
-						quizType: this.quiz.type
+						quizType: this.quiz.type,
+						playerV2: true,
+						hostPrimaryUsage: "social"
 					}),
 					gameid: this.session,
 					host: "play.kahoot.it",
@@ -170,11 +197,15 @@ class Handler extends EventEmitter{
 			this.send(r);
 			this.players.push({
 				name: data.data.name,
-				id: data.data.cid
+				id: data.data.cid,
+				connected: this.options.mode !== "team" || !this.options.twoFactorAuth
 			});
+			if(this.options.mode == "team" || this.options.twoFactorAuth){
+				return;
+			}
 			this.emit("join",{name: data.data.name,id:data.data.cid});
 			return;
-		}
+		}else
 		if(data.data && data.data.type == "left"){
 			this.emit("leave",{
 				name: this.players.filter(o=>{
@@ -186,16 +217,16 @@ class Handler extends EventEmitter{
 				return o.id != data.data.cid;
 			});
 			return;
-		}
+		}else
 		if(data.channel == "/controller/" + this.session && data.data && data.data.content && typeof(JSON.parse(data.data.content).choice) != "undefined"){
 			if(this.options.manuallyHandleAnswers){
 				this.emit("answer",data.data);
 				return;
 			}
 			this.handleScore(data.data.cid,JSON.parse(data.data.content));
-			this.emit("answer",data.data.cid);
+			this.emit("answer",data.data.cid,data.data.content);
 			return;
-		}
+		}else
 		// open_ended support
 		if(data.channel == "/controller/" + this.session && data.data && data.data.content && typeof(JSON.parse(data.data.content).text) != "undefined"){
 			if(this.options.manuallyHandleAnswers){
@@ -203,9 +234,9 @@ class Handler extends EventEmitter{
 				return;
 			}
 			this.handleScore(data.data.cid,JSON.parse(data.data.content));
-			this.emit("answer",data.data.cid);
+			this.emit("answer",data.data.cid,data.data.content);
 			return;
-		}
+		}else
 		//ping + pong system.
 		if(data.channel == consts.channels.connect && typeof(data.advice) == "undefined" && !data.subscription){
 			let r = {
@@ -224,7 +255,7 @@ class Handler extends EventEmitter{
 			r.clientId = this.clientID;
 			this.send(r);
 			return;
-		}
+		}else
 		// ready to start
 		if(data.channel == consts.channels.connect && data.advice && data.advice.reconnect && data.advice.reconnect == "retry"){
 			let r = {
@@ -246,7 +277,120 @@ class Handler extends EventEmitter{
 				timesync: this.ts
 			};
 			this.send(r);
+		}else if(data.data && data.data.content){ // other messages
+			this.messageHandler(data.data,data.data.content);
 		}
+	}
+	messageHandler(data,content){
+		try{
+			content = JSON.parse(content);
+		}catch(e){}
+		switch (data.id) {
+			case 18:{
+				for(let player of this.players){
+					if(player.id == data.cid){
+						this.send({
+							channel: "/service/player",
+							clientId: this.clientID,
+							data: {
+								cid: player.id,
+								content: JSON.stringify({
+									memberNames: content,
+									recoveryData: {
+										data: {},
+										defaultQuizData: {
+											quizType: "quiz",
+											quizQuestionAnswers: []
+										},
+										quizType: "quiz",
+										didControllerLeave: false,
+										wasControllerKicked: false,
+										state: 0
+									}
+								}),
+								gameid: this.session,
+								host: "play.kahoot.it",
+								id: 19,
+								type: "message"
+							},
+							ext: {}
+						});
+						player.team = content;
+						if(this.options.twoFactorAuth){
+							break;
+						}
+						player.connected = true;
+						this.emit("join",{name: player.name,id:player.id,members:content});
+						break;
+					}
+				}
+				break;
+			}
+			case 11:
+				this.emit("feedback",content);
+				break;
+			case 50:{
+				if(content.sequence && content.sequence == this.TFACode.join("")){
+					this.send({
+						channel: "/service/player",
+						clientId: this.clientID,
+						ext: {},
+						data: {
+							cid: data.cid,
+							content: "{}",
+							gameid: this.session,
+							host: "play.kahoot.it",
+							id: 52,
+							type: "message"
+						}
+					});
+					for(let player of this.players){
+						if(player.id == data.cid){
+							player.connected = true;
+							this.emit("join",{name:player.name,id:player.id,members:player.team});
+							break;
+						}
+					}
+				}else{
+					this.send({
+						channel: "/service/player",
+						clientId: this.clientID,
+						ext: {},
+						data: {
+							cid: data.cid,
+							content: "{}",
+							gameid: this.session,
+							host: "play.kahoot.it",
+							id: 51,
+							type: "message"
+						}
+					});
+				}
+				break;
+			}
+		}
+	}
+	lock(){
+		this.send({
+			channel: "/service/player",
+			clientId: this.clientID,
+			data: {
+				gameid: this.session,
+				type: "lock"
+			},
+			ext: {}
+		});
+	}
+	unlock(){
+		this.send({
+			channel: "/service/player",
+			clientId: this.clientID,
+			data: {
+				gameid: this.session,
+				type: "unlock"
+			},
+			ext: {}
+		});
 	}
 	getPacket(p){
 		let l = (Date.now() - p.ext.timesync.tc - p.ext.timesync.p) / 2;
@@ -281,14 +425,34 @@ class Handler extends EventEmitter{
 			id: String(this.msgID)
 		};
 	}
+	requestFeedback(){
+		this.send({
+			channel: "/service/player",
+			clientId: this.clientID,
+			ext: {},
+			data: {
+				content: '{"quizType":"quiz"}',
+				gameid: this.session,
+				host: "play.kahoot.it",
+				id: 12,
+				type: "message"
+			}
+		});
+	}
 	executeQuestion(){
-		let answerMap = {};
+		clearTimeout(this.timeout);
 		let ans = [];
 		for(let i in this.quiz.questions){
 			ans.push(this.quiz.questions[i].choices ? this.quiz.questions[i].choices.length : null);
 		}
-		for(let i in this.quiz.questions[this.questionIndex].choices){
-			answerMap[String(i)] = Number(i);
+		if(this.quiz.questions[this.questionIndex].type == "content"){
+			if(!this.options.autoNextQuestion){
+				return;
+			}
+			this.timeout2 = setTimeout(()=>{
+				this.endQuestion();
+			},20000);
+			return;
 		}
 		let r = {
 			channel: consts.channels.subscription,
@@ -309,7 +473,7 @@ class Handler extends EventEmitter{
 		let extraTimeout = (this.quiz.questions[this.questionIndex].video.endTime - this.quiz.questions[this.questionIndex].video.startTime) * 1000;
 		this.timeout2 = setTimeout(()=>{
 			this.endQuestion();
-		}, this.quiz.questions[this.questionIndex].time + extraTimeout);
+		}, (this.quiz.questions[this.questionIndex].time || 20000) + extraTimeout); // if no time, assume 2 minutes
 	}
 	send(msg){
 		if(typeof(msg.push) == "function"){
@@ -375,6 +539,7 @@ class Handler extends EventEmitter{
 	}
 	close(){
 		this.emit("close");
+		clearInterval(this.TFA);
 		this.ws.close();
 	}
 	startQuiz(){
@@ -427,7 +592,9 @@ class Handler extends EventEmitter{
 	}
 	rankPlayers(){
 		//credit to leemetme for the bug fix
-		return JSON.parse(JSON.stringify(this.players)).sort((a,b)=>{
+		return JSON.parse(JSON.stringify(this.players)).filter(player=>{
+			return player.connected;
+		}).sort((a,b)=>{
 			if ("info" in a){
 				// Great.
 			} else {
@@ -443,32 +610,37 @@ class Handler extends EventEmitter{
 			return b.info.totalScore - a.info.totalScore;
 		});
 	}
-	scoreProtection(type,options){
-		if(type == "open_ended"){
+	scoreProtection(type,options){ // true = bad, false = ok
+		if(type == "open_ended" || type == "word_cloud"){
 			if(!options.text && options.choice){
 				return true;
 			}
 			return false;
-		}
-		if(type == "quiz"){
-			if(!options.choice && options.text){
+		}else
+		if(type == "quiz" || type == "survey"){
+			if((!options.choice || isNaN(options.choice)) && options.text){
 				return true;
 			}
 			return false;
-		}
+		}else
 		if(type == "jumble"){
 			if((!options.choice || options.text)){
 				return true;
 			}
-			if(typeof(options.choice.push) != "function"){
+			if(typeof(options.choice.push) != "function" || options.choice.length != 4){
+				return true;
+			}
+			return false;
+		}else
+		if(type == "content"){ // should not get answers for content type
+			return true;
+		}else if(type == "multiple_select_quiz"){
+			if(!options.choice || typeof options.choice.push != "function"){
 				return true;
 			}
 			return false;
 		}
-		if(type == "content"){
-			return true;
-		}
-		if(!options.choice){
+		if(isNaN(options.choice)){
 			return true;
 		}
 		return false;
@@ -496,6 +668,7 @@ class Handler extends EventEmitter{
 		let nemesis = undefined;
 		let hasPoints = this.quiz.questions[this.questionIndex].points || this.quiz.questions[this.questionIndex].type == "open_ended";
 		let correct;
+		const invalid = /[~`!@#$%^&*(){}[\];:"'<,.>?/\\|\-_+=]| $/gm;
 		if(this.quiz.questions[this.questionIndex].type == "open_ended"){
 			correct = false;
 			const c = this.quiz.questions[this.questionIndex].choices;
@@ -503,21 +676,39 @@ class Handler extends EventEmitter{
 				if(!options.text){
 					break;
 				}
-				if(c[i].answer.toLowerCase() == options.text.toLowerCase()){
-					correct = true;
+				if(c[i].answer.replace(consts.emoji,"").length){
+					let compare = c[i].answer.replace(consts.emoji,"").replace(invalid,"").toLowerCase();
+					let userInput = options.text.replace(consts.emoji,"").replace(invalid,"").toLowerCase();
+					correct = compare == userInput;
+				}else{
+					correct = c[i].answer === options.text;
+				}
+				if(correct){
 					break;
 				}
 			}
 		}else if(this.quiz.questions[this.questionIndex].type == "jumble"){
 			correct = true;
 			for (let i = 0; i < options.choice.length; i++) {
-				if(options.choice[i] != this.jumbleData[i]){
+				if(this.quiz.questions[this.questionIndex].choices[options.choice[i]].answer != this.jumbleData[i].answer){
 					correct = false;
 					break;
 				}
 			}
 		}else if(this.quiz.questions[this.questionIndex].type == "survey"){
 			correct = true;
+		}else if(this.quiz.questions[this.questionIndex].type == "multiple_select_quiz"){
+			correct = 0;
+			for(let i = 0; i < options.choice.length;i++){
+				let n = options.choice[i];
+				let q = this.quiz.questions[this.questionIndex];
+				if(q.choices[i] && q.choices[i].correct){
+					correct++;
+				}else{
+					correct = 0;
+					break;
+				}
+			}
 		}else{
 			correct = answerIsNULL ? false : this.quiz.questions[this.questionIndex].choices[options.choice].correct;
 		}
@@ -528,10 +719,9 @@ class Handler extends EventEmitter{
 			if(sorted[j].id == tp.id){
 				place = Number(j) + 1;
 				if(place == 1){
-					nemesis = null;
+					nemesis = undefined;
 				}else{
 					nemesis = {
-						isGhost: false,
 						name: sorted[j].name,
 						score: sorted[j].info && sorted[j].info.totalScore
 					};
@@ -539,11 +729,36 @@ class Handler extends EventEmitter{
 				break;
 			}
 		}
+		// tbh, I don't actually care about this part too much
+		function getStreakData(streak,client){
+			streak = Number(streak) || 0;
+			const oldstreak = streak;
+			if(correct){
+				streak ++;
+			}else{
+				streak = 0;
+			}
+			return {
+				totalPointsWithoutBonuses: Number(hasPoints) * (tp.info.totalScore || 0),
+				totalPointsWithBonuses: Number(hasPoints) * (tp.info.totalScore || 0),
+				questionPoints: Number(hasPoints) * client.getPoints(Date.now(),options,correct),
+				answerStreakPoints: {
+					streakLevel: streak,
+					streakBonus: 100 * (Number(hasPoints) * ((streak - 1) > 5 && 5) || ((streak - 1 < 0 ? 0 : streak - 1))),
+					totalStreakPoints: 0,
+					previousStreakLevel: oldstreak,
+					previousStreakBonus: 100 * ((streak - 1) > 5 && 5) || ((streak - 1 < 0 ? 0 : streak - 1))
+				}
+			}
+		}
 		if(answerIsNULL){
 			tp.info = {
 				choice: null,
 				isCorrect: false,
 				correctAnswers: (()=>{
+					if(!this.quiz.questions[this.questionIndex].choices){
+						return [];
+					}
 					let objs = this.quiz.questions[this.questionIndex].choices.filter(o=>{
 						return o.correct;
 					});
@@ -553,45 +768,32 @@ class Handler extends EventEmitter{
 					}
 					return c;
 				})(),
+				correctChoices: [],
 				points: 0,
 				meta: {
 					lag: 0
 				},
 				totalScore: typeof(tp.info.totalScore) == "undefined" ? 0 : tp.info.totalScore,
-				pointsData: {
-					totalPointsWithoutBonuses: hasPoints ? typeof(tp.info.totalScore) == "undefined" ? 0 : tp.info.totalScore : 0,
-					totalPointsWithBonuses: hasPoints ? typeof(tp.info.totalScore) == "undefined" ? 0 : tp.info.totalScore : 0,
-					questionPoints: 0,
-					answerStreakPoints: {
-						streakLevel: this.quiz.questions[this.questionIndex].points ? 0 : typeof(tp.info.pointsData) == "undefined" ? 0 : typeof(tp.info.pointsData.answerStreakPoints) == "undefined" ? 0 : tp.info.pointsData.answerStreakPoints.streakLevel,
-						streakBonus: 0,
-						totalStreakPoints: typeof(tp.info.pointsData) == "undefined" ? 0 : typeof(tp.info.pointsData.answerStreakPoints) == "undefined" ? 0 : tp.info.pointsData.answerStreakPoints.totalStreakPoints,
-						previousStreakLevel: typeof(tp.info.pointsData) == "undefined" ? 0 : typeof(tp.info.pointsData.answerStreakPoints) == "undefined" ? 0 : tp.info.pointsData.answerStreakPoints.streakLevel,
-						previousStreakBonus: typeof(tp.info.pointsData) == "undefined" ? 0 : typeof(tp.info.pointsData.answerStreakPoints) == "undefined" ? 0 : tp.info.pointsData.answerStreakPoints.streakBonus
-					}
-				},
+				pointsData: getStreakData((tp.info.pointsData && tp.info.pointsData.answerStreakPoints && tp.info.pointsData.answerStreakPoints.streakLevel) || 0,this),
 				rank: place,
 				nemesis: nemesis,
-				nemesisIsGhost: false,
 				receivedTime: Date.now(),
 				text: "",
-				pointsQuestion: this.quiz.questions[this.questionIndex].points,
+				pointsQuestion: this.quiz.questions[this.questionIndex].points || true,
 				quizType: "quiz",
 				quizQuestionAnswers: ans
 			};
+			tp.info.text = tp.info.correctAnswers.join(",");
 		}else{
-			let streakPoints = 0;
-			if(tp.info && tp.info.pointsData && tp.info.pointsData.answerStreakPoints && tp.info.pointsData.answerStreakPoints.streakLevel){
-				if(tp.info.pointsData.answerStreakPoints.streakLevel >= 6){
-					streakPoints = 500;
-				}else{
-					streakPoints = tp.info.pointsData.answerStreakPoints.streakLevel * 100;
-				}
-			}
+			let streakPoints = getStreakData((tp.info.pointsData && tp.info.pointsData.answerStreakPoints && tp.info.pointsData.answerStreakPoints.streakLevel) || 0,this);
+			streakPoints = streakPoints.answerStreakPoints.streakBonus;
 			tp.info = {
 				choice: options.text || options.choice,
-				isCorrect: correct,
+				isCorrect: Boolean(correct),
 				correctAnswers: (()=>{
+					if(!this.quiz.questions[this.questionIndex].choices){
+						return [];
+					}
 					let objs = this.quiz.questions[this.questionIndex].choices.filter(o=>{
 						return o.correct;
 					});
@@ -601,18 +803,17 @@ class Handler extends EventEmitter{
 					}
 					return c;
 				})(),
-				points: correct ? hasPoints ? this.getPoints(Date.now(),options) + streakPoints : 0 : 0,
+				correctChoices: [],
+				points: correct ? hasPoints ? this.getPoints(Date.now(),options,correct) + streakPoints : 0 : 0,
 				meta: {
 					lag: options.meta.lag
 				},
 				totalScore: correct ? (
 					hasPoints ? (
 						typeof(tp.info.totalScore) == "undefined" ? (
-							this.getPoints(Date.now(),options) + streakPoints
+							this.getPoints(Date.now(),options,correct) + streakPoints
 						):(
-							tp.info.totalScore + this.getPoints(Date.now(),options) + (typeof(tp.info.streakLevel) == "undefined" ? 0 : (
-								(tp.info.streakLevel * 100)
-							))
+							tp.info.totalScore + this.getPoints(Date.now(),options,correct) + streakPoints
 						)
 					) : (
 						typeof(tp.info.totalScore) == "undefined" ? 0 : tp.info.totalScore
@@ -620,116 +821,16 @@ class Handler extends EventEmitter{
 				) : (
 					typeof(tp.info.totalScore) == "undefined" ? 0 : tp.info.totalScore
 				),
-				pointsData: {
-					totalPointsWithoutBonuses: hasPoints ? (
-						correct ? (
-							typeof(tp.info.pointsData) == "undefined" ? this.getPoints(Date.now(),options) :
-								typeof(tp.info.pointsData.totalPointsWithoutBonuses) == "undefined" ? (
-									this.getPoints(Date.now(),options)
-								):(
-									tp.info.pointsData.totalPointsWithoutBonuses + this.getPoints(Date.now(),options)
-								)
-						):(
-							typeof(tp.info.pointsData) == "undefined" ? 0 : typeof(tp.info.pointsData.totalPointsWithoutBonuses) == "undefined" ? 0 : tp.info.pointsData.totalPointsWithoutBonuses
-						)
-					):(
-						typeof(tp.info.pointsData.totalPointsWithoutBonuses) == "undefined" ? 0 : tp.info.pointsData.totalPointsWithoutBonuses
-					),
-					totalPointsWithBonuses: hasPoints ? (
-						correct ? (
-							typeof(tp.info.pointsData) == "undefined" ? 0 :
-								typeof(tp.info.pointsData.totalPointsWithBonuses) == "undefined" ? (
-									this.getPoints(Date.now(),options) + streakPoints
-								):(
-									tp.info.pointsData.totalPointsWithBonuses + this.getPoints(Date.now(),options) + streakPoints
-								)
-						):(
-							typeof(tp.info.pointsData) == "undefined" ? 0 :
-								typeof(tp.info.pointsData.totalPointsWithBonuses) == "undefined" ? 0 : tp.info.pointsData.totalPointsWithBonuses
-						)
-					):(
-						typeof(tp.info.pointsData.totalPointsWithBonuses) == "undefined" ? 0 : tp.info.pointsData.totalPointsWithBonuses
-					),
-					questionPoints: hasPoints ? (
-						correct ? (
-							this.getPoints(Date.now(),options) + streakPoints
-						):(
-							0
-						)
-					):0,
-					answerStreakPoints: {
-						streakLevel: hasPoints ? (
-							correct ? (
-								typeof(tp.info.pointsData) == "undefined" ? (
-									1
-								):(
-									typeof(tp.info.pointsData.answerStreakPoints) == "undefined" ? (
-										1
-									):(
-										typeof(tp.info.pointsData.answerStreakPoints.streakLevel) == "undefined" ? 1 : tp.info.pointsData.answerStreakPoints.streakLevel + 1
-									)
-								)
-							):(
-								0
-							)
-						):(
-							typeof(tp.info.pointsData) == "undefined" ? (
-								typeof(tp.info.pointsData.answerStreakPoints) == "undefined" ? (
-									typeof(tp.info.pointsData.answerStreakPoints.streakLevel) == "undefined" ? (
-										0
-									):(
-										tp.info.pointsData.answerStreakPoints.streakLevel
-									)
-								):(
-									0
-								)
-							):(
-								0
-							)
-						),
-						streakBonus: hasPoints ? (
-							correct ? (
-								typeof(tp.info.pointsData) == "undefined" ? (
-									0
-								):(
-									typeof(tp.info.pointsData.answerStreakPoints) == "undefined" ? (
-										0
-									):(
-										typeof(tp.info.pointsData.answerStreakPoints.streakBonus) == "undefined" ? 100 : tp.info.pointsData.answerStreakPoints.streakBonus + 100
-									)
-								)
-							):(
-								0
-							)
-						):(
-							typeof(tp.info.pointsData) == "undefined" ? (
-								typeof(tp.info.pointsData.answerStreakPoints) == "undefined" ? (
-									typeof(tp.info.pointsData.answerStreakPoints.streakBonus) == "undefined" ? (
-										0
-									):(
-										tp.info.pointsData.answerStreakPoints.streakBonus
-									)
-								):(
-									0
-								)
-							):(
-								0
-							)
-						),
-						totalStreakPoints: typeof(tp.info.pointsData) == "undefined" ? 0 : typeof(tp.info.pointsData.answerStreakPoints) == "undefined" ? 0 : tp.info.pointsData.answerStreakPoints.totalStreakPoints,
-						previousStreakLevel: typeof(tp.info.pointsData) == "undefined" ? 0 : typeof(tp.info.pointsData.answerStreakPoints) == "undefined" ? 0 : tp.info.pointsData.answerStreakPoints.streakLevel,
-						previousStreakBonus: typeof(tp.info.pointsData) == "undefined" ? 0 : typeof(tp.info.pointsData.answerStreakPoints) == "undefined" ? 0 : tp.info.pointsData.answerStreakPoints.streakBonus
-					}
-				},
+				pointsData: getStreakData((tp.info.pointsData && tp.info.pointsData.answerStreakPoints && tp.info.pointsData.answerStreakPoints.streakLevel) || 0,this),
 				rank: place,
 				nemesis: nemesis,
-				nemesisIsGhost: false,
 				receivedTime: Date.now(),
 				text: "",
 				pointsQuestion: this.quiz.questions[this.questionIndex].points,
 				quizType: "quiz",
 				quizQuestionAnswers: ans
 			};
+			tp.info.text = tp.info.correctAnswers.join(",");
 		}
 		//nemesis and other score stuff will be updated after time.
 		//streaks increase score by 100 (per streak).
@@ -742,15 +843,29 @@ class Handler extends EventEmitter{
 			this.endQuestion();
 		}
 	}
-	getPoints(time){
+	getPoints(time,answer,correct){
 		let extraTimeout = 1000 * (this.quiz.questions[this.questionIndex].video.endTime - this.quiz.questions[this.questionIndex].video.startTime);
 		let quizTime = this.quiz.questions[this.questionIndex].time + extraTimeout;
 		let ansTime = time - this.questionTimestamp;
-		return Math.round(1000 * ((quizTime - ansTime) / quizTime));
+		let raw = (Math.round((1 - ((ansTime / quizTime) / 2)) * 1000) * this.quiz.questions[this.questionIndex].pointsMultiplier || 0);
+		if(this.quiz.questions[this.questionIndex].type == "multiple_select_quiz"){
+			raw = raw * correct;
+		}
+		return raw;
 	}
 	endQuestion(){
+		clearTimeout(this.timeout);
 		if(this.questionIndex == this.quiz.questions.length){
 			this.endQuiz();
+		}
+		if(this.quiz.questions[this.questionIndex].type == "content"){
+			if(this.options.autoNextQuestion){
+				this.timeout = setTimeout(()=>{
+					this.nextQuestion(false);
+				},4000);
+				return;
+			}
+			return this.nextQuestion(false);
 		}
 		clearTimeout(this.timeout);
 		clearTimeout(this.timeout2);
@@ -788,8 +903,11 @@ class Handler extends EventEmitter{
 		//send results
 		let rs = [];
 		for(let i in this.players){
+			if(!this.players[i].connected){
+				continue;
+			}
 			//determine if we need to set base score?
-			if(!this.players[i].info || !this.players[i].info.pointsData || !this.players[i].info.pointsData.answerStreakPoints){
+			if(!this.players[i].info || !this.players[i].info.pointsData || !typeof this.players[i].info.pointsData.answerStreakPoints == "number"){
 				this.handleScore(this.players[i].id,{},true);
 			}
 			if(typeof(this.players[i].info.choice) == "undefined"){
@@ -839,6 +957,7 @@ class Handler extends EventEmitter{
 		}
 	}
 	nextQuestion(isFirst){
+		clearTimeout(this.timeout);
 		this.questionIndex++;
 		if(isFirst){this.questionIndex--;}
 		if(this.questionIndex >= this.quiz.questions.length){
@@ -851,7 +970,6 @@ class Handler extends EventEmitter{
 			shuffle(this.quiz.questions[this.questionIndex].choices);
 		}
 		this.emit("questionStart",this.quiz.questions[this.questionIndex]);
-		let answerMap = {};
 		let ans = [];
 		for(let i in this.players){
 			if(typeof(this.players[i].info) == "undefined"){
@@ -863,9 +981,6 @@ class Handler extends EventEmitter{
 		}
 		for(let i in this.quiz.questions){
 			ans.push(this.quiz.questions[i].choices ? this.quiz.questions[i].choices.length : null);
-		}
-		for(let i in this.quiz.questions[this.questionIndex].choices){
-			answerMap[String(i)] = Number(i);
 		}
 		let r = {
 			channel: consts.channels.subscription,
@@ -879,7 +994,8 @@ class Handler extends EventEmitter{
 					questionIndex: this.questionIndex,
 					gameBlockType: this.quiz.questions[this.questionIndex].type,
 					quizQuestionAnswers: ans,
-					timeLeft: 4
+					timeLeft: 4,
+					gameBlockLayout: this.quiz.questions[this.questionIndex].layout || "CLASSIC"
 				})
 			}
 		};
@@ -894,6 +1010,9 @@ class Handler extends EventEmitter{
 		//send end message.
 		let rs2 = [];
 		for(let i in this.players){
+			if(!this.players[i].connected){
+				continue;
+			}
 			let rank = 0;
 			let pl = this.rankPlayers();
 			for(let h in pl){

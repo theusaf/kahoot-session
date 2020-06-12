@@ -24,8 +24,9 @@ Session.start();
 manuallyHandleAnswers: (false|true) //whether you are going to manually handle answers and the point system. default is false
 autoNextQuestion: (false|true) //whether you are going to automatically go through questions. default is false.
 namerator: (false|true) //whether to enable the namerator. default is false
-twoFactorAuth: (false|true) //whether to enable two factor authentification. currently does nothing. default is false
-useAntiBot: (false|true) //enable the antibot and ban bots. (from greasyfork). defaults to false
+mode: ("team"|"normal") // enable team mode or play normally
+twoFactorAuth: (false|true) //whether to enable two factor authentification. default is false
+useAntiBot: (false|true) //enable the antibot and ban bots. (from greasyfork). defaults to false [Not fully working]
 antiBotPercent: (0-1) //the percent number for names to match in order to be banned. defaults to 0.6
 ```
 ---
@@ -39,23 +40,40 @@ Session.nextQuestion(); //sends the next question
 Session.endQuiz(); //ends the quiz
 Session.rankPlayers(); //returns an ordered list of Players
 Session.getPlayerById(id); //gets the player by id
+Session.requestFeedback(); // at the end of the quiz, ask for feedback
+// Lock or unlock a session
+Session.lock();
+Session.unlock();
 ```
 ---
 ## Events
 ```js
-Session.on("answer",id=>{
+Session.on("answer",(id,data)=>{
   //when somebody answers the quiz. id is the id of the player who sent the answer.
   //if manuallyHandleAnswers is enabled, id is actually the data of the player, including id, and choice, etc.
+  // data is the raw data of the choice
 });
 Session.on("start",quiz=>{
   //when quiz starts. has quiz object.
 });
-Session.on("handshake",id=>{
-  //technical event. Id is the "clientId"
-});
 Session.on("ready",session=>{
   //runs when the quiz is set up and ready to go.
   //session is the session number that players use to connect to
+});
+Session.on("TFA",code=>{
+  // runs when code is updated.
+  const example_code = [1,2,0,3];
+});
+Session.on("feedback",data=>{
+  // runs when feedback is sent back to the host
+  const example_feedback = {
+    totalScore: 9482,
+    fun: 3,
+    learning: 1,
+    recommend: 1,
+    overall: 1,
+    nickname: 'SwiftSable'
+  }
 });
 Session.on("close",()=>{
   //runs when the quiz is closed.
@@ -65,7 +83,6 @@ Session.on("open",()=>{
 });
 Session.on("questionStart",question=>{
   //runs on the start of the quiz. Has the question object.
-  //event start is similar events, but should be replaced with this.
 });
 Session.on("questionEnd",players=>{
   //runs when the question ends. Players is a sorted list of players based on score
@@ -86,13 +103,12 @@ Session.on("leave",player=>{
 ## Properties
 ```js
 Session.players //list of players
+Session.jumbleData // the jumble information (correct order)
 Session.session //session id
 Session.clientID //client id
 Session.quiz //quiz info
 Session.secret //secret kahoot token
 Session.quizIndex //current quiz index
-Session.success //an array of text to send at the end of the quiz. (the top text) ["1st","2nd","3rd","top 5","below top 5"]
-Session.success2 //an array of text to send at the end of the quiz (the bottom text) ["you won!","almost","good try","made it to the leaderboard at least","good job, nice try"]
 ```
 ---
 ```js

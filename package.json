@@ -1,6 +1,6 @@
 {
   "name": "kahoot-session",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "Creates a kahoot game and stuff.",
   "main": "kahoot.js",
   "scripts": {
@@ -9,9 +9,9 @@
   "author": "theusaf",
   "license": "ISC",
   "dependencies": {
+    "@theusaf/kahoot-antibot": "git+https://github.com/theusaf/kahoot-antibot.git#24124d7",
     "request": "^2.88.2",
-    "ws": "^6.2.1",
-    "@theusaf/kahoot-antibot": "git+https://github.com/theusaf/kahoot-antibot.git#160a000"
+    "ws": "^7.3.0"
   },
   "homepage": "https://github.com/theusaf/kahoot-session",
   "repository": {
