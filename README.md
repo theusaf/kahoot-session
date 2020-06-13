@@ -26,7 +26,7 @@ autoNextQuestion: (false|true) //whether you are going to automatically go throu
 namerator: (false|true) //whether to enable the namerator. default is false
 mode: ("team"|"normal") // enable team mode or play normally
 twoFactorAuth: (false|true) //whether to enable two factor authentification. default is false
-useAntiBot: (false|true) //enable the antibot and ban bots. (from greasyfork). defaults to false [Not fully working]
+useAntiBot: (false|true) //enable the antibot and ban bots. (from greasyfork). defaults to false
 antiBotPercent: (0-1) //the percent number for names to match in order to be banned. defaults to 0.6
 ```
 ---

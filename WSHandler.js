@@ -64,7 +64,17 @@ class Handler extends EventEmitter{
 				this.questionTimestamp = Date.now();
 			},4000);
 		});
+		this.antibot = {
+			handle: ()=>{}
+		};
 		this.on("ready",()=>{
+			this.antibot = new antibot({
+				timeout: options.antibot.timeout,
+				random: options.antibot.random,
+				mid: this.msgID,
+				clientId: this.clientID,
+				pin: this.session
+			});
 			if(!this.options.twoFactorAuth){
 				return;
 			}
@@ -86,13 +96,6 @@ class Handler extends EventEmitter{
 			},this.options.TFATime || 7000);
 		});
 		options.antibot = options.antibot || {};
-		this.antibot = new antibot({
-			timeout: options.antibot.timeout,
-			random: options.antibot.random,
-			mid: this.msgID,
-			clientId: this.clientID,
-			pin: this.session
-		});
 	}
 	start(){
 		this.timestamp = Date.now();
