@@ -24,6 +24,7 @@
     "game"
   ],
   "devDependencies": {
-    "eslint": "^7.18.0"
+    "eslint": "^7.18.0",
+    "kahoot.js-updated": "^2.3.2"
   }
 }

@@ -18,6 +18,7 @@ class Client extends EventEmitter {
    */
   constructor(options) {
     super();
+    this.questionStartTime = null;
     this.options = options || {};
     this.cometd = null;
     this.controllers = {};
@@ -32,6 +33,17 @@ class Client extends EventEmitter {
     this.quizPlaylist = [];
     this.state = "lobby";
     this.status = "ACTIVE";
+  }
+
+  /**
+   * get quizQuestionAnswers - The number of choices per question
+   *
+   * @returns {Number[]}
+   */
+  get quizQuestionAnswers() {
+    return this.quiz.questions.map((question) => {
+      return question.choices ? question.choices.length : null;
+    });
   }
 
   /**
@@ -217,6 +229,7 @@ class Client extends EventEmitter {
    */
   async timeOver() {
     this.emit("TimeOver");
+    this.state = "timeover";
     await modules.TimeOver.call(this);
     return this.sendQuestionResults();
   }
@@ -227,7 +240,8 @@ class Client extends EventEmitter {
    * @returns {Promise<Boolean[]>} Whether the message was successfully sent
    */
   sendQuestionResults() {
-    this.emit("SendQuestionResults");
+    this.emit("QuestionResults");
+    this.state = "questionend";
     const pack = modules.SendQuestionResults.call(this);
     return this.send(pack);
   }
@@ -263,16 +277,21 @@ class Client extends EventEmitter {
    * @returns {Promise<Boolean>} Whether successful or not
    */
   startGame() {
-
+    this.emit("GameStart");
+    this.state = "start";
+    return modules.Start.call(this);
   }
 
   /**
-   * startQuestion - Starts the question
+   * async startQuestion - Starts the question
    *
-   * @returns {Promise<Boolean>} Whether successful or not
+   * @returns {Promise} Resolves when question is started.
    */
-  startQuestion() {
-
+  async startQuestion() {
+    this.emit("QuestionStart");
+    await modules.StartQuestion.call(this);
+    this.questionStartTime = Date.now();
+    this.state = "question";
   }
 
   /**
@@ -281,7 +300,9 @@ class Client extends EventEmitter {
    * @returns {Promise<Boolean>} Whether successful or not
    */
   readyQuestion() {
-
+    this.emit("QuestionReady");
+    this.state = "getready";
+    return modules.ReadyQuestion.call(this);
   }
 
   /**
@@ -290,7 +311,9 @@ class Client extends EventEmitter {
    * @returns {Promise<Boolean>} Whether successful or not
    */
   startTeamTalk() {
-
+    this.emit("TeamTalk");
+    this.state = "teamtalk";
+    return modules.StartTeamTalk.call(this);
   }
 
   /**
@@ -300,7 +323,8 @@ class Client extends EventEmitter {
    * @returns {Promise<Boolean>} Resolves if successful, rejects if not
    */
   sendRankings() {
-
+    this.emit("Rankings");
+    this.state = "podium";
   }
 
   /**
@@ -309,7 +333,8 @@ class Client extends EventEmitter {
    * @returns {Promise<Boolean>} Resolves if successful, rejects if not
    */
   endGame() {
-
+    this.emit("GameEnd");
+    this.state = "quizend";
   }
 
   /**
@@ -331,6 +356,8 @@ class Client extends EventEmitter {
    * @returns {Promise<Boolean>} Resolves whether successful or not
    */
   resetGame() {
+    this.emit("GameReset");
+    this.state = "lobby";
     return modules.ResetGame.call(this);
   }
 
@@ -340,6 +367,8 @@ class Client extends EventEmitter {
    * @returns {Promise<Boolean>} Whether the replay message was successful
    */
   replayGame() {
+    this.emit("GameReset");
+    this.state = "lobby";
     return modules.ReplayGame.call(this);
   }
 
@@ -376,8 +405,8 @@ class CustomClient extends Client {
   /**
    * constructor - Create the custom client
    */
-  constructor() {
-    super(...arguments);
+  constructor(options, messageHandler) {
+    super(options);
     const oldMessage = this.message;
     this.message = (message) => {
       if(typeof this.options.messageHandler === "function") {

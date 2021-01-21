@@ -16,7 +16,7 @@ module.exports = function getPoints(type, question, choice, client, answer) {
     case "multiple_select_quiz": {
       choice = Array.from(choice);
       if(correct && answer.pointsQuestion) {
-        const responseRatio = (answer.receivedTime -  this._questionStartTime) / (question.time || 20000),
+        const responseRatio = (answer.receivedTime -  this.questionStartTime) / (question.time || 20000),
           newValue = responseRatio / 2,
           inverse = 1 - newValue,
           maxPoints = 1000 * (question.pointsMultiplier || 1),
@@ -46,7 +46,7 @@ module.exports = function getPoints(type, question, choice, client, answer) {
     }
     default: {
       if(correct && answer.pointsQuestion) {
-        const responseRatio = (answer.receivedTime -  this._questionStartTime) / (question.time || 20000),
+        const responseRatio = (answer.receivedTime -  this.questionStartTime) / (question.time || 20000),
           newValue = responseRatio / 2,
           inverse = 1 - newValue,
           maxPoints = 1000 * (question.pointsMultiplier || 1),

@@ -12,5 +12,9 @@ module.exports = {
   Unlock: require("./Unlock"),
   KickPlayer: require("./KickPlayer"),
   ResetGame: require("./ResetGame"),
-  ReplayGame: require("./ReplayGame")
+  ReplayGame: require("./ReplayGame"),
+  Start: require("./Start"),
+  StartTeamTalk: require("./StartTeamTalk"),
+  ReadyQuestion: require("./ReadyQuestion"),
+  StartQuestion: require("./StartQuestion")
 };
