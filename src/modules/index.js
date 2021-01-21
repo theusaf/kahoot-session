@@ -6,5 +6,11 @@ module.exports = {
   TeamSent: require("./TeamSent"),
   TwoFactorAnswered: require("./TwoFactorAnswered"),
   QuestionAnswered: require("./QuestionAnswered"),
-  TimeOver: require("./timeOver")
+  TimeOver: require("./timeOver"),
+  SendQuestionResults: require("./SendQuestionResults"),
+  Lock: require("./Lock"),
+  Unlock: require("./Unlock"),
+  KickPlayer: require("./KickPlayer"),
+  ResetGame: require("./ResetGame"),
+  ReplayGame: require("./ReplayGame")
 };

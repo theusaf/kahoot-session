@@ -187,6 +187,8 @@ class Client extends EventEmitter {
 
   /**
    * _createHandshake - Creates the connection to the server
+   *
+   * @returns {Promise} - Resolves if successful, rejects if an error occurs
    */
   _createHandshake() {
     const cometd = new cometdAPI.CometD;
@@ -210,20 +212,80 @@ class Client extends EventEmitter {
 
   /**
    * timeOver - Ends the question
+   *
+   * @returns {Promise} @see {Client.sendQuestionResults}
    */
   async timeOver() {
     this.emit("TimeOver");
     await modules.TimeOver.call(this);
-    this.sendQuestionResults();
+    return this.sendQuestionResults();
   }
 
   /**
    * sendQuestionResults - Sends the question results to the players
+   *
+   * @returns {Promise<Boolean[]>} Whether the message was successfully sent
    */
   sendQuestionResults() {
     this.emit("SendQuestionResults");
     const pack = modules.SendQuestionResults.call(this);
-    this.send(pack);
+    return this.send(pack);
+  }
+
+  /**
+   * lock - Locks the game
+   *
+   * @returns {Promise} Resolves if successful, rejects if not
+   */
+  lock() {
+    return modules.Lock.call(this);
+  }
+
+  /**
+   * unlock - Unlocks the game
+   *
+   * @returns {Promise}  Resolves if successful, rejects if not
+   */
+  unlock() {
+    return modules.Unlock.call(this);
+  }
+
+  /**
+   * closeGame - Closes the game, disconnects from Kahoot
+   */
+  closeGame() {
+    this.cometd.disconnect();
+  }
+
+  /**
+   * kickPlayer - Kicks a player from a game
+   *
+   * @param  {String|Player} player The cid or player to kick
+   * @returns {Promise<Boolean>} Resolves if the kick is successful or not
+   */
+  kickPlayer(player) {
+    if(typeof player === "object") {
+      player = player.cid;
+    }
+    return modules.KickPlayer.call(this, player);
+  }
+
+  /**
+   * resetGame - Resets the game, removes all players
+   *
+   * @returns {Promise<Boolean>} Resolves whether successful or not
+   */
+  resetGame() {
+    return modules.ResetGame.call(this);
+  }
+
+  /**
+   * replayGame - Plays the game again
+   *
+   * @returns {Promise<Boolean>} Whether the replay message was successful
+   */
+  replayGame() {
+    return modules.ReplayGame.call(this);
   }
 
   /**
