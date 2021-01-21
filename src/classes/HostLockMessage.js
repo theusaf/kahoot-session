@@ -1,5 +1,5 @@
 module.exports = class HostLockMessage {
-  constructor(this) {
+  constructor(client) {
     this.gameid = client.gameid;
     this.type = "lock";
   }

@@ -1,5 +1,5 @@
 module.exports = class HostUnlockMessage {
-  constructor(this) {
+  constructor(client) {
     this.gameid = client.gameid;
     this.type = "unlock";
   }
