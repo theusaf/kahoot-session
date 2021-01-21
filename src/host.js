@@ -242,8 +242,7 @@ class Client extends EventEmitter {
   sendQuestionResults() {
     this.emit("QuestionResults");
     this.state = "questionend";
-    const pack = modules.SendQuestionResults.call(this);
-    return this.send(pack);
+    return modules.SendQuestionResults.call(this);
   }
 
   /**
@@ -335,6 +334,26 @@ class Client extends EventEmitter {
   endGame() {
     this.emit("GameEnd");
     this.state = "quizend";
+  }
+
+  /**
+   * requestFeedback - Requests feedback from the user
+   *
+   * @returns {Promise<Boolean>} Whether the request was successful or not
+   */
+  requestFeedback(){
+    this.emit("FeedbackRequested");
+    return modules.RequestFeedback.call(this);
+  }
+
+  /**
+   * resetTwoFactorAuth - Resets the two-factor auth and notifies clients
+   *
+   * @returns {Promise<Boolean>} Successful or not
+   */
+  resetTwoFactorAuth() {
+    this.emit("TwoFactorAuthReset");
+    return modules.ResetTwoFactorAuth.call(this);
   }
 
   /**

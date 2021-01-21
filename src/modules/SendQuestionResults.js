@@ -27,5 +27,5 @@ module.exports = function sendQuestionResults() {
       delete pack[1].tempContent;
     }
   }
-  return pack;
+  return this.send(pack);
 };

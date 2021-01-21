@@ -16,5 +16,7 @@ module.exports = {
   Start: require("./Start"),
   StartTeamTalk: require("./StartTeamTalk"),
   ReadyQuestion: require("./ReadyQuestion"),
-  StartQuestion: require("./StartQuestion")
+  StartQuestion: require("./StartQuestion"),
+  ResetTwoFactorAuth: require("./ResetTwoFactorAuth"),
+  RequestFeedback: require("./RequestFeedback")
 };
