@@ -1,5 +1,5 @@
 module.exports = class Player{
-  constructor(data, client) {
+  constructor(data) {
     this.name = data.name;
     this.recoveryData = {
       hasAnswer: false

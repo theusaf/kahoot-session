@@ -32,7 +32,7 @@ module.exports = function QuestionAnswered(data) {
       case "multiple_select_quiz": {
         answerData.text = Array.from(choice).join("|");
         answerData.pointsQuestion = points;
-        let c = [];
+        const c = [];
         for(let i = 0; i < choices.length; i++) {
           if(choices[i].correct) {
             c.push(i);

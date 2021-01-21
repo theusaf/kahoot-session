@@ -18,7 +18,7 @@ class Client extends EventEmitter {
    */
   constructor(options) {
     super();
-    options = options || {};
+    this.options = options || {};
     this.cometd = null;
     this.controllers = {};
     this.currentQuestionIndex = 0;
@@ -165,7 +165,7 @@ class Client extends EventEmitter {
   send(channel, message, shouldReject) {
     if(typeof channel === "object" && typeof channel.push === "function") {
       // An array
-      let promises = [];
+      const promises = [];
       this.cometd.batch(() => {
         for(let i = 0; i < channel.length; i++) {
           promises.push(this.send(channel[i][0], channel[i][1], message));
@@ -255,6 +255,61 @@ class Client extends EventEmitter {
    */
   closeGame() {
     this.cometd.disconnect();
+  }
+
+  /**
+   * startGame - Starts the game
+   *
+   * @returns {Promise<Boolean>} Whether successful or not
+   */
+  startGame() {
+
+  }
+
+  /**
+   * startQuestion - Starts the question
+   *
+   * @returns {Promise<Boolean>} Whether successful or not
+   */
+  startQuestion() {
+
+  }
+
+  /**
+   * readyQuestion - Starts the question
+   *
+   * @returns {Promise<Boolean>} Whether successful or not
+   */
+  readyQuestion() {
+
+  }
+
+  /**
+   * startTeamTalk - Starts team talk
+   *
+   * @returns {Promise<Boolean>} Whether successful or not
+   */
+  startTeamTalk() {
+
+  }
+
+  /**
+   * sendRankings - Sends the medals to players (podium)
+   * Used before endGame
+   *
+   * @returns {Promise<Boolean>} Resolves if successful, rejects if not
+   */
+  sendRankings() {
+
+  }
+
+  /**
+   * endGame - Ends the quiz. Sends the final data to all players
+   *
+   * @returns {Promise<Boolean>} Resolves if successful, rejects if not
+   */
+  endGame() {
+
   }
 
   /**
