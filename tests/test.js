@@ -1,4 +1,4 @@
-const path = require('path');
+const path = require("path");
 const game = require(path.join(__dirname,"..","WSHandler.js"));
 
 const quiz = new game.Quiz("Testing123");
@@ -45,7 +45,7 @@ Session.on("quizEnd",players=>{
 Session.on("join",player=>{
   //runs when a player joins.
   //player has id and name
-  setTimeout(()=>{Session.startQuiz(Session)},2000);
+  setTimeout(()=>{Session.startQuiz(Session);},2000);
 });
 Session.on("leave",player=>{
   //runs when a player leaves

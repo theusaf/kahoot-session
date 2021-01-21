@@ -1,17 +1,16 @@
 {
   "name": "kahoot-session",
-  "version": "1.7.1",
-  "description": "Creates a kahoot game and stuff.",
-  "main": "kahoot.js",
+  "version": "2.0.0",
+  "description": "Host a Kahoot! game using NodeJS.",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "theusaf",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
-    "@theusaf/kahoot-antibot": "git+https://github.com/theusaf/kahoot-antibot.git#24124d7",
-    "request": "^2.88.2",
-    "ws": "^7.3.0"
+    "cometd": "^7.0.0",
+    "got": "^11.8.1"
   },
   "homepage": "https://github.com/theusaf/kahoot-session",
   "repository": {
@@ -25,6 +24,6 @@
     "game"
   ],
   "devDependencies": {
-    "eslint": "^6.8.0"
+    "eslint": "^7.18.0"
   }
 }

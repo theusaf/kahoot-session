@@ -28,7 +28,7 @@ Session.on("join",player=>{
   //runs when a player joins.
   //player has id and name
   console.log(player);
-  setTimeout(()=>{Session.startQuiz(Session)},2000);
+  setTimeout(()=>{Session.startQuiz(Session);},2000);
 });
 Session.on("quizEnd",()=>{
   setTimeout(()=>{
