@@ -1,7 +1,6 @@
 const EventEmitter = require("events"),
   cometdAPI = require("cometd"),
   got = require("got"),
-  sleep = require("./util/sleep"),
   modules = require("./modules/index"),
   HostSessionData = require("./classes/HostSessionData"),
   HostStartedData = require("./classes/HostStartedData"),
@@ -27,6 +26,7 @@ class Client extends EventEmitter {
     this.feedback = [];
     this.gameid = null;
     this.jumbleSteps = null;
+    this.mainEventTimer = null;
     this.twoFactorSteps = null;
     this.quiz = null;
     this.quizPlaylist = [];
@@ -163,6 +163,17 @@ class Client extends EventEmitter {
    * @returns {Promise<Boolean>} Whether the message was successful
    */
   send(channel, message, shouldReject) {
+    if(typeof channel === "object" && typeof channel.push === "function") {
+      // An array
+      let promises = [];
+      this.cometd.batch(() => {
+        for(let i = 0; i < channel.length; i++) {
+          promises.push(this.send(channel[i][0], channel[i][1], message));
+        }
+      });
+      console.log("[DEBUG] (send batch):",promises);
+      return Promise.all(promises);
+    }
     return new Promise((resolve, reject) => {
       this.cometd.publish(channel, message, (ack) => {
         if(shouldReject && !ack.successful) {
@@ -197,6 +208,27 @@ class Client extends EventEmitter {
     });
   }
 
+  /**
+   * timeOver - Ends the question
+   */
+  async timeOver() {
+    this.emit("TimeOver");
+    await modules.TimeOver.call(this);
+    this.sendQuestionResults();
+  }
+
+  /**
+   * sendQuestionResults - Sends the question results to the players
+   */
+  sendQuestionResults() {
+    this.emit("SendQuestionResults");
+    const pack = modules.SendQuestionResults.call(this);
+    this.send(pack);
+  }
+
+  /**
+   * checkAllAnswered - Checks if all players have answered. If yes, ends the question.
+   */
   checkAllAnswered() {
     let isDone = true;
     for(const i in this.controllers) {
@@ -204,6 +236,9 @@ class Client extends EventEmitter {
         isDone = false;
         break;
       }
+    }
+    if(isDone) {
+      this.timeOver();
     }
   }
 

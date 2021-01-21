@@ -5,5 +5,6 @@ module.exports = {
   PlayerLeft: require("./PlayerLeft"),
   TeamSent: require("./TeamSent"),
   TwoFactorAnswered: require("./TwoFactorAnswered"),
-  QuestionAnswered: require("./QuestionAnswered")
+  QuestionAnswered: require("./QuestionAnswered"),
+  TimeOver: require("./timeOver")
 };

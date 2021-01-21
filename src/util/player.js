@@ -7,7 +7,6 @@ module.exports = class Player{
     this.team = null;
     this.active = false;
     this.answer = null;
-    this.totalScore = 0;
     this.pointsData = {
       questionPoints: 0,
       totalPointsWithBonuses: 0,
