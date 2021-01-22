@@ -107,7 +107,7 @@ class Client extends EventEmitter {
       cometd.addListener(`/controller/${this.gameid}`, this.message);
       cometd.addListener("/service/status", this.message);
       cometd.addListener("/service/player", this.message);
-      await this.send("/service/player", new HostStartedData(), true);
+      await this.send("/service/player", new HostStartedData(this), true);
       return this.gameid;
     } catch(error) {
       throw {
