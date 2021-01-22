@@ -10,6 +10,8 @@ module.exports = class LiveEventQuestionStart {
       gameBlockLayout: client.quiz.questions[client.currentQuestionIndex].layout,
       quizQuestionAnswers: client.quizQuestionAnswers,
       timeAvailable: client.quiz.questions[client.currentQuestionIndex].time,
+      timeLeft: client.quiz.questions[client.currentQuestionIndex].time,
+      numberOfAnswersAllowed: 1
     });
     if(client.quiz.questions[client.currentQuestionIndex].type === "jumble") {
       client.jumbleSteps = shuffle(client.quiz.questions[client.currentQuestionIndex].choices.map((e,i) => {

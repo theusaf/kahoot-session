@@ -7,6 +7,7 @@ module.exports = class LiveEventQuestionEnd {
     this.id = 8;
     this.type = "message";
     this.cid = player.cid;
+    this.lastGameBlockIndex = client.currentQuestionIndex ? client.currentQuestionIndex - 1 : client.currentQuestionIndex;
     const currentQuestion = client.quiz.questions[client.currentQuestionIndex],
       content = player.answer || {
         isCorrect: false,

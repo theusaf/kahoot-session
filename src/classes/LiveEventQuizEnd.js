@@ -8,9 +8,9 @@ module.exports = class LiveEventQuizEnd {
     this.content = JSON.stringify({
       rank: player.rank,
       cid: player.cid,
-      correctCount: player.data.correctCount,
-      incorrectCount: player.data.incorrectCount,
-      unansweredCount: player.data.unansweredCount,
+      correctCount: player.correctCount,
+      incorrectCount: player.incorrectCount,
+      unansweredCount: player.unansweredCount,
       isKicked: false,
       isGhost: false,
       playerCount: Object.keys(client.controllers).length,

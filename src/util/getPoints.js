@@ -27,7 +27,7 @@ module.exports = function getPoints(type, question, choice, client, answer) {
         }
         pointsData.questionPoints = points;
         pointsData.totalPointsWithoutBonuses += points;
-        pointsData.totalPointsWithoutBonuses += points + streakBonus;
+        pointsData.totalPointsWithBonuses += points + streakBonus;
         answerStreakPoints.streakLevel++;
         answerStreakPoints.totalStreakPoints += streakBonus;
         answerStreakPoints.streakBonus = streakBonus;
@@ -46,7 +46,7 @@ module.exports = function getPoints(type, question, choice, client, answer) {
     }
     default: {
       if(correct && answer.pointsQuestion) {
-        const responseRatio = (answer.receivedTime -  this.questionStartTime) / (question.time || 20000),
+        const responseRatio = (answer.receivedTime -  client.questionStartTime) / (question.time || 20000),
           newValue = responseRatio / 2,
           inverse = 1 - newValue,
           maxPoints = 1000 * (question.pointsMultiplier || 1),
@@ -65,8 +65,8 @@ module.exports = function getPoints(type, question, choice, client, answer) {
       } else if(correct) {
         // correct, but not a points question
         pointsData.questionPoints = 0;
-        answerStreakPoints.streakLevel++;
         answerStreakPoints.streakBonus = 0;
+        return 0;
       } else {
         // wrong
         pointsData.questionPoints = 0;

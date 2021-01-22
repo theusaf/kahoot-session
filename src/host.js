@@ -1,3 +1,4 @@
+require("cometd-nodejs-client").adapt();
 const EventEmitter = require("events"),
   cometdAPI = require("cometd"),
   calculateReadTime = require("./util/calculateReadTime"),
@@ -8,7 +9,7 @@ const EventEmitter = require("events"),
   HostStartedData = require("./classes/HostStartedData"),
   AckExtension = require("cometd/AckExtension"),
   TimeSyncExtension = require("cometd/TimeSyncExtension"),
-  ReloadExtension = require("cometd/ReloadExtension");
+  LiveEventDisconnect = require("./classes/LiveEventDisconnect");
 
 // The basic Kahoot host
 class Client extends EventEmitter {
@@ -114,10 +115,22 @@ class Client extends EventEmitter {
       this.gameid = parseInt(response.body);
       await this._createHandshake();
       const cometd = this.cometd;
-      cometd.addListener(`/controller/${this.gameid}`, this.message);
-      cometd.addListener("/service/status", this.message);
-      cometd.addListener("/service/player", this.message);
-      await this.send("/service/player", new HostStartedData(), true);
+      cometd.addListener(`/controller/${this.gameid}`, (data) => {
+        this.message(data);
+      });
+      cometd.addListener("/service/status", (data) => {
+        this.message(data);
+      });
+      cometd.addListener("/service/player", (data) => {
+        this.message(data);
+      });
+      cometd.onListenerException = (exception) => {
+        this.emit("error", exception.description ? exception : {
+          error: exception,
+          description: "Unknown error"
+        });
+      };
+      await this.send("/service/player", new HostStartedData(this), true);
       this.recoveryData = {
         data: {},
         defaultQuizData: {
@@ -209,7 +222,6 @@ class Client extends EventEmitter {
           promises.push(this.send(channel[i][0], channel[i][1], message));
         }
       });
-      console.log("[DEBUG] (send batch):",promises);
       return Promise.all(promises);
     }
     return new Promise((resolve, reject) => {
@@ -233,7 +245,6 @@ class Client extends EventEmitter {
     this.cometd = cometd;
     cometd.registerExtension("ack",new AckExtension);
     cometd.registerExtension("timesync",new TimeSyncExtension);
-    cometd.registerExtension("reload",new ReloadExtension);
     cometd.configure({
       url: `wss://play.kahoot.it/cometd/${this.gameid}/${this._token}`
     });
@@ -283,7 +294,7 @@ class Client extends EventEmitter {
    * @returns {Promise<Boolean[]>} Whether the message was successfully sent
    */
   sendQuestionResults() {
-    this.clearTimeout(this.mainEventTimer);
+    clearTimeout(this.mainEventTimer);
     this.state = "questionend";
     this.recoveryData.state = 5;
     this.recoveryData.data = {
@@ -329,11 +340,12 @@ class Client extends EventEmitter {
   }
 
   /**
-   * closeGame - Closes the game, disconnects from Kahoot
+   * async closeGame - Closes the game, disconnects from Kahoot
    */
-  closeGame() {
-    this.emit("Disconnect");
+  async closeGame() {
+    await this.send("/service/player", new LiveEventDisconnect(this));
     this.cometd.disconnect();
+    this.emit("Disconnect");
   }
 
   /**
@@ -402,7 +414,7 @@ class Client extends EventEmitter {
     if(this.quiz.questions[this.currentQuestionIndex].type !== "content"){
       this.mainEventTimer = setTimeout(() => {
         this.next();
-      }, this.recoveryData.data.getReady.timeLeft);
+      }, this.recoveryData.data.getReady.timeLeft * 1e3);
     } else {
       if(this.options.autoPlay) {
         this.mainEventTimer = setTimeout(() => {
@@ -646,8 +658,8 @@ class CustomClient extends Client {
     super(options);
     const oldMessage = this.message;
     this.message = (message) => {
-      if(typeof this.options.messageHandler === "function") {
-        if(this.options.messageHandler(message) === true) {
+      if(typeof messageHandler === "function") {
+        if(messageHandler(message) === true) {
           return;
         }
       }

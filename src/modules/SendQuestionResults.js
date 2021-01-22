@@ -7,40 +7,39 @@ module.exports = function sendQuestionResults() {
     }
     if(this.controllers[i].hasLeft) {
       if(this.controllers[i].answer !== null) {
-        const p = new LiveEventQuestionEnd(this.controllers[i], this);
-        if(p.isCorrect) {
-          this.controllers[i].correctCount++;
-        } else {
-          this.controllers[i].incorrectCount++;
-        }
-      } else {
-        this.controllers[i].pointsData.answerStreakPoints.streakLevel = 0;
-        this.controllers[i].unansweredCount++;
+        new LiveEventQuestionEnd(this.controllers[i], this);
       }
       continue;
     }
     pack.push(["/service/player", new LiveEventQuestionEnd(this.controllers[i], this)]);
     // get ranks and nemesis
-    pack.sort((a, b) => {
-      return b[1].tempContent.pointsData.totalPointsWithBonuses - a[1].tempContent.pointsData.totalPointsWithBonuses;
+    const players = Object.values(this.controllers);
+    players.sort((a, b) => {
+      return b.pointsData.totalPointsWithBonuses - a.pointsData.totalPointsWithBonuses;
     });
-    for(let i = 0; i < pack.length; i++) {
-      if(this.controllers[pack[i][1].cid].answer === null) {
-        this.controllers[pack[i][1].cid].unansweredCount++;
-      } else if(pack[i][1].isCorrect) {
-        this.controllers[pack[i][1].cid].correctCount++;
+    for(let i = 0; i < players.length; i++) {
+      if(players[i].answer === null) {
+        this.controllers[i].pointsData.answerStreakPoints.streakLevel = 0;
+        players[i].unansweredCount++;
+      } else if(players[i].answer.isCorrect) {
+        players[i].correctCount++;
       } else {
-        this.controllers[pack[i][1].cid].incorrectCount++;
+        players[i].incorrectCount++;
       }
-      pack[i][1].tempContent.rank = i + 1;
-      if(i > 0) {
-        const nemesis = this.controllers[pack[i - 1][1].cid];
-        pack[i][1].tempContent.nemesis = {
-          isGhost: false,
-          name: nemesis.name,
-          totalScore: nemesis.pointsData.totalPointsWithBonuses
-        };
+      players[i].rank = i + 1;
+      if(players[i].answer){
+        players[i].answer.rank = i + 1;
+        if(i > 0) {
+          const nemesis = players[i - 1];
+          players[i].answer.nemesis = {
+            isGhost: false,
+            name: nemesis.name,
+            totalScore: nemesis.pointsData.totalPointsWithBonuses
+          };
+        }
       }
+    }
+    for(let i = 0; i < pack.length; i++) {
       pack[i][1].content = JSON.stringify(pack[i][1].tempContent);
       delete pack[i][1].tempContent;
     }

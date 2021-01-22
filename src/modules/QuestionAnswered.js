@@ -3,7 +3,7 @@ module.exports = function QuestionAnswered(data) {
   try {
     const {cid, content} = data,
       quiz = this.quiz,
-      question = quiz[this.currentQuestionIndex],
+      question = quiz.questions[this.currentQuestionIndex],
       {type,points,choices} = question,
       player = this.controllers[cid],
       answer = JSON.parse(content),
@@ -15,7 +15,7 @@ module.exports = function QuestionAnswered(data) {
       // cannot answer yet!
       return;
     }
-    if(typeof player.answer === "object"){
+    if(player.answer !== null){
       // already answered
       return;
     }
@@ -26,12 +26,14 @@ module.exports = function QuestionAnswered(data) {
     answerData.receivedTime = Date.now();
     switch(type) {
       case "open_ended": {
-        answerData.text = `${choice}`;
+        answerData.text = `${choice}`.toLowerCase();
         answerData.pointsQuestion = true;
         break;
       }
       case "multiple_select_quiz": {
-        answerData.text = Array.from(choice).join("|");
+        answerData.text = Array.from(choice).map((c) => {
+          return choices[+c] ? choices[+c].answer : "";
+        }).join("|");
         answerData.pointsQuestion = points;
         const c = [];
         for(let i = 0; i < choices.length; i++) {
@@ -43,20 +45,32 @@ module.exports = function QuestionAnswered(data) {
         break;
       }
       case "jumble": {
-        answerData.text = Array.from(choice).join("|");
+        answerData.text = Array.from(choice).map((c) => {
+          return choices[+c] ? choices[+c].answer : "";
+        }).join("|");
         answerData.pointsQuestion = points;
         break;
       }
-      case "survey":
-      case "content":
-      case "word_cloud":
+      case "survey": {
+        answerData.text = choices[+choice] ? choices[+choice].answer : "";
+        answerData.pointsQuestion = false;
+        break;
+      }
       case "multiple_select_poll": {
+        answerData.text = Array.from(choice).map((c) => {
+          return choices[+c] ? choices[+c].answer : "";
+        }).join("|");
+        answerData.pointsQuestion = false;
+        break;
+      }
+      case "content":
+      case "word_cloud": {
         answerData.text = `${choice}`;
         answerData.pointsQuestion = false;
         break;
       }
       default: {
-        answerData.text = `${choice}`;
+        answerData.text = choices[+choice] ? choices[+choice].answer : "";
         answerData.pointsQuestion = points;
       }
     }

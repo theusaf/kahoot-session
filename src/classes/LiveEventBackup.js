@@ -5,6 +5,6 @@ module.exports = class LiveEventBackup {
     this.id = 17;
     this.type = "message";
     this.cid = data.cid;
-    this.content = JSON.stringify(this.getPlayer(data.cid).recoveryData || this.recoveryData);
+    this.content = JSON.stringify(client.getPlayer(data.cid).recoveryData || this.recoveryData);
   }
 };
