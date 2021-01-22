@@ -67,7 +67,7 @@ class Client extends EventEmitter {
       this.quiz = quizId;
       return this;
     }
-    const uuid = /[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}/i.match(quizId);
+    const uuid = quizId.match(RegExp("/[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}/i")[0];
     if(uuid === null) {
       throw {
         description: "Invalid UUID"
@@ -107,9 +107,10 @@ class Client extends EventEmitter {
       this.gameid = parseInt(response.body);
       await this._createHandshake();
       const cometd = this.cometd;
-      cometd.addListener(`/controller/${this.gameid}`, this.message);
-      cometd.addListener("/service/status", this.message);
-      cometd.addListener("/service/player", this.message);
+	  var message = this.message.bind(this)
+      cometd.addListener(`/controller/${this.gameid}`, message);
+      cometd.addListener("/service/status", message);
+      cometd.addListener("/service/player", message);
       await this.send("/service/player", new HostStartedData(), true);
       this.recoveryData = {
         data: {},
