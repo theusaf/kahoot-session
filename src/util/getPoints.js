@@ -57,7 +57,7 @@ module.exports = function getPoints(type, question, choice, client, answer) {
         }
         pointsData.questionPoints = points;
         pointsData.totalPointsWithoutBonuses += points;
-        pointsData.totalPointsWithoutBonuses += points + streakBonus;
+        pointsData.totalPointsWithBonuses += points + streakBonus;
         answerStreakPoints.streakLevel++;
         answerStreakPoints.totalStreakPoints += streakBonus;
         answerStreakPoints.streakBonus = streakBonus;

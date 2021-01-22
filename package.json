@@ -22,7 +22,8 @@
     "kahoot",
     "session",
     "quiz",
-    "game"
+    "game",
+    "host"
   ],
   "devDependencies": {
     "eslint": "^7.18.0",
