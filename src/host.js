@@ -27,7 +27,7 @@ class Client extends EventEmitter {
     this.currentQuizIndex = 0;
     this.feedback = [];
     this.gameid = null;
-    this.getReadyTime  null;
+    this.getReadyTime = null;
     this.jumbleSteps = null;
     this.mainEventTimer = null;
     this.twoFactorSteps = null;
