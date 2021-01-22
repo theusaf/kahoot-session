@@ -19,6 +19,7 @@ module.exports = function QuestionAnswered(data) {
       // already answered
       return;
     }
+    answerData.correctChoices = [];
     answerData.hasAnswer = true;
     answerData.type = type;
     answerData.choice = choice;

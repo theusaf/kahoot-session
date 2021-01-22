@@ -11,6 +11,7 @@ module.exports = function sendQuestionResults() {
           this.controllers[i].incorrectCount++;
         }
       } else {
+        this.controllers[i].pointsData.answerStreakPoints.streakLevel = 0;
         this.controllers[i].unansweredCount++;
       }
       continue;

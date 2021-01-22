@@ -1,9 +1,8 @@
 module.exports = class Player{
-  constructor(data) {
+  constructor(data, client) {
+    this.client = client;
     this.name = data.name;
-    this.recoveryData = {
-      hasAnswer: false
-    };
+    this.cid = data.cid;
     this.team = null;
     this.active = false;
     this.answer = null;
@@ -25,5 +24,25 @@ module.exports = class Player{
         previousStreakBonus: 0
       }
     };
+  }
+  get recoveryData() {
+    const data = JSON.parse(JSON.stringify(this.client.recoveryData)));
+    switch(data.state) {
+      case 2: {
+        data.data.getReady.timeLeft = Math.ceil(data.data.getReady.timeLeft - (Date.now() - this.client.getReadyTime));
+        break;
+      }
+      case 3: {
+        data.data.timeAvailable = Math.ceil(data.data.timeAvailable - (Date.now() - this.client.questionStartTime));
+        break;
+      }
+      case 4:
+      case 5: {
+        data.data.timeUp.cid = this.cid;
+        data.data.revealAnswer = this.answer || data.data.revealAnswer;
+        break;
+      }
+    }
+    return data;
   }
 };

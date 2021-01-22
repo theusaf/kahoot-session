@@ -1,5 +1,6 @@
 const EventEmitter = require("events"),
   cometdAPI = require("cometd"),
+  calculateReadTime = require("./util/calculateReadTime"),
   got = require("got"),
   modules = require("./modules/index"),
   HostSessionData = require("./classes/HostSessionData"),
@@ -26,11 +27,13 @@ class Client extends EventEmitter {
     this.currentQuizIndex = 0;
     this.feedback = [];
     this.gameid = null;
+    this.getReadyTime  null;
     this.jumbleSteps = null;
     this.mainEventTimer = null;
     this.twoFactorSteps = null;
     this.quiz = null;
     this.quizPlaylist = [];
+    this.recoveryData = {};
     this.startTime = null;
     this.state = "lobby";
     this.status = "ACTIVE";
@@ -108,6 +111,16 @@ class Client extends EventEmitter {
       cometd.addListener("/service/status", this.message);
       cometd.addListener("/service/player", this.message);
       await this.send("/service/player", new HostStartedData(), true);
+      this.recoveryData = {
+        data: {},
+        defaultQuizData: {
+          quizType: "quiz",
+          quizQuestionAnswers: this.quizQuestionAnswers,
+          didControllerLeave: false,
+          wasControllerKicked: false
+        },
+        state: 0
+      };
       return this.gameid;
     } catch(error) {
       throw {
@@ -231,6 +244,22 @@ class Client extends EventEmitter {
   async timeOver() {
     this.emit("TimeOver");
     this.state = "timeover";
+    this.recoveryData.state = 4;
+    this.recoveryData.data = {
+      timeUp: {
+        gameid: this.gameid,
+        host: "play.kahoot.it",
+        id: 4,
+        type: "message",
+        content: JSON.stringify({
+          questionNumber: this.currentQuestionIndex
+        }),
+        cid: null
+      },
+      revealAnswer: {
+        hasAnswer: false
+      }
+    };
     await modules.TimeOver.call(this);
     return this.sendQuestionResults();
   }
@@ -243,6 +272,22 @@ class Client extends EventEmitter {
   sendQuestionResults() {
     this.emit("QuestionResults");
     this.state = "questionend";
+    this.recoveryData.state = 5;
+    this.recoveryData.data = {
+      timeUp: {
+        gameid: this.gameid,
+        host: "play.kahoot.it",
+        id: 4,
+        type: "message",
+        content: JSON.stringify({
+          questionNumber: this.currentQuestionIndex
+        }),
+        cid: null
+      },
+      revealAnswer: {
+        hasAnswer: false
+      }
+    };
     return modules.SendQuestionResults.call(this);
   }
 
@@ -280,6 +325,11 @@ class Client extends EventEmitter {
     this.emit("GameStart");
     this.state = "start";
     this.startTime = Date.now();
+    this.recoveryData.data = {
+      quizType: "quiz",
+      quizQuestionAnswers: this.quizQuestionAnswers
+    };
+    this.recoveryData.state = 1;
     return modules.Start.call(this);
   }
 
@@ -293,6 +343,14 @@ class Client extends EventEmitter {
     await modules.StartQuestion.call(this);
     this.questionStartTime = Date.now();
     this.state = "question";
+    this.recoveryData.state = 3;
+    this.recoveryData.data = {
+      questionIndex: this.currentQuestionIndex,
+      gameBlockType: this.quiz.questions[this.currentQuestionIndex].type,
+      gameBlockLayout: this.quiz.questions[this.currentQuestionIndex].layout,
+      quizQuestionAnswers: this.quizQuestionAnswers,
+      timeAvailable: this.quiz.questions[this.currentQuestionIndex].time
+    };
   }
 
   /**
@@ -303,6 +361,17 @@ class Client extends EventEmitter {
   readyQuestion() {
     this.emit("QuestionReady");
     this.state = "getready";
+    this.recoveryData.state = 2;
+    this.recoveryData.data = {
+      getReady: {
+        questionIndex: this.currentQuestionIndex,
+        gameBlockType: this.quiz.questions[this.currentQuestionIndex].type,
+        gameBlockLayout: this.quiz.questions[this.currentQuestionIndex].layout,
+        quizQuestionAnswers: this.quizQuestionAnswers,
+        timeLeft: calculateReadTime(this.quiz.questions[this.currentQuestionIndex].question || this.quiz.questions[this.currentQuestionIndex].title)
+      }
+    };
+    this.getReadyTime = Date.now();
     return modules.ReadyQuestion.call(this);
   }
 
@@ -337,6 +406,8 @@ class Client extends EventEmitter {
   endGame() {
     this.emit("GameEnd");
     this.state = "quizend";
+    this.recoveryData.state = 6;
+    this.recoveryData.data = {};
     return modules.EndGame.call(this);
   }
 
@@ -347,6 +418,8 @@ class Client extends EventEmitter {
    */
   requestFeedback(){
     this.emit("FeedbackRequested");
+    this.recoveryData.state = 7;
+    this.recoveryData.data = {};
     return modules.RequestFeedback.call(this);
   }
 

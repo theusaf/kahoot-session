@@ -7,13 +7,25 @@ module.exports = class LiveEventQuestionEnd {
     this.id = 8;
     this.type = "message";
     this.cid = player.cid;
-    const content = player.answer;
-    content.isCorrect = isCorrect(
-      content.type,
-      client.quiz.questions[client.currentQuestionIndex].choices,
-      content.choice,
-      client
-    );
+    const currentQuestion = client.quiz.questions[client.currentQuestionIndex],
+        content = player.answer || {
+        isCorrect: false,
+        type: currentQuestion.type,
+        choice: null,
+        pointsData: player.pointsData,
+        text: "",
+        receivedTime: null,
+        pointsQuestion: typeof currentQuestion.points === "boolean" ? currentQuestion.points : currentQuestion.type === "open_ended",
+        correctChoices: []
+      };
+    if(player.answer !== null) {
+      content.isCorrect = isCorrect(
+        content.type,
+        client.quiz.questions[client.currentQuestionIndex].choices,
+        content.choice,
+        client
+      );
+    }
     content.points = getPoints(
       content.type,
       client.quiz.questions[client.currentQuestionIndex],
@@ -21,6 +33,10 @@ module.exports = class LiveEventQuestionEnd {
       client,
       content
     );
+    content.totalScore = content.pointsData.totalPointsWithBonuses;
+    if(player.answer === null) {
+      player.answer = content;
+    }
     this.tempContent = content;
   }
 };
