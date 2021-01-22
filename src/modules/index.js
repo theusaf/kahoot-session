@@ -6,7 +6,7 @@ module.exports = {
   TeamSent: require("./TeamSent"),
   TwoFactorAnswered: require("./TwoFactorAnswered"),
   QuestionAnswered: require("./QuestionAnswered"),
-  TimeOver: require("./timeOver"),
+  TimeOver: require("./TimeOver"),
   SendQuestionResults: require("./SendQuestionResults"),
   Lock: require("./Lock"),
   Unlock: require("./Unlock"),
