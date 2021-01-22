@@ -10,5 +10,11 @@ module.exports = function PlayerJoined(data) {
   } else {
     this.controllers[cid] = new Player(data, this);
   }
+  if(this.state === "lobby" && this.options.autoPlay) {
+    clearTimeout(this.mainEventTimer);
+    this.mainEventTimer = setTimeout(() => {
+      this.startGame();
+    }, 15e3);
+  }
   this.send("/service/player", new LiveEventNameAccept(data, this));
 };

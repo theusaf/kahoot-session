@@ -126,6 +126,11 @@ class Client extends EventEmitter {
         },
         state: 0
       };
+      if(Object.keys(this.controllers) > 0 && this.options.autoPlay) {
+        this.mainEventTimer = setTimeout(() => {
+          this.startGame();
+        }, 15e3);
+      }
       return this.gameid;
     } catch(error) {
       throw {
@@ -248,7 +253,6 @@ class Client extends EventEmitter {
    */
   async timeOver() {
     clearTimeout(this.mainEventTimer);
-    this.emit("TimeOver");
     this.state = "timeover";
     this.recoveryData.state = 4;
     this.recoveryData.data = {
@@ -267,7 +271,8 @@ class Client extends EventEmitter {
       }
     };
     await modules.TimeOver.call(this);
-    return this.sendQuestionResults();
+    this.emit("TimeOver");
+    return this.next();
   }
 
   /**
@@ -277,7 +282,6 @@ class Client extends EventEmitter {
    */
   sendQuestionResults() {
     this.clearTimeout(this.mainEventTimer);
-    this.emit("QuestionResults");
     this.state = "questionend";
     this.recoveryData.state = 5;
     this.recoveryData.data = {
@@ -300,6 +304,7 @@ class Client extends EventEmitter {
         this.next();
       }, 5e3);
     }
+    this.emit("QuestionResults");
     return modules.SendQuestionResults.call(this);
   }
 
@@ -325,6 +330,7 @@ class Client extends EventEmitter {
    * closeGame - Closes the game, disconnects from Kahoot
    */
   closeGame() {
+    this.emit("Disconnect");
     this.cometd.disconnect();
   }
 
@@ -334,7 +340,6 @@ class Client extends EventEmitter {
    * @returns {Promise<Boolean>} Whether successful or not
    */
   startGame() {
-    this.emit("GameStart");
     this.state = "start";
     this.startTime = Date.now();
     this.recoveryData.data = {
@@ -343,8 +348,9 @@ class Client extends EventEmitter {
     };
     this.recoveryData.state = 1;
     this.mainEventTimer = setTimeout(() => {
-      this.readyQuestion();
+      this.next();
     }, 5e3);
+    this.emit("GameStart");
     return modules.Start.call(this);
   }
 
@@ -355,7 +361,6 @@ class Client extends EventEmitter {
    */
   async startQuestion() {
     clearTimeout(this.mainEventTimer);
-    this.emit("QuestionStart",this.quiz.questions[this.currentQuestionIndex]);
     await modules.StartQuestion.call(this);
     this.questionStartTime = Date.now();
     this.state = "question";
@@ -370,6 +375,7 @@ class Client extends EventEmitter {
     this.mainEventTimer = setTimeout(() => {
       this.timeOver();
     }, this.recoveryData.data.timeAvailable);
+    this.emit("QuestionStart",this.quiz.questions[this.currentQuestionIndex]);
   }
 
   /**
@@ -379,7 +385,6 @@ class Client extends EventEmitter {
    */
   readyQuestion() {
     clearTimeout(this.mainEventTimer);
-    this.emit("QuestionReady",this.quiz.questions[this.currentQuestionIndex]);
     this.state = "getready";
     this.recoveryData.state = 2;
     this.recoveryData.data = {
@@ -394,11 +399,7 @@ class Client extends EventEmitter {
     this.getReadyTime = Date.now();
     if(this.quiz.questions[this.currentQuestionIndex].type !== "content"){
       this.mainEventTimer = setTimeout(() => {
-        if(this.options.gameMode === "team") {
-          this.startTeamTalk();
-        } else {
-          this.startQuestion();
-        }
+        this.next();
       }, this.recoveryData.data.getReady.timeLeft);
     } else {
       if(this.options.autoPlay) {
@@ -407,6 +408,7 @@ class Client extends EventEmitter {
         }, 20e3);
       }
     }
+    this.emit("QuestionReady",this.quiz.questions[this.currentQuestionIndex]);
     return modules.ReadyQuestion.call(this);
   }
 
@@ -417,25 +419,26 @@ class Client extends EventEmitter {
    */
   startTeamTalk() {
     clearTimeout(this.mainEventTimer);
-    this.emit("TeamTalk");
     this.state = "teamtalk";
     this.mainEventTimer = setTimeout(() => {
-      this.startQuestion();
+      this.next();
     }, 5e3);
+    this.emit("TeamTalk");
     return modules.StartTeamTalk.call(this);
   }
 
   /**
-   * sendRankings - Sends the medals to players (podium)
+   * async sendRankings - Sends the medals to players (podium)
    * Used before endGame
    *
    * @returns {Promise<Boolean>} Resolves if successful, rejects if not
    */
-  sendRankings() {
+  async sendRankings() {
     clearTimeout(this.mainEventTimer);
-    this.emit("Rankings");
     this.state = "podium";
-    return modules.SendRankings.call(this);
+    await modules.SendRankings.call(this);
+    this.emit("Rankings");
+    return this.next();
   }
 
   /**
@@ -445,7 +448,6 @@ class Client extends EventEmitter {
    */
   endGame() {
     clearTimeout(this.mainEventTimer);
-    this.emit("GameEnd");
     this.state = "quizend";
     this.recoveryData.state = 6;
     this.recoveryData.data = {};
@@ -454,6 +456,7 @@ class Client extends EventEmitter {
         this.next();
       }, 15e3);
     }
+    this.emit("GameEnd");
     return modules.EndGame.call(this);
   }
 
@@ -578,7 +581,55 @@ class Client extends EventEmitter {
    */
   next() {
     clearTimeout(this.mainEventTimer);
-    
+    switch(this.state) {
+      case "lobby": {
+        return this.startGame();
+      }
+      case "start": {
+        return this.readyQuestion();
+      }
+      case "getready": {
+        if(this.quiz.questions[this.currentQuestionIndex].type === "content") {
+          this.currentQuestionIndex++;
+          return this.readyQuestion();
+        } else {
+          if(this.options.gameMode === "team") {
+            return this.startTeamTalk();
+          } else {
+            return this.startQuestion();
+          }
+        }
+      }
+      case "teamtalk": {
+        return this.startQuestion();
+      }
+      case "question": {
+        return this.timeOver();
+      }
+      case "timeover": {
+        return this.sendQuestionResults();
+      }
+      case "questionend": {
+        if(this.currentQuestionIndex + 1 >= this.quiz.questions.length) {
+          // end quiz
+          return this.sendRankings();
+        } else {
+          // next question
+          this.currentQuestionIndex++;
+          return this.readyQuestion();
+        }
+      }
+      case "podium": {
+        return this.endGame();
+      }
+      case "endGame": {
+        if(this.options.rejoinOnReset) {
+          return this.resetGame();
+        } else {
+          return this.replayGame();
+        }
+      }
+    }
   }
 }
 
