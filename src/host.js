@@ -3,6 +3,7 @@ const EventEmitter = require("events"),
   calculateReadTime = require("./util/calculateReadTime"),
   got = require("got"),
   modules = require("./modules/index"),
+  shuffle = require("./util/shuffle"),
   HostSessionData = require("./classes/HostSessionData"),
   HostStartedData = require("./classes/HostStartedData"),
   AckExtension = require("cometd/AckExtension"),
@@ -480,6 +481,7 @@ class Client extends EventEmitter {
    */
   resetTwoFactorAuth() {
     this.emit("TwoFactorAuthReset");
+    this.twoFactorSteps = shuffle([0,1,2,3]);
     return modules.ResetTwoFactorAuth.call(this);
   }
 
@@ -554,7 +556,7 @@ class Client extends EventEmitter {
   checkAllAnswered() {
     let isDone = true;
     for(const i in this.controllers) {
-      if(this.controllers[i].answer === null && !this.controllers[i].hasLeft) {
+      if(this.controllers[i].answer === null && !this.controllers[i].hasLeft && this.controllers[i].active) {
         isDone = false;
         break;
       }

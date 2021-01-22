@@ -6,6 +6,9 @@ module.exports = function TeamSent(data) {
     if(this.controllers[cid]) {
       this.controllers[cid].team = JSON.parse(content);
     }
+    if(!this.options.twoFactorAuth) {
+      this.controllers[cid].active = true;
+    }
     this.send(new LiveEventTeamAccept(data, this));
   } catch(error) {
     this.emit("error", {

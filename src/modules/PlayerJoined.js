@@ -10,7 +10,7 @@ module.exports = function PlayerJoined(data) {
   } else {
     this.controllers[cid] = new Player(data, this);
   }
-  if(this.state === "lobby" && this.options.autoPlay) {
+  if(this.state === "lobby" && this.options.autoPlay && this.controllers[cid].active) {
     clearTimeout(this.mainEventTimer);
     this.mainEventTimer = setTimeout(() => {
       this.startGame();

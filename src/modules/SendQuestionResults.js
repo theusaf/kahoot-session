@@ -2,6 +2,9 @@ const LiveEventQuestionEnd = require("../classes/LiveEventQuestionEnd");
 module.exports = function sendQuestionResults() {
   const pack = [];
   for(const i in this.controllers) {
+    if(!this.controllers[i].active) {
+      continue;
+    }
     if(this.controllers[i].hasLeft) {
       if(this.controllers[i].answer !== null) {
         const p = new LiveEventQuestionEnd(this.controllers[i], this);

@@ -1,3 +1,4 @@
+const shuffle = require("../util/shuffle");
 module.exports = class LiveEventQuestionStart {
   constructor(client) {
     this.gameid = client.gameid;
@@ -10,5 +11,10 @@ module.exports = class LiveEventQuestionStart {
       quizQuestionAnswers: client.quizQuestionAnswers,
       timeAvailable: client.quiz.questions[client.currentQuestionIndex].time,
     });
+    if(client.quiz.questions[client.currentQuestionIndex].type === "jumble") {
+      client.jumbleSteps = shuffle(client.quiz.questions[client.currentQuestionIndex].choices.map((e,i) => {
+        return i;
+      }));
+    }
   }
 };

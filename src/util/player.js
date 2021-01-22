@@ -24,6 +24,9 @@ module.exports = class Player{
         previousStreakBonus: 0
       }
     };
+    if(client.options.gameMode !== "team" && !client.options.twoFactorAuth) {
+      this.active = true;
+    }
   }
   get recoveryData() {
     const data = JSON.parse(JSON.stringify(this.client.recoveryData));
