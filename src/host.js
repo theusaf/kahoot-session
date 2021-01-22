@@ -72,7 +72,7 @@ class Client extends EventEmitter {
       this.quizPlaylist[this.currentQuizIndex] = quizId;
       return this;
     }
-    const uuid = quizId.match(/[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}/i);
+    let uuid = quizId.match(/[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}/i);
     if(uuid === null) {
       throw {
         description: "Invalid UUID"
