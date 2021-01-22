@@ -31,6 +31,7 @@ class Client extends EventEmitter {
     this.twoFactorSteps = null;
     this.quiz = null;
     this.quizPlaylist = [];
+    this.startTime = null;
     this.state = "lobby";
     this.status = "ACTIVE";
   }
@@ -278,6 +279,7 @@ class Client extends EventEmitter {
   startGame() {
     this.emit("GameStart");
     this.state = "start";
+    this.startTime = Date.now();
     return modules.Start.call(this);
   }
 
@@ -324,6 +326,7 @@ class Client extends EventEmitter {
   sendRankings() {
     this.emit("Rankings");
     this.state = "podium";
+    return modules.SendRankings.call(this);
   }
 
   /**
@@ -334,6 +337,7 @@ class Client extends EventEmitter {
   endGame() {
     this.emit("GameEnd");
     this.state = "quizend";
+    return modules.EndGame.call(this);
   }
 
   /**

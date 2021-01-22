@@ -18,5 +18,7 @@ module.exports = {
   ReadyQuestion: require("./ReadyQuestion"),
   StartQuestion: require("./StartQuestion"),
   ResetTwoFactorAuth: require("./ResetTwoFactorAuth"),
-  RequestFeedback: require("./RequestFeedback")
+  RequestFeedback: require("./RequestFeedback"),
+  EndGame: require("./EndGame"),
+  SendRankings: require("./SendRankings")
 };

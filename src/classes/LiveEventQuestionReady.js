@@ -12,4 +12,4 @@ module.exports = class LiveEventQuestionReady {
       timeLeft: calculateReadTime(client.quiz.questions[client.currentQuestionIndex].question || client.quiz.questions[client.currentQuestionIndex].title)
     });
   }
-}
+};

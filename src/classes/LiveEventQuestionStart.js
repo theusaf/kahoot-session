@@ -8,7 +8,7 @@ module.exports = class LiveEventQuestionStart {
       gameBlockType: client.quiz.questions[client.currentQuestionIndex].type,
       gameBlockLayout: client.quiz.questions[client.currentQuestionIndex].layout,
       quizQuestionAnswers: client.quizQuestionAnswers,
-      timeAvailable: gameBlockType: client.quiz.questions[client.currentQuestionIndex].time,
+      timeAvailable: client.quiz.questions[client.currentQuestionIndex].time,
     });
   }
 };
