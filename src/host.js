@@ -72,12 +72,13 @@ class Client extends EventEmitter {
       this.quizPlaylist[this.currentQuizIndex] = quizId;
       return this;
     }
-    const uuid = /[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}/i.match(quizId);
+    const uuid = quizId.match(/[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}/i);
     if(uuid === null) {
       throw {
         description: "Invalid UUID"
       };
     }
+    uuid = uuid[0];
     try {
       const response = await got(`https://play.kahoot.it/rest/kahoots/${uuid}`),
         data = JSON.parse(response.body);
