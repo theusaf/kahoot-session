@@ -27,7 +27,7 @@ class Client extends EventEmitter {
     this.currentQuizIndex = 0;
     this.feedback = [];
     this.gameid = null;
-    this.getReadyTime  null;
+    this.getReadyTime = null;
     this.jumbleSteps = null;
     this.mainEventTimer = null;
     this.twoFactorSteps = null;
@@ -57,6 +57,9 @@ class Client extends EventEmitter {
    * @returns {Promise<Client>} The client.
    */
   async initialize(quizId) {
+    if(quizId === true) {
+      quizId = this.quizPlaylist[this.currentQuizIndex];
+    }
     if (typeof quizId === "object" && typeof quizId.push === "function") {
       // is array
       this.quizPlaylist = quizId;
@@ -65,6 +68,7 @@ class Client extends EventEmitter {
     if(typeof quizId === "object" && typeof quizId.questions === "object") {
       // is quiz object
       this.quiz = quizId;
+      this.quizPlaylist[this.currentQuizIndex] = quizId;
       return this;
     }
     const uuid = /[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}/i.match(quizId);
@@ -80,6 +84,7 @@ class Client extends EventEmitter {
         throw data.error;
       }
       this.quiz = data;
+      this.quizPlaylist[this.currentQuizIndex] = data;
     } catch(error) {
       throw {
         error,
@@ -242,6 +247,7 @@ class Client extends EventEmitter {
    * @returns {Promise} @see {Client.sendQuestionResults}
    */
   async timeOver() {
+    clearTimeout(this.mainEventTimer);
     this.emit("TimeOver");
     this.state = "timeover";
     this.recoveryData.state = 4;
@@ -270,6 +276,7 @@ class Client extends EventEmitter {
    * @returns {Promise<Boolean[]>} Whether the message was successfully sent
    */
   sendQuestionResults() {
+    this.clearTimeout(this.mainEventTimer);
     this.emit("QuestionResults");
     this.state = "questionend";
     this.recoveryData.state = 5;
@@ -288,6 +295,11 @@ class Client extends EventEmitter {
         hasAnswer: false
       }
     };
+    if(this.options.autoPlay) {
+      this.mainEventTimer = setTimeout(() => {
+        this.next();
+      }, 5e3);
+    }
     return modules.SendQuestionResults.call(this);
   }
 
@@ -330,6 +342,9 @@ class Client extends EventEmitter {
       quizQuestionAnswers: this.quizQuestionAnswers
     };
     this.recoveryData.state = 1;
+    this.mainEventTimer = setTimeout(() => {
+      this.readyQuestion();
+    }, 5e3);
     return modules.Start.call(this);
   }
 
@@ -339,7 +354,8 @@ class Client extends EventEmitter {
    * @returns {Promise} Resolves when question is started.
    */
   async startQuestion() {
-    this.emit("QuestionStart");
+    clearTimeout(this.mainEventTimer);
+    this.emit("QuestionStart",this.quiz.questions[this.currentQuestionIndex]);
     await modules.StartQuestion.call(this);
     this.questionStartTime = Date.now();
     this.state = "question";
@@ -351,6 +367,9 @@ class Client extends EventEmitter {
       quizQuestionAnswers: this.quizQuestionAnswers,
       timeAvailable: this.quiz.questions[this.currentQuestionIndex].time
     };
+    this.mainEventTimer = setTimeout(() => {
+      this.timeOver();
+    }, this.recoveryData.data.timeAvailable);
   }
 
   /**
@@ -359,7 +378,8 @@ class Client extends EventEmitter {
    * @returns {Promise<Boolean>} Whether successful or not
    */
   readyQuestion() {
-    this.emit("QuestionReady");
+    clearTimeout(this.mainEventTimer);
+    this.emit("QuestionReady",this.quiz.questions[this.currentQuestionIndex]);
     this.state = "getready";
     this.recoveryData.state = 2;
     this.recoveryData.data = {
@@ -372,6 +392,21 @@ class Client extends EventEmitter {
       }
     };
     this.getReadyTime = Date.now();
+    if(this.quiz.questions[this.currentQuestionIndex].type !== "content"){
+      this.mainEventTimer = setTimeout(() => {
+        if(this.options.gameMode === "team") {
+          this.startTeamTalk();
+        } else {
+          this.startQuestion();
+        }
+      }, this.recoveryData.data.getReady.timeLeft);
+    } else {
+      if(this.options.autoPlay) {
+        this.mainEventTimer = setTimeout(() => {
+          this.next();
+        }, 20e3);
+      }
+    }
     return modules.ReadyQuestion.call(this);
   }
 
@@ -381,8 +416,12 @@ class Client extends EventEmitter {
    * @returns {Promise<Boolean>} Whether successful or not
    */
   startTeamTalk() {
+    clearTimeout(this.mainEventTimer);
     this.emit("TeamTalk");
     this.state = "teamtalk";
+    this.mainEventTimer = setTimeout(() => {
+      this.startQuestion();
+    }, 5e3);
     return modules.StartTeamTalk.call(this);
   }
 
@@ -393,6 +432,7 @@ class Client extends EventEmitter {
    * @returns {Promise<Boolean>} Resolves if successful, rejects if not
    */
   sendRankings() {
+    clearTimeout(this.mainEventTimer);
     this.emit("Rankings");
     this.state = "podium";
     return modules.SendRankings.call(this);
@@ -404,10 +444,16 @@ class Client extends EventEmitter {
    * @returns {Promise<Boolean>} Resolves if successful, rejects if not
    */
   endGame() {
+    clearTimeout(this.mainEventTimer);
     this.emit("GameEnd");
     this.state = "quizend";
     this.recoveryData.state = 6;
     this.recoveryData.data = {};
+    if(this.options.autoPlay) {
+      this.mainEventTimer = setTimeout(() => {
+        this.next();
+      }, 15e3);
+    }
     return modules.EndGame.call(this);
   }
 
@@ -417,6 +463,7 @@ class Client extends EventEmitter {
    * @returns {Promise<Boolean>} Whether the request was successful or not
    */
   requestFeedback(){
+    clearTimeout(this.mainEventTimer);
     this.emit("FeedbackRequested");
     this.recoveryData.state = 7;
     this.recoveryData.data = {};
@@ -451,21 +498,51 @@ class Client extends EventEmitter {
    *
    * @returns {Promise<Boolean>} Resolves whether successful or not
    */
-  resetGame() {
+  async resetGame() {
+    clearTimeout(this.mainEventTimer);
     this.emit("GameReset");
     this.state = "lobby";
+    this.currentQuestionIndex = 0;
+    this.currentQuizIndex++;
+    if(this.currentQuizIndex >= this.quizPlaylist.length) {
+      this.currentQuizIndex = 0;
+    }
+    try {
+      await this.initialize(true);
+    } catch(error) {
+      this.emit("error", {
+        error,
+        description: "An error ocurred while reinintializing the game"
+      });
+      return;
+    }
     return modules.ResetGame.call(this);
   }
 
   /**
-   * replayGame - Plays the game again
+   * async replayGame - Plays the game again
    *
    * @returns {Promise<Boolean>} Whether the replay message was successful
    */
-  replayGame() {
+  async replayGame() {
+    clearTimeout(this.mainEventTimer);
     this.emit("GameReset");
     this.state = "lobby";
-    return modules.ReplayGame.call(this);
+    this.currentQuestionIndex = 0;
+    this.currentQuizIndex++;
+    if(this.currentQuizIndex >= this.quizPlaylist.length) {
+      this.currentQuizIndex = 0;
+    }
+    try {
+      await this.initialize(true);
+    } catch(error) {
+      this.emit("error", {
+        error,
+        description: "An error ocurred while reinintializing the game"
+      });
+      return;
+    }
+    return await modules.ReplayGame.call(this);
   }
 
   /**
@@ -492,6 +569,16 @@ class Client extends EventEmitter {
    */
   getPlayer(cid) {
     return this.controllers[cid] || {};
+  }
+
+  /**
+   * next - Manages transitions between certain events
+   *
+   * @returns {Promise<Boolean>} Successful or not
+   */
+  next() {
+    clearTimeout(this.mainEventTimer);
+    
   }
 }
 

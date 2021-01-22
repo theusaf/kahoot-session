@@ -26,7 +26,7 @@ module.exports = class Player{
     };
   }
   get recoveryData() {
-    const data = JSON.parse(JSON.stringify(this.client.recoveryData)));
+    const data = JSON.parse(JSON.stringify(this.client.recoveryData));
     switch(data.state) {
       case 2: {
         data.data.getReady.timeLeft = Math.ceil(data.data.getReady.timeLeft - (Date.now() - this.client.getReadyTime));

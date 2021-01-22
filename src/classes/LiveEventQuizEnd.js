@@ -23,4 +23,4 @@ module.exports = class LiveEventQuizEnd {
       isOnlyNonPointGameBlockKahoot: false
     });
   }
-}
+};
