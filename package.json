@@ -1,6 +1,6 @@
 {
   "name": "kahoot-session",
-  "version": "2.0.0-pre2",
+  "version": "2.0.0-pre3",
   "description": "Host a Kahoot! game using NodeJS.",
   "main": "index.js",
   "scripts": {
