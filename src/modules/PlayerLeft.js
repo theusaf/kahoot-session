@@ -1,5 +1,4 @@
 module.exports = function PlayerLeft(data) {
-  this.emit("PlayerLeft", data);
   const {cid} = data;
   if(this.controllers[cid]) {
     this.controllers[cid].hasLeft = true;
@@ -10,4 +9,5 @@ module.exports = function PlayerLeft(data) {
       }, 15e3);
     }
   }
+  this.emit("PlayerLeft", data);
 };

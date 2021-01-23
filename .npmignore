@@ -1,3 +1,7 @@
 /tests
 /node_modules
 .DS_Store
+.eslintignore
+.editorconfig
+.travis.yml
+**/.DS_Store

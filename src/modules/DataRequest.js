@@ -6,6 +6,6 @@ const LiveEventBackup = require("../classes/LiveEventBackup");
  * @param  {Object} data The data from the server (https://kahoot.js.org/enum/LiveDataRequest)
  */
 module.exports = function DataRequest(data) {
-  this.emit("RecoveryDataRequested", data);
   this.send("/service/player", new LiveEventBackup(data, this));
+  this.emit("RecoveryDataRequested", data);
 };

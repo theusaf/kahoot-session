@@ -1,7 +1,6 @@
 const Player = require("../util/player"),
   LiveEventNameAccept = require("../classes/LiveEventNameAccept");
 module.exports = function PlayerJoined(data) {
-  this.emit("PlayerJoined", data);
   const {cid} = data;
   if(this.controllers[cid]) {
     if(this.controllers[cid].hasLeft) {
@@ -17,4 +16,5 @@ module.exports = function PlayerJoined(data) {
     }, 15e3);
   }
   this.send("/service/player", new LiveEventNameAccept(data, this));
+  this.emit("PlayerJoined", data);
 };

@@ -1,5 +1,4 @@
 module.exports = function FeedbackSent(data) {
-  this.emit("FeedbackReceived", data);
   try {
     const content = JSON.parse(data);
     content.cid = data.cid;
@@ -10,4 +9,5 @@ module.exports = function FeedbackSent(data) {
       description: "Unknown error occured at FeedbackSent"
     });
   }
+  this.emit("FeedbackReceived", data);
 };

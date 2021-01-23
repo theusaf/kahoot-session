@@ -32,7 +32,7 @@ class Client extends EventEmitter {
     this.getReadyTime = null;
     this.jumbleSteps = null;
     this.mainEventTimer = null;
-    this.twoFactorSteps = null;
+    this.twoFactorSteps = shuffle([0,1,2,3]);
     this.quiz = null;
     this.quizPlaylist = [];
     this.recoveryData = {};
@@ -343,6 +343,7 @@ class Client extends EventEmitter {
    * async closeGame - Closes the game, disconnects from Kahoot
    */
   async closeGame() {
+    clearTimeout(this.mainEventTimer);
     await this.send("/service/player", new LiveEventDisconnect(this));
     this.cometd.disconnect();
     this.emit("Disconnect");
@@ -384,10 +385,12 @@ class Client extends EventEmitter {
       gameBlockType: this.quiz.questions[this.currentQuestionIndex].type,
       gameBlockLayout: this.quiz.questions[this.currentQuestionIndex].layout,
       quizQuestionAnswers: this.quizQuestionAnswers,
-      timeAvailable: this.quiz.questions[this.currentQuestionIndex].time
+      timeAvailable: this.quiz.questions[this.currentQuestionIndex].time,
+      timeLeft: this.quiz.questions[this.currentQuestionIndex].time,
+      numberOfAnswersAllowed: 1
     };
     this.mainEventTimer = setTimeout(() => {
-      this.timeOver();
+      this.next();
     }, this.recoveryData.data.timeAvailable);
     this.emit("QuestionStart",this.quiz.questions[this.currentQuestionIndex]);
   }

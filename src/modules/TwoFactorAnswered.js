@@ -1,7 +1,6 @@
 const LiveEventTwoFactorRight = require("../classes/LiveEventTwoFactorRight"),
   LiveEventTwoFactorWrong = require("../classes/LiveEventTwoFactorWrong");
 module.exports = function TwoFactorAnswered(data) {
-  this.emit("TwoFactorAnswered", data);
   const {cid,content} = data;
   try {
     const player = this.controllers[cid],
@@ -18,4 +17,5 @@ module.exports = function TwoFactorAnswered(data) {
       description: "Unknown error while handling TwoFactorAnswered"
     });
   }
+  this.emit("TwoFactorAnswered", data);
 };

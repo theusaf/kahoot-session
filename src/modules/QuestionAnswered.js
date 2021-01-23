@@ -1,5 +1,4 @@
 module.exports = function QuestionAnswered(data) {
-  this.emit("QuestionAnswered", data);
   try {
     const {cid, content} = data,
       quiz = this.quiz,
@@ -17,6 +16,10 @@ module.exports = function QuestionAnswered(data) {
     }
     if(player.answer !== null){
       // already answered
+      return;
+    }
+    if(!player.active){
+      // cannot partake yet
       return;
     }
     answerData.correctChoices = [];
@@ -81,5 +84,6 @@ module.exports = function QuestionAnswered(data) {
       description: "Unknown error while handling QuestionAnswered"
     });
   }
+  this.emit("QuestionAnswered", data);
   this.checkAllAnswered();
 };

@@ -1,5 +1,6 @@
 const tests = [
-  require("./basic")
+  require("./basic"),
+  require("./teamMode")
 ];
 
 (async () => {
