@@ -1,5 +1,12 @@
 const shuffle = require("../util/shuffle");
+// The question start message
 module.exports = class LiveEventQuestionStart {
+
+  /**
+   * constructor
+   *
+   * @param  {Client} client The client
+   */
   constructor(client) {
     this.gameid = client.gameid;
     this.id = 2;

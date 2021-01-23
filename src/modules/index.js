@@ -1,3 +1,6 @@
+/**
+ * @fileinfo Puts all modules into a single export objcet
+ */
 module.exports = {
   DataRequest: require("./DataRequest"),
   FeedbackSent: require("./FeedbackSent"),

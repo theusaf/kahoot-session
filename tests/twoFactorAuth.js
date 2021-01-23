@@ -1,3 +1,6 @@
+/**
+ * @fileinfo Checks whether the Two Factor Authentification works as expected 
+ */
 const {Client:Host} = require("../index"),
   Client = require("kahoot.js-updated"),
   sleep = require("../src/util/sleep");

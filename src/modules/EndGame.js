@@ -1,4 +1,10 @@
 const LiveEventQuizEnd = require("../classes/LiveEventQuizEnd");
+
+/**
+ * EndGame - Sends the message to end the quiz
+ *
+ * @returns {Promise<Boolean>} Whether the message was sent successfully
+ */
 module.exports = function EndGame() {
   const pack = [];
   for(const i in this.controllers) {

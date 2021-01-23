@@ -1,4 +1,10 @@
 const LiveEventPodium = require("../classes/LiveEventPodium");
+
+/**
+ * SendRankings - Sends the final podium info to the players
+ *
+ * @returns {Boolean} Whether the message was sent successfully
+ */
 module.exports = function SendRankings() {
   const pack = [];
   for(const i in this.controllers) {

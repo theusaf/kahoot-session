@@ -1,3 +1,13 @@
+/**
+ * getPoints - Returns an amount of points and updates various point-related data for players
+ *
+ * @param  {String} type The type of the question
+ * @param  {Question} question The question
+ * @param  {Number|String|Number[]} choice The choice of the player
+ * @param  {Client} client The client
+ * @param  {Object} answer The player's answer
+ * @returns {Number} The points earned for the question
+ */
 module.exports = function getPoints(type, question, choice, client, answer) {
   const {pointsData} = answer,
     {answerStreakPoints} = pointsData,

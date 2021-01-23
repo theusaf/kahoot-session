@@ -60,7 +60,9 @@ class Client extends EventEmitter {
    * @returns {Promise<Client>} The client.
    */
   async initialize(quizId) {
+    let restart;
     if(quizId === true) {
+      restart = true;
       quizId = this.quizPlaylist[this.currentQuizIndex];
     }
     if (typeof quizId === "object" && typeof quizId.push === "function") {
@@ -94,6 +96,25 @@ class Client extends EventEmitter {
         error,
         description: "Failed to fetch quiz."
       };
+    }
+    if(restart) {
+      this.recoveryData = {
+        data: {},
+        defaultQuizData: {
+          quizType: "quiz",
+          quizQuestionAnswers: this.quizQuestionAnswers,
+          didControllerLeave: false,
+          wasControllerKicked: false
+        },
+        state: 0
+      };
+      if(Object.keys(this.controllers).length > 0 && this.options.autoPlay) {
+        this.mainEventTimer = setTimeout(() => {
+          this.next().catch((error) => {
+            this.emit("error", error);
+          });
+        }, 15e3);
+      }
     }
     return this;
   }
@@ -142,11 +163,6 @@ class Client extends EventEmitter {
         },
         state: 0
       };
-      if(Object.keys(this.controllers) > 0 && this.options.autoPlay) {
-        this.mainEventTimer = setTimeout(() => {
-          this.startGame();
-        }, 15e3);
-      }
       if(this.twoFactorInterval === null && this.options.twoFactorAuth) {
         this.twoFactorInterval = setInterval(() => {
           this.resetTwoFactorAuth();
@@ -320,7 +336,9 @@ class Client extends EventEmitter {
     };
     if(this.options.autoPlay) {
       this.mainEventTimer = setTimeout(() => {
-        this.next();
+        this.next().catch((error) => {
+          this.emit("error", error);
+        });
       }, 5e3);
     }
     this.emit("QuestionResults");
@@ -370,7 +388,9 @@ class Client extends EventEmitter {
     };
     this.recoveryData.state = 1;
     this.mainEventTimer = setTimeout(() => {
-      this.next();
+      this.next().catch((error) => {
+        this.emit("error", error);
+      });
     }, 5e3);
     this.emit("GameStart");
     return modules.Start.call(this);
@@ -397,7 +417,9 @@ class Client extends EventEmitter {
       numberOfAnswersAllowed: 1
     };
     this.mainEventTimer = setTimeout(() => {
-      this.next();
+      this.next().catch((error) => {
+        this.emit("error", error);
+      });
     }, this.recoveryData.data.timeAvailable);
     this.emit("QuestionStart",this.quiz.questions[this.currentQuestionIndex]);
   }
@@ -423,12 +445,16 @@ class Client extends EventEmitter {
     this.getReadyTime = Date.now();
     if(this.quiz.questions[this.currentQuestionIndex].type !== "content"){
       this.mainEventTimer = setTimeout(() => {
-        this.next();
+        this.next().catch((error) => {
+          this.emit("error", error);
+        });
       }, this.recoveryData.data.getReady.timeLeft * 1e3);
     } else {
       if(this.options.autoPlay) {
         this.mainEventTimer = setTimeout(() => {
-          this.next();
+          this.next().catch((error) => {
+            this.emit("error", error);
+          });
         }, 20e3);
       }
     }
@@ -445,7 +471,9 @@ class Client extends EventEmitter {
     clearTimeout(this.mainEventTimer);
     this.state = "teamtalk";
     this.mainEventTimer = setTimeout(() => {
-      this.next();
+      this.next().catch((error) => {
+        this.emit("error", error);
+      });
     }, 5e3);
     this.emit("TeamTalk");
     return modules.StartTeamTalk.call(this);
@@ -477,7 +505,9 @@ class Client extends EventEmitter {
     this.recoveryData.data = {};
     if(this.options.autoPlay) {
       this.mainEventTimer = setTimeout(() => {
-        this.next();
+        this.next().catch((error) => {
+          this.emit("error", error);
+        });
       }, 15e3);
     }
     this.emit("GameEnd");
@@ -528,7 +558,6 @@ class Client extends EventEmitter {
    */
   async resetGame() {
     clearTimeout(this.mainEventTimer);
-    this.emit("GameReset");
     this.state = "lobby";
     this.currentQuestionIndex = 0;
     this.currentQuizIndex++;
@@ -544,6 +573,7 @@ class Client extends EventEmitter {
       });
       return;
     }
+    this.emit("GameReset");
     return modules.ResetGame.call(this);
   }
 
@@ -554,7 +584,6 @@ class Client extends EventEmitter {
    */
   async replayGame() {
     clearTimeout(this.mainEventTimer);
-    this.emit("GameReset");
     this.state = "lobby";
     this.currentQuestionIndex = 0;
     this.currentQuizIndex++;
@@ -570,6 +599,7 @@ class Client extends EventEmitter {
       });
       return;
     }
+    this.emit("GameReset");
     return await modules.ReplayGame.call(this);
   }
 
@@ -647,7 +677,7 @@ class Client extends EventEmitter {
       case "podium": {
         return this.endGame();
       }
-      case "endGame": {
+      case "quizend": {
         if(this.options.rejoinOnReset) {
           return this.resetGame();
         } else {

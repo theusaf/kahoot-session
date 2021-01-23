@@ -1,7 +1,8 @@
 const tests = [
   require("./basic"),
   require("./teamMode"),
-  require("./twoFactorAuth")
+  require("./twoFactorAuth"),
+  require("./multiple")
 ];
 
 (async () => {

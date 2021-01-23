@@ -1,6 +1,6 @@
 {
   "name": "kahoot-session",
-  "version": "2.0.0-pre3",
+  "version": "2.0.0",
   "description": "Host a Kahoot! game using NodeJS.",
   "main": "index.js",
   "scripts": {
@@ -13,7 +13,13 @@
     "cometd-nodejs-client": "^1.3.0",
     "got": "^11.8.1"
   },
+  "engines": {
+    "node": ">=10.9.0"
+  },
   "homepage": "https://github.com/theusaf/kahoot-session",
+  "bugs": {
+    "url": "https://github.com/theusaf/kahoot-session/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/theusaf/kahoot-session.git"

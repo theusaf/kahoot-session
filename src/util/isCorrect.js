@@ -1,3 +1,12 @@
+/**
+ * isCorrect - Calculates whether the player's answer was correct or not
+ *
+ * @param  {String} type The question type
+ * @param  {Object[]} choices The question choices
+ * @param  {Number|String|Number[]} choice The player's choice
+ * @param  {Client} client The client
+ * @returns {Boolean} Whether correct or not
+ */
 module.exports = function isCorrect(type, choices, choice, client){
   switch(type) {
     case "survey":

@@ -1,3 +1,8 @@
+/**
+ * QuestionAnswered - Handles answers from players
+ *
+ * @param  {Object} data The answer data {@link https://kahoot.js.org/enum/LiveQuestionAnswered}
+ */
 module.exports = function QuestionAnswered(data) {
   try {
     const {cid, content} = data,

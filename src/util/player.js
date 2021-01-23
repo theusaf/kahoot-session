@@ -1,4 +1,12 @@
+// A player
 module.exports = class Player{
+
+  /**
+   * constructor - Player constructor
+   *
+   * @param  {Object} data The player join data {@link https://kahoot.js.org/enum/LiveEventPlayerJoined}
+   * @param  {Client} client The client
+   */
   constructor(data, client) {
     this.client = client;
     this.name = data.name;

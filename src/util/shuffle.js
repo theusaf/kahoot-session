@@ -1,3 +1,9 @@
+/**
+ * shuffle - Shuffles an array
+ *
+ * @param  {Array} array The array to shuffle
+ * @returns {Array} The shuffled array
+ */
 module.exports = function shuffle(array) {
   let currentIndex = array.length, temporaryValue, randomIndex;
   // While there remain elements to shuffle...

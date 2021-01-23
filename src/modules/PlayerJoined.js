@@ -1,5 +1,11 @@
 const Player = require("../util/player"),
   LiveEventNameAccept = require("../classes/LiveEventNameAccept");
+
+/**
+ * PlayerJoined - Handles players joining
+ *
+ * @param {Object} data The information about the player {@link https://kahoot.js.org/enum/LiveEventPlayerJoined}
+ */
 module.exports = function PlayerJoined(data) {
   const {cid} = data;
   if(this.controllers[cid]) {

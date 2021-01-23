@@ -1,3 +1,6 @@
+/**
+ * @fileinfo Checks whether Team Mode works as expected
+ */
 const {Client:Host} = require("../index"),
   Client = require("kahoot.js-updated");
 module.exports = function teamModeTest() {

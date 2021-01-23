@@ -1,5 +1,12 @@
 const calculateReadTime = require("../util/calculateReadTime");
+// The question ready message
 module.exports = class LiveEventQuestionReady {
+
+  /**
+   * constructor
+   *
+   * @param  {Client} client The client
+   */
   constructor(client) {
     this.gameid = client.gameid;
     this.id = 1;

@@ -1,5 +1,11 @@
 const LiveEventTwoFactorRight = require("../classes/LiveEventTwoFactorRight"),
   LiveEventTwoFactorWrong = require("../classes/LiveEventTwoFactorWrong");
+
+/**
+ * TwoFactorAnswered - Handles two-factor answers
+ *
+ * @param  {Object} data The two-factor answer data. {@link https://kahoot.js.org/enum/LiveTwoStepAnswered}
+ */
 module.exports = function TwoFactorAnswered(data) {
   const {cid,content} = data;
   try {

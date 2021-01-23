@@ -1,8 +1,10 @@
-const clients = require("./src/host"),
-  quiz = require("./src/util/quiz"),
-  question = require("./src/util/question");
+const {Client, CustomClient} = require("./src/host"),
+  Quiz = require("./src/util/quiz"),
+  Question = require("./src/util/question");
 
-clients.Quiz = quiz;
-clients.Question = question;
-
-module.exports = clients;
+module.exports = {
+  Client,
+  CustomClient,
+  Quiz,
+  Question
+};

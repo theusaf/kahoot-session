@@ -1,4 +1,10 @@
 const LiveEventTeamAccept = require("../classes/LiveEventTeamAccept");
+
+/**
+ * TeamSent - Handles team members being sent
+ *
+ * @param  {Object} data The team info {@link https://kahoot.js.org/enum/LiveJoinedTeamPacket}
+ */
 module.exports = function TeamSent(data) {
   try {
     const {cid,content} = data;

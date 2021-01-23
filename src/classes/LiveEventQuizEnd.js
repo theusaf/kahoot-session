@@ -1,4 +1,12 @@
+// The quiz end message
 module.exports = class LiveEventQuizEnd {
+
+  /**
+   * constructor
+   *
+   * @param  {Player} player The player
+   * @param  {Client} client The client
+   */
   constructor(player, client) {
     this.gameid = client.gameid;
     this.host = "play.kahoot.it";

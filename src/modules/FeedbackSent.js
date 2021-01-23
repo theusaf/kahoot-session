@@ -1,3 +1,8 @@
+/**
+ * FeedbackSent - Handles feedback
+ *
+ * @param {Object} data The feedback data. {@see https://kahoot.js.org/enum/LiveFeedbackPacketContent}
+ */
 module.exports = function FeedbackSent(data) {
   try {
     const content = JSON.parse(data);
