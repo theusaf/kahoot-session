@@ -6,12 +6,14 @@ const tests = [
 ];
 
 (async () => {
+  const testPromises = [];
   for(const test of tests) {
-    try {
-      await test();
-    } catch(error) {
-      console.error(error);
-      process.exit(1);
-    }
+    testPromises.push(test());
+  }
+  try {
+    await Promise.all(testPromises);
+  } catch(error) {
+    console.error(error);
+    process.exit(1);
   }
 })();
