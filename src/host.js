@@ -388,16 +388,19 @@ class Client extends EventEmitter {
    */
   send(channel, message, shouldReject) {
     if(this.cometd.isDisconnected()) {
-      setTimeout(() => {
-        if(this.cometd.isDisconnected()) {
-          this.emit("Disconnect");
-          clearTimeout(this.mainEventTimer);
-          clearInterval(this.twoFactorInterval);
-          this.cometd.disconnect();
-        } else {
-          this.send.apply(this, arguments);
-        }
-      }, 10e3);
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          if(this.cometd.isDisconnected()) {
+            this.emit("Disconnect");
+            clearTimeout(this.mainEventTimer);
+            clearInterval(this.twoFactorInterval);
+            this.cometd.disconnect();
+          } else {
+            this.send.apply(this, arguments);
+          }
+          resolve();
+        }, 10e3);
+      });
       return;
     }
     if(typeof channel === "object" && typeof channel.push === "function") {
