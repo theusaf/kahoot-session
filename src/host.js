@@ -32,6 +32,7 @@ class Client extends EventEmitter {
     this.getReadyTime = null;
     this.jumbleSteps = null;
     this.mainEventTimer = null;
+    this.twoFactorInterval = null;
     this.twoFactorSteps = shuffle([0,1,2,3]);
     this.quiz = null;
     this.quizPlaylist = [];
@@ -145,6 +146,11 @@ class Client extends EventEmitter {
         this.mainEventTimer = setTimeout(() => {
           this.startGame();
         }, 15e3);
+      }
+      if(this.twoFactorInterval === null && this.options.twoFactorAuth) {
+        this.twoFactorInterval = setInterval(() => {
+          this.resetTwoFactorAuth();
+        }, this.options.twoFactorInterval || 7e3);
       }
       return this.gameid;
     } catch(error) {
@@ -344,6 +350,7 @@ class Client extends EventEmitter {
    */
   async closeGame() {
     clearTimeout(this.mainEventTimer);
+    clearInterval(this.twoFactorInterval);
     await this.send("/service/player", new LiveEventDisconnect(this));
     this.cometd.disconnect();
     this.emit("Disconnect");
