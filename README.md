@@ -1,5 +1,5 @@
 # Kahoot-Session
-Documentation can be found at [theusaf.github.io/Kahoot-Session](https://theusaf.github.io/Kahoot-Session)
+Documentation can be found at [theusaf.github.io/kahoot-session](https://theusaf.github.io/kahoot-kession)
 
 ![Dependencies](https://david-dm.org/theusaf/kahoot-session.svg) [![Known Vulnerabilities](https://snyk.io/test/github/theusaf/kahoot-session/badge.svg)](https://snyk.io/test/github/theusaf/kahoot-session) ![Builds](https://travis-ci.com/theusaf/kahoot-session.svg?branch=master) ![Docs](https://inch-ci.org/github/theusaf/kahoot-session?branch=master)
 
