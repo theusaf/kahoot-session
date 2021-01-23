@@ -387,6 +387,19 @@ class Client extends EventEmitter {
    * @returns {Promise<Boolean>} Whether the message was successful
    */
   send(channel, message, shouldReject) {
+    if(this.cometd.isDisconnected()) {
+      setTimeout(() => {
+        if(this.cometd.isDisconnected()) {
+          this.emit("Disconnect");
+          clearTimeout(this.mainEventTimer);
+          clearInterval(this.twoFactorInterval);
+          this.cometd.disconnect();
+        } else {
+          this.send.apply(this, arguments);
+        }
+      }, 10e3);
+      return;
+    }
     if(typeof channel === "object" && typeof channel.push === "function") {
       // An array
       const promises = [];
@@ -461,7 +474,7 @@ class Client extends EventEmitter {
     /**
      * Emitted when the time is up
      *
-     * @event TimeOver    
+     * @event TimeOver
      */
     this.emit("TimeOver");
     return this.next();
