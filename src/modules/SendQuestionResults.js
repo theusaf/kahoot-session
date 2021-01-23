@@ -5,7 +5,7 @@ const LiveEventQuestionEnd = require("../classes/LiveEventQuestionEnd");
  *
  * @returns {Promise<Boolean>} Whether the message was successful
  */
-module.exports = function sendQuestionResults() {
+function SendQuestionResults() {
   const pack = [];
   for(const i in this.controllers) {
     if(!this.controllers[i].active) {
@@ -51,4 +51,5 @@ module.exports = function sendQuestionResults() {
     delete pack[i][1].tempContent;
   }
   return this.send(pack);
-};
+}
+module.exports = SendQuestionResults;

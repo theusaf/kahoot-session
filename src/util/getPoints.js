@@ -8,7 +8,7 @@
  * @param  {Object} answer The player's answer
  * @returns {Number} The points earned for the question
  */
-module.exports = function getPoints(type, question, choice, client, answer) {
+function getPoints(type, question, choice, client, answer) {
   const {pointsData} = answer,
     {answerStreakPoints} = pointsData,
     correct = answer.isCorrect;
@@ -86,4 +86,5 @@ module.exports = function getPoints(type, question, choice, client, answer) {
       }
     }
   }
-};
+}
+module.exports = getPoints;

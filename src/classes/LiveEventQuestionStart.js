@@ -1,6 +1,6 @@
 const shuffle = require("../util/shuffle");
 // The question start message
-module.exports = class LiveEventQuestionStart {
+class LiveEventQuestionStart {
 
   /**
    * constructor
@@ -8,9 +8,31 @@ module.exports = class LiveEventQuestionStart {
    * @param  {Client} client The client
    */
   constructor(client) {
+
+    /**
+     * The game id
+     *
+     * @name LiveEventQuestionStart#gameid
+     * @type String
+     */
     this.gameid = client.gameid;
+
+    /**
+     * The event id
+     *
+     * @name LiveEventQuestionStart#id
+     * @type Number
+     */
     this.id = 2;
     this.type = "message";
+
+    /**
+     * The content of the question start event
+     *
+     * @name LiveEventQuestionStart#content
+     * @type String
+     * @see {@link https://kahoot.js.org/enum/LiveEventQuestionStartContent}    
+     */
     this.content = JSON.stringify({
       questionIndex: client.currentQuestionIndex,
       gameBlockType: client.quiz.questions[client.currentQuestionIndex].type,
@@ -26,4 +48,5 @@ module.exports = class LiveEventQuestionStart {
       }));
     }
   }
-};
+}
+module.exports = LiveEventQuestionStart;

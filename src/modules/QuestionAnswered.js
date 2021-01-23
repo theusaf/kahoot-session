@@ -3,7 +3,7 @@
  *
  * @param  {Object} data The answer data {@link https://kahoot.js.org/enum/LiveQuestionAnswered}
  */
-module.exports = function QuestionAnswered(data) {
+function QuestionAnswered(data) {
   try {
     const {cid, content} = data,
       quiz = this.quiz,
@@ -89,6 +89,15 @@ module.exports = function QuestionAnswered(data) {
       description: "Unknown error while handling QuestionAnswered"
     });
   }
+
+  /**
+   * Emitted when a player answered a question
+   *
+   * @event QuestionAnswered
+   * @type Object
+   * @see  {@link https://kahoot.js.org/enum/LiveQuestionAnswered}
+   */
   this.emit("QuestionAnswered", data);
   this.checkAllAnswered();
-};
+}
+module.exports = QuestionAnswered;

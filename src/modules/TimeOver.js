@@ -5,6 +5,7 @@ const LiveEventTimeOver = require("../classes/LiveEventTimeOver");
  *
  * @returns {Promise<Boolean>} Whether the message was sent successfully
  */
-module.exports = function TimeOver() {
+function TimeOver() {
   return this.send("/service/player", new LiveEventTimeOver(this));
-};
+}
+module.exports = TimeOver;

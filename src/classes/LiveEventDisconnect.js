@@ -1,5 +1,5 @@
 // The disconnect message
-module.exports = class LiveEventDisconnect {
+class LiveEventDisconnect {
 
   /**
    * constructor
@@ -8,11 +8,39 @@ module.exports = class LiveEventDisconnect {
    * @param  {String} cid The cid of the player to kick
    */
   constructor(client, cid) {
+
+    /**
+     * The game id
+     *
+     * @name LiveEventDisconnect#gameid
+     * @type String
+     */
     this.gameid = client.gameid;
+
+    /**
+     * The event id
+     *
+     * @name LiveEventDisconnect#id
+     * @type Number
+     */
     this.id = 10;
     this.type = "message";
+
+    /**
+     * The host of the game
+     *
+     * @name LiveEventDisconnect#host
+     * @type String
+     */
     this.host = "play.kahoot.it";
     if(typeof cid === "string") {
+
+      /**
+       * The content of the message
+       *
+       * @name LiveEventDisconnect#content
+       * @type String      
+       */
       this.content = JSON.stringify({
         kickCode: 1
       });
@@ -21,4 +49,5 @@ module.exports = class LiveEventDisconnect {
       this.content = "{}";
     }
   }
-};
+}
+module.exports = LiveEventDisconnect;

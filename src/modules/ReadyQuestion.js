@@ -5,9 +5,10 @@ const LiveEventQuestionReady = require("../classes/LiveEventQuestionReady");
  *
  * @returns {Promise<Boolean>} Whether the message was sent successfully
  */
-module.exports = function ReadyQuestion() {
+function ReadyQuestion() {
   for(const i in this.controllers) {
     this.controllers[i].answer = null;
   }
   return this.send("/service/player", new LiveEventQuestionReady(this));
-};
+}
+module.exports = ReadyQuestion;

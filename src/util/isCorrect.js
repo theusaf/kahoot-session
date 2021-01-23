@@ -7,7 +7,7 @@
  * @param  {Client} client The client
  * @returns {Boolean} Whether correct or not
  */
-module.exports = function isCorrect(type, choices, choice, client){
+function isCorrect(type, choices, choice, client){
   switch(type) {
     case "survey":
     case "content":
@@ -58,4 +58,5 @@ module.exports = function isCorrect(type, choices, choice, client){
       }
     }
   }
-};
+}
+module.exports = isCorrect;

@@ -5,6 +5,7 @@ const LiveEventTwoFactorReset = require("../classes/LiveEventTwoFactorReset");
  *
  * @returns {Promise<Boolean>} Whether the notice was sent successfully
  */
-module.exports = function ResetTwoFactorAuth() {
+function ResetTwoFactorAuth() {
   return this.send("/service/player", new LiveEventTwoFactorReset(this));
-};
+}
+module.exports = ResetTwoFactorAuth;

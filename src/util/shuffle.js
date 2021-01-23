@@ -4,7 +4,7 @@
  * @param  {Array} array The array to shuffle
  * @returns {Array} The shuffled array
  */
-module.exports = function shuffle(array) {
+function shuffle(array) {
   let currentIndex = array.length, temporaryValue, randomIndex;
   // While there remain elements to shuffle...
   while (0 !== currentIndex) {
@@ -17,4 +17,5 @@ module.exports = function shuffle(array) {
     array[randomIndex] = temporaryValue;
   }
   return array;
-};
+}
+module.exports = shuffle;

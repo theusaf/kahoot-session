@@ -5,6 +5,7 @@ const LiveEventFeedbackRequest = require("../classes/LiveEventFeedbackRequest");
  *
  * @returns {Promise<Boolean>} Whether the request was successful
  */
-module.exports = function RequestFeedback() {
+function RequestFeedback() {
   return this.send("/service/player", new LiveEventFeedbackRequest(this));
-};
+}
+module.exports = RequestFeedback;

@@ -27,23 +27,51 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>// The time over message
-module.exports = class LiveEventTimeOver {
+class LiveEventTimeOver {
 
   /**
    * constructor
    *
-   * @param  {Client} client The Client 
+   * @param  {Client} client The Client
    */
   constructor(client) {
+
+    /**
+     * The game id
+     *
+     * @name LiveEventTimeOver#gameid
+     * @type String
+     */
     this.gameid = client.gameid;
+
+    /**
+     * The host of the game
+     * @name LiveEventTimeOver#host
+     * @type String
+     */
     this.host = "play.kahoot.it";
+
+    /**
+     * The event id
+     *
+     * @name LiveEventTimeOver#id
+     * @type Number
+     */
     this.id = 4;
     this.type = "message";
+
+    /**
+     * The content of the time over event
+     *
+     * @name LiveEventTimeOver#content
+     * @type String    
+     */
     this.content = JSON.stringify({
       questionNumber: client.currentQuizIndex
     });
   }
-};
+}
+module.exports = LiveEventTimeOver;
 </code></pre>
         </article>
     </section>
@@ -54,13 +82,13 @@ module.exports = class LiveEventTimeOver {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Client.html">Client</a></li><li><a href="CustomClient.html">CustomClient</a></li><li><a href="module.exports_module.exports.html">exports</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Client.html">Client</a></li><li><a href="CustomClient.html">CustomClient</a></li><li><a href="HostLockMessage.html">HostLockMessage</a></li><li><a href="HostSessionData.html">HostSessionData</a></li><li><a href="HostStartedData.html">HostStartedData</a></li><li><a href="HostUnlockMessage.html">HostUnlockMessage</a></li><li><a href="LiveEventBackup.html">LiveEventBackup</a></li><li><a href="LiveEventDisconnect.html">LiveEventDisconnect</a></li><li><a href="LiveEventFeedbackRequest.html">LiveEventFeedbackRequest</a></li><li><a href="LiveEventNameAccept.html">LiveEventNameAccept</a></li><li><a href="LiveEventPodium.html">LiveEventPodium</a></li><li><a href="LiveEventQuestionEnd.html">LiveEventQuestionEnd</a></li><li><a href="LiveEventQuestionReady.html">LiveEventQuestionReady</a></li><li><a href="LiveEventQuestionStart.html">LiveEventQuestionStart</a></li><li><a href="global.html#LiveEventQuizEnd">LiveEventQuizEnd</a></li><li><a href="LiveEventReplay.html">LiveEventReplay</a></li><li><a href="LiveEventStartQuiz.html">LiveEventStartQuiz</a></li><li><a href="LiveEventTeamAccept.html">LiveEventTeamAccept</a></li><li><a href="LiveEventTeamTalk.html">LiveEventTeamTalk</a></li><li><a href="LiveEventTimeOver.html">LiveEventTimeOver</a></li><li><a href="LiveEventTwoFactorReset.html">LiveEventTwoFactorReset</a></li><li><a href="LiveEventTwoFactorRight.html">LiveEventTwoFactorRight</a></li><li><a href="LiveEventTwoFactorWrong.html">LiveEventTwoFactorWrong</a></li><li><a href="Player.html">Player</a></li></ul><h3>Events</h3><ul><li><a href="global.html#event:Disconnect">Disconnect</a></li><li><a href="global.html#event:FeedbackReceived">FeedbackReceived</a></li><li><a href="global.html#event:FeedbackRequested">FeedbackRequested</a></li><li><a href="global.html#event:GameEnd">GameEnd</a></li><li><a href="global.html#event:GameReset">GameReset</a></li><li><a href="global.html#event:GameStart">GameStart</a></li><li><a href="global.html#event:PlayerJoined">PlayerJoined</a></li><li><a href="global.html#event:PlayerLeft">PlayerLeft</a></li><li><a href="global.html#event:QuestionAnswered">QuestionAnswered</a></li><li><a href="global.html#event:QuestionReady">QuestionReady</a></li><li><a href="global.html#event:QuestionResults">QuestionResults</a></li><li><a href="global.html#event:QuestionStart">QuestionStart</a></li><li><a href="global.html#event:Rankings">Rankings</a></li><li><a href="global.html#event:RecoveryDataRequested">RecoveryDataRequested</a></li><li><a href="global.html#event:TeamReceived">TeamReceived</a></li><li><a href="global.html#event:TimeOver">TimeOver</a></li><li><a href="global.html#event:TwoFactorAnswered">TwoFactorAnswered</a></li><li><a href="global.html#event:TwoFactorAuthReset">TwoFactorAuthReset</a></li></ul><h3>Global</h3><ul><li><a href="global.html#calculateReadTime">calculateReadTime</a></li><li><a href="global.html#DataRequest">DataRequest</a></li><li><a href="global.html#EndGame">EndGame</a></li><li><a href="global.html#FeedbackSent">FeedbackSent</a></li><li><a href="global.html#getPoints">getPoints</a></li><li><a href="global.html#isCorrect">isCorrect</a></li><li><a href="global.html#KickPlayer">KickPlayer</a></li><li><a href="global.html#Lock">Lock</a></li><li><a href="global.html#PlayerJoined">PlayerJoined</a></li><li><a href="global.html#PlayerLeft">PlayerLeft</a></li><li><a href="global.html#QuestionAnswered">QuestionAnswered</a></li><li><a href="global.html#ReadyQuestion">ReadyQuestion</a></li><li><a href="global.html#ReplayGame">ReplayGame</a></li><li><a href="global.html#RequestFeedback">RequestFeedback</a></li><li><a href="global.html#ResetGame">ResetGame</a></li><li><a href="global.html#ResetTwoFactorAuth">ResetTwoFactorAuth</a></li><li><a href="global.html#SendQuestionResults">SendQuestionResults</a></li><li><a href="global.html#SendRankings">SendRankings</a></li><li><a href="global.html#shuffle">shuffle</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Start">Start</a></li><li><a href="global.html#StartQuestion">StartQuestion</a></li><li><a href="global.html#StartTeamTalk">StartTeamTalk</a></li><li><a href="global.html#TeamSent">TeamSent</a></li><li><a href="global.html#TimeOver">TimeOver</a></li><li><a href="global.html#TwoFactorAnswered">TwoFactorAnswered</a></li><li><a href="global.html#Unlock">Unlock</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Fri Jan 22 2021 21:22:01 GMT-0800 (Pacific Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Sat Jan 23 2021 13:22:26 GMT-0800 (Pacific Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

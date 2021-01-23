@@ -1,5 +1,5 @@
 // The quiz end message
-module.exports = class LiveEventQuizEnd {
+class LiveEventQuizEnd {
 
   /**
    * constructor
@@ -8,11 +8,47 @@ module.exports = class LiveEventQuizEnd {
    * @param  {Client} client The client
    */
   constructor(player, client) {
+
+    /**
+     * The game id
+     *
+     * @name LiveEventQuizEnd
+     * @type String
+     */
     this.gameid = client.gameid;
+
+    /**
+     * The host of the game
+     *
+     * @name LiveEventQuizEnd#host
+     * @type String
+     */
     this.host = "play.kahoot.it";
+
+    /**
+     * The event id
+     *
+     * @name LiveEventQuizEnd#id
+     * @type Number
+     */
     this.id = 3;
     this.type = "message";
+
+    /**
+     * The id of the player to send the final results to
+     *
+     * @name LiveEventQuizEnd#cid
+     * @type String
+     */
     this.cid = player.cid;
+
+    /**
+     * The content of the quiz end data
+     *
+     * @name LiveEventQuizEnd#content
+     * @type String
+     * @see {@link https://kahoot.js.org/enum/LiveEventQuizEndContent}    
+     */
     this.content = JSON.stringify({
       rank: player.rank,
       cid: player.cid,
@@ -31,4 +67,5 @@ module.exports = class LiveEventQuizEnd {
       isOnlyNonPointGameBlockKahoot: false
     });
   }
-};
+}
+module.exports = LiveEventQuizEnd;

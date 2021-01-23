@@ -5,7 +5,8 @@ const LiveEventDisconnect = require("../classes/LiveEventDisconnect");
  *
  * @returns {Promise<Boolean>} Whether the message was successfully sent
  */
-module.exports = function ResetGame() {
+function ResetGame() {
   this.controllers = {};
   return this.send("/service/player", new LiveEventDisconnect(this));
-};
+}
+module.exports = ResetGame;

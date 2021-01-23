@@ -3,7 +3,7 @@
  *
  * @param  {Object} data The player leave data {@link https://kahoot.js.org/enum/LiveEventPlayerLeft}
  */
-module.exports = function PlayerLeft(data) {
+function PlayerLeft(data) {
   const {cid} = data;
   if(this.controllers[cid]) {
     this.controllers[cid].hasLeft = true;
@@ -14,5 +14,14 @@ module.exports = function PlayerLeft(data) {
       }, 15e3);
     }
   }
+
+  /**
+   * Emitted when a player leaves
+   *
+   * @event PlayerLeft
+   * @type Object
+   * @see  {@link https://kahoot.js.org/enum/LiveEventPlayerLeft}  
+   */
   this.emit("PlayerLeft", data);
-};
+}
+module.exports = PlayerLeft;

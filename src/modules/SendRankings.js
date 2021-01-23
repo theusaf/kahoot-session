@@ -5,7 +5,7 @@ const LiveEventPodium = require("../classes/LiveEventPodium");
  *
  * @returns {Boolean} Whether the message was sent successfully
  */
-module.exports = function SendRankings() {
+function SendRankings() {
   const pack = [];
   for(const i in this.controllers) {
     if(this.controllers[i].hasLeft || !this.controllers[i].active) {
@@ -14,4 +14,5 @@ module.exports = function SendRankings() {
     pack.push(["/service/player", new LiveEventPodium(this.controllers[i], this)]);
   }
   return this.send(pack);
-};
+}
+module.exports = SendRankings;

@@ -5,7 +5,7 @@ const LiveEventQuizEnd = require("../classes/LiveEventQuizEnd");
  *
  * @returns {Promise<Boolean>} Whether the message was sent successfully
  */
-module.exports = function EndGame() {
+function EndGame() {
   const pack = [];
   for(const i in this.controllers) {
     if(this.controllers[i].hasLeft || !this.controllers[i].active) {
@@ -14,4 +14,5 @@ module.exports = function EndGame() {
     pack.push(["/service/player", new LiveEventQuizEnd(this.controllers[i], this)]);
   }
   return this.send(pack);
-};
+}
+module.exports = EndGame;

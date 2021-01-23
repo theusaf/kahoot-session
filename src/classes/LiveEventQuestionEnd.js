@@ -1,7 +1,7 @@
 const isCorrect = require("../util/isCorrect"),
   getPoints = require("../util/getPoints");
 // The question end message
-module.exports = class LiveEventQuestionEnd {
+class LiveEventQuestionEnd {
 
   /**
    * constructor
@@ -10,11 +10,45 @@ module.exports = class LiveEventQuestionEnd {
    * @param  {Client} client The client
    */
   constructor(player, client) {
+
+    /**
+     * The game id
+     *
+     * @name LiveEventQuestionEnd#gameid
+     * @type String
+     */
     this.gameid = client.gameid;
+
+    /**
+     * The host of the game
+     *
+     * @name LiveEventQuestionEnd#name
+     * @type String
+     */
     this.host = "play.kahoot.it";
+
+    /**
+     * The event id
+     *
+     * @name LiveEventQuestionEnd#id
+     * @type Number
+     */
     this.id = 8;
     this.type = "message";
+
+    /**
+     * The id of the player to send the message to
+     *
+     * @name LiveEventQuestionEnd#cid
+     * @type String
+     */
     this.cid = player.cid;
+
+    /**
+     * The previous question index
+     * @name LiveEventQuestionEnd#lastGameBlockIndex
+     * @type Number
+     */
     this.lastGameBlockIndex = client.currentQuestionIndex ? client.currentQuestionIndex - 1 : client.currentQuestionIndex;
     const currentQuestion = client.quiz.questions[client.currentQuestionIndex],
       content = player.answer || {
@@ -46,6 +80,14 @@ module.exports = class LiveEventQuestionEnd {
     if(player.answer === null) {
       player.answer = content;
     }
+
+    /**
+     * The temporary content of the message (should be modified and replaced with stringified `content` instead)
+     *
+     * @name LiveEventQuestionEnd#tempContent
+     * @type Object
+     */
     this.tempContent = content;
   }
-};
+}
+module.exports = LiveEventQuestionEnd;

@@ -6,7 +6,7 @@ const LiveEventTwoFactorRight = require("../classes/LiveEventTwoFactorRight"),
  *
  * @param  {Object} data The two-factor answer data. {@link https://kahoot.js.org/enum/LiveTwoStepAnswered}
  */
-module.exports = function TwoFactorAnswered(data) {
+function TwoFactorAnswered(data) {
   const {cid,content} = data;
   try {
     const player = this.controllers[cid],
@@ -32,5 +32,14 @@ module.exports = function TwoFactorAnswered(data) {
       description: "Unknown error while handling TwoFactorAnswered"
     });
   }
+
+  /**
+   * Emitted when the two factor was answered
+   *
+   * @event TwoFactorAnswered
+   * @type Object
+   * @see {@link https://kahoot.js.org/enum/LiveTwoStepAnswered}  
+   */
   this.emit("TwoFactorAnswered", data);
-};
+}
+module.exports = TwoFactorAnswered;

@@ -17,28 +17,177 @@ class Client extends EventEmitter {
   /**
    * constructor - Creates the Client
    *
-   * @param  {Object} options An object containing settings, controlling things such as team mode, two factor auth, and antibot
+   * @param {Object} options An object containing settings, controlling things such as team mode, two factor auth
+   * @param {Boolean} options.autoPlay Whether to automatically start, move through questions, and replay games
+   * @param {String} [options.gameMode=classic] The game mode of the game. Can be "classic" or "team"
+   * @param {Boolean} options.twoFactorAuth Whether to enable two-factor auth in the game
+   * @param {Boolbea} options.namerator Whether to enable the friendly nickname generator
+   * @param {Number} options.twoFactorInterval The time in seconds between two-factor resets
    */
   constructor(options) {
     super();
+
+    /**
+     * The time the quesiton started
+     *
+     * @name Client#questionStartTime
+     * @type Number
+     */
     this.questionStartTime = null;
+
+    /**
+     * The game options
+     *
+     * @name Client#questionStartTime
+     * @see Client
+     */
     this.options = options || {};
+
+    /**
+     * The CometD client. {@link https://docs.cometd.org/current7/reference/}
+     *
+     * @name Client#cometd
+     * @type CometDClient
+     */
     this.cometd = null;
+
+    /**
+     * The controllers, mapped by id
+     *
+     * @name Client#controllers
+     * @type Object<Player>
+     */
     this.controllers = {};
+
+    /**
+     * The current question index
+     *
+     * @name Client#currentQuestionIndex
+     * @type Number
+     */
     this.currentQuestionIndex = 0;
+
+    /**
+     * The current quiz index, used in playlists
+     *
+     * @name Client#currentQuizIndex
+     * @type Number
+     */
     this.currentQuizIndex = 0;
+
+    /**
+     * The feedback received.
+     *
+     * @see FeedbackSent
+     * @name Client#feedback
+     * @type Object[]
+     */
     this.feedback = [];
+
+    /**
+     * The game pin of the game
+     *
+     * @name Client#gameid
+     * @type String
+     */
     this.gameid = null;
+
+    /**
+     * The time the QuestionReady started
+     *
+     * @name Client#getReadyTime
+     * @type Number
+     */
     this.getReadyTime = null;
+
+    /**
+     * The shuffled steps of the jumble question
+     *
+     * @name Client#jumbleSteps
+     * @type Number[]
+     */
     this.jumbleSteps = null;
+
+    /**
+     * A number from setTimeout used for autoPlay and question ending
+     *
+     * @name Client#mainEventTimer
+     * @type Number
+     */
     this.mainEventTimer = null;
+
+    /**
+     * A number from setInterval for use in two-factor auth resets
+     *
+     * @name Client#twoFactorInterval
+     * @type Number
+     */
     this.twoFactorInterval = null;
+
+    /**
+     * A shuffled list of numbers representing the current pattern for the two-factor steps
+     *
+     * @name Client#twoFactorSteps
+     * @type Number[]
+     */
     this.twoFactorSteps = shuffle([0,1,2,3]);
+
+    /**
+     * The current quiz being played
+     *
+     * @name Client#quiz
+     * @type Quiz
+     */
     this.quiz = null;
+
+    /**
+     * The list of quizzes or ids
+     *
+     * @name Client#quizPlaylist
+     * @type String[]|Quiz[]
+     */
     this.quizPlaylist = [];
+
+    /**
+     * The recovery data
+     *
+     * @name Client#recoveryData
+     * @type Object
+     * @see {@link https://kahoot.js.org/enum/LiveEventRecoveryData}
+     */
     this.recoveryData = {};
+
+    /**
+     * The time the quiz started
+     *
+     * @name Client#startTime
+     * @type Number
+     */
     this.startTime = null;
+
+    /**
+     * The current state of the game
+     * - "lobby"
+     * - "start"
+     * - "getready"
+     * - "teamtalk"
+     * - "question"
+     * - "timeover"
+     * - "questionend"
+     * - "podium"
+     * - "quizend"
+     *
+     * @name Client#state
+     * @type String
+     */
     this.state = "lobby";
+
+    /**
+     * The current status of the game. Either "ACTIVE" or "LOCKED"
+     *
+     * @name Client#status
+     * @type String
+     */
     this.status = "ACTIVE";
   }
 
@@ -181,6 +330,8 @@ class Client extends EventEmitter {
    * message - Handles messages from the server
    *
    * @param {Object} message The CometD message from the server
+   * @param {Object} message.data The data sent from the server
+   * @param {String} message.channel The channel the message is in
    */
   message(message) {
     const {channel,data} = message;
@@ -306,6 +457,12 @@ class Client extends EventEmitter {
       }
     };
     await modules.TimeOver.call(this);
+
+    /**
+     * Emitted when the time is up
+     *
+     * @event TimeOver    
+     */
     this.emit("TimeOver");
     return this.next();
   }
@@ -341,6 +498,13 @@ class Client extends EventEmitter {
         });
       }, 5e3);
     }
+
+    /**
+     * Emitted when the question has ended
+     *
+     * @event QuestionResults
+     * @type Object<Player>
+     */
     this.emit("QuestionResults", this.controllers);
     return modules.SendQuestionResults.call(this);
   }
@@ -371,6 +535,12 @@ class Client extends EventEmitter {
     clearInterval(this.twoFactorInterval);
     await this.send("/service/player", new LiveEventDisconnect(this));
     this.cometd.disconnect();
+
+    /**
+     * Emitted when the game is disconnected
+     *
+     * @event Disconnect
+     */
     this.emit("Disconnect");
   }
 
@@ -392,7 +562,14 @@ class Client extends EventEmitter {
         this.emit("error", error);
       });
     }, 5e3);
-    this.emit("GameStart");
+
+    /**
+     * Emitted when the quiz starts
+     *
+     * @event GameStart
+     * @type Quiz
+     */
+    this.emit("GameStart", this.quiz);
     return modules.Start.call(this);
   }
 
@@ -421,7 +598,14 @@ class Client extends EventEmitter {
         this.emit("error", error);
       });
     }, this.recoveryData.data.timeAvailable);
-    this.emit("QuestionStart",this.quiz.questions[this.currentQuestionIndex]);
+
+    /**
+     * Emitted when the question starts
+     *
+     * @event QuestionStart
+     * @type Question
+     */
+    this.emit("QuestionStart", this.quiz.questions[this.currentQuestionIndex]);
   }
 
   /**
@@ -458,7 +642,14 @@ class Client extends EventEmitter {
         }, 20e3);
       }
     }
-    this.emit("QuestionReady",this.quiz.questions[this.currentQuestionIndex]);
+
+    /**
+     * Emitted when the question is starting up
+     *
+     * @event QuestionReady
+     * @type Question
+     */
+    this.emit("QuestionReady", this.quiz.questions[this.currentQuestionIndex]);
     return modules.ReadyQuestion.call(this);
   }
 
@@ -489,7 +680,14 @@ class Client extends EventEmitter {
     clearTimeout(this.mainEventTimer);
     this.state = "podium";
     await modules.SendRankings.call(this);
-    this.emit("Rankings");
+
+    /**
+     * Emitted at the end of the game, before GameEnd
+     *
+     * @event Rankings
+     * @type Object<Player>
+     */
+    this.emit("Rankings", this.controllers);
     return this.next();
   }
 
@@ -510,7 +708,14 @@ class Client extends EventEmitter {
         });
       }, 15e3);
     }
-    this.emit("GameEnd");
+
+    /**
+     * Emitted at the end of the quiz
+     *
+     * @event GameEnd
+     * @type Object<Player>
+     */
+    this.emit("GameEnd", this.controllers);
     return modules.EndGame.call(this);
   }
 
@@ -521,9 +726,15 @@ class Client extends EventEmitter {
    */
   requestFeedback(){
     clearTimeout(this.mainEventTimer);
-    this.emit("FeedbackRequested");
     this.recoveryData.state = 7;
     this.recoveryData.data = {};
+
+    /**
+     * Emitted when feedback is requested
+     *
+     * @event FeedbackRequested
+     */
+    this.emit("FeedbackRequested");
     return modules.RequestFeedback.call(this);
   }
 
@@ -533,8 +744,15 @@ class Client extends EventEmitter {
    * @returns {Promise<Boolean>} Successful or not
    */
   resetTwoFactorAuth() {
-    this.emit("TwoFactorAuthReset");
     this.twoFactorSteps = shuffle([0,1,2,3]);
+
+    /**
+     * Emitted when the two factor resets
+     *
+     * @event TwoFactorAuthReset
+     * @type Number[]
+     */
+    this.emit("TwoFactorAuthReset", this.twoFactorSteps);
     return modules.ResetTwoFactorAuth.call(this);
   }
 
@@ -573,7 +791,7 @@ class Client extends EventEmitter {
       });
       return;
     }
-    this.emit("GameReset");
+    this.emit("GameReset", this.quiz);
     return modules.ResetGame.call(this);
   }
 
@@ -599,7 +817,14 @@ class Client extends EventEmitter {
       });
       return;
     }
-    this.emit("GameReset");
+
+    /**
+     * Emitted when the game resets
+     *
+     * @event GameReset
+     * @type Quiz
+     */
+    this.emit("GameReset", this.quiz);
     return await modules.ReplayGame.call(this);
   }
 

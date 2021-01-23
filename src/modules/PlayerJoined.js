@@ -6,7 +6,7 @@ const Player = require("../util/player"),
  *
  * @param {Object} data The information about the player {@link https://kahoot.js.org/enum/LiveEventPlayerJoined}
  */
-module.exports = function PlayerJoined(data) {
+function PlayerJoined(data) {
   const {cid} = data;
   if(this.controllers[cid]) {
     if(this.controllers[cid].hasLeft) {
@@ -22,5 +22,14 @@ module.exports = function PlayerJoined(data) {
     }, 15e3);
   }
   this.send("/service/player", new LiveEventNameAccept(data, this));
+
+  /**
+   * Emitted when a player joins the game
+   *
+   * @event PlayerJoined
+   * @type Object
+   * @see {@link https://kahoot.js.org/enum/LiveEventPlayerJoined}
+   */
   this.emit("PlayerJoined", data);
-};
+}
+module.exports = PlayerJoined;

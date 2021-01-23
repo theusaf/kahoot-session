@@ -1,9 +1,9 @@
 /**
  * FeedbackSent - Handles feedback
  *
- * @param {Object} data The feedback data. {@see https://kahoot.js.org/enum/LiveFeedbackPacketContent}
+ * @param {Object} data The feedback data. {@link https://kahoot.js.org/enum/LiveFeedbackPacketContent}
  */
-module.exports = function FeedbackSent(data) {
+function FeedbackSent(data) {
   try {
     const content = JSON.parse(data);
     content.cid = data.cid;
@@ -14,5 +14,14 @@ module.exports = function FeedbackSent(data) {
       description: "Unknown error occured at FeedbackSent"
     });
   }
+
+  /**
+   * Emitted when feedback is received
+   *
+   * @event FeedbackReceived
+   * @type Object
+   * @see {@link https://kahoot.js.org/enum/LiveFeedbackPacketContent}
+   */
   this.emit("FeedbackReceived", data);
-};
+}
+module.exports = FeedbackSent;

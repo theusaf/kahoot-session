@@ -101,7 +101,216 @@
 
             
 
-            <td class="description last">An object containing settings, controlling things such as team mode, two factor auth, and antibot</td>
+            <td class="description last">An object containing settings, controlling things such as team mode, two factor auth
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>autoPlay</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Whether to automatically start, move through questions, and replay games</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>gameMode</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    classic
+                
+                </td>
+            
+
+            <td class="description last">The game mode of the game. Can be "classic" or "team"</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>twoFactorAuth</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Whether to enable two-factor auth in the game</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>namerator</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolbea</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Whether to enable the friendly nickname generator</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>twoFactorInterval</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The time in seconds between two-factor resets</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -142,7 +351,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line22">line 22</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line27">line 27</a>
     </li></ul></dd>
     
 
@@ -192,6 +401,949 @@
 
         
             
+<h4 class="name" id="cometd"><span class="type-signature"></span>cometd<span class="type-signature"> :CometDClient</span></h4>
+
+
+
+
+<div class="description">
+    The CometD client. <a href="https://docs.cometd.org/current7/reference/">https://docs.cometd.org/current7/reference/</a>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">CometDClient</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line46">line 46</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="controllers"><span class="type-signature"></span>controllers<span class="type-signature"> :Object.&lt;<a href="Player.html">Player</a>></span></h4>
+
+
+
+
+<div class="description">
+    The controllers, mapped by id
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object.&lt;<a href="Player.html">Player</a>></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line54">line 54</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="currentQuestionIndex"><span class="type-signature"></span>currentQuestionIndex<span class="type-signature"> :Number</span></h4>
+
+
+
+
+<div class="description">
+    The current question index
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line62">line 62</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="currentQuizIndex"><span class="type-signature"></span>currentQuizIndex<span class="type-signature"> :Number</span></h4>
+
+
+
+
+<div class="description">
+    The current quiz index, used in playlists
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line70">line 70</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="feedback"><span class="type-signature"></span>feedback<span class="type-signature"> :Array.&lt;Object></span></h4>
+
+
+
+
+<div class="description">
+    The feedback received.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Array.&lt;Object></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line78">line 78</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="global.html#FeedbackSent">FeedbackSent</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="gameid"><span class="type-signature"></span>gameid<span class="type-signature"> :String</span></h4>
+
+
+
+
+<div class="description">
+    The game pin of the game
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">String</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line87">line 87</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="getReadyTime"><span class="type-signature"></span>getReadyTime<span class="type-signature"> :Number</span></h4>
+
+
+
+
+<div class="description">
+    The time the QuestionReady started
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line95">line 95</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="jumbleSteps"><span class="type-signature"></span>jumbleSteps<span class="type-signature"> :Array.&lt;Number></span></h4>
+
+
+
+
+<div class="description">
+    The shuffled steps of the jumble question
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Array.&lt;Number></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line103">line 103</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="mainEventTimer"><span class="type-signature"></span>mainEventTimer<span class="type-signature"> :Number</span></h4>
+
+
+
+
+<div class="description">
+    A number from setTimeout used for autoPlay and question ending
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line111">line 111</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="questionStartTime"><span class="type-signature"></span>questionStartTime<span class="type-signature"> :Number</span></h4>
+
+
+
+
+<div class="description">
+    The time the quesiton started
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line30">line 30</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="questionStartTime"><span class="type-signature"></span>questionStartTime<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    The game options
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line38">line 38</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="Client.html">Client</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="quiz"><span class="type-signature"></span>quiz<span class="type-signature"> :Quiz</span></h4>
+
+
+
+
+<div class="description">
+    The current quiz being played
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Quiz</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line135">line 135</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="quizPlaylist"><span class="type-signature"></span>quizPlaylist<span class="type-signature"> :Array.&lt;String>|Array.&lt;Quiz></span></h4>
+
+
+
+
+<div class="description">
+    The list of quizzes or ids
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Array.&lt;String></span>
+|
+
+<span class="param-type">Array.&lt;Quiz></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line143">line 143</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
 <h4 class="name" id="quizQuestionAnswers"><span class="type-signature"></span>quizQuestionAnswers<span class="type-signature"></span></h4>
 
 
@@ -236,7 +1388,455 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line50">line 50</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line199">line 199</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="recoveryData"><span class="type-signature"></span>recoveryData<span class="type-signature"> :Object</span></h4>
+
+
+
+
+<div class="description">
+    The recovery data
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line151">line 151</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="https://kahoot.js.org/enum/LiveEventRecoveryData">https://kahoot.js.org/enum/LiveEventRecoveryData</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="startTime"><span class="type-signature"></span>startTime<span class="type-signature"> :Number</span></h4>
+
+
+
+
+<div class="description">
+    The time the quiz started
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line160">line 160</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="state"><span class="type-signature"></span>state<span class="type-signature"> :String</span></h4>
+
+
+
+
+<div class="description">
+    The current state of the game
+- "lobby"
+- "start"
+- "getready"
+- "teamtalk"
+- "question"
+- "timeover"
+- "questionend"
+- "podium"
+- "quizend"
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">String</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line168">line 168</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="status"><span class="type-signature"></span>status<span class="type-signature"> :String</span></h4>
+
+
+
+
+<div class="description">
+    The current status of the game. Either "ACTIVE" or "LOCKED"
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">String</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line185">line 185</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="twoFactorInterval"><span class="type-signature"></span>twoFactorInterval<span class="type-signature"> :Number</span></h4>
+
+
+
+
+<div class="description">
+    A number from setInterval for use in two-factor auth resets
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line119">line 119</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="twoFactorSteps"><span class="type-signature"></span>twoFactorSteps<span class="type-signature"> :Array.&lt;Number></span></h4>
+
+
+
+
+<div class="description">
+    A shuffled list of numbers representing the current pattern for the two-factor steps
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Array.&lt;Number></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line127">line 127</a>
     </li></ul></dd>
     
 
@@ -316,7 +1916,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line265">line 265</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line416">line 416</a>
     </li></ul></dd>
     
 
@@ -426,7 +2026,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line609">line 609</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line834">line 834</a>
     </li></ul></dd>
     
 
@@ -514,7 +2114,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line369">line 369</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line533">line 533</a>
     </li></ul></dd>
     
 
@@ -602,7 +2202,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line501">line 501</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line699">line 699</a>
     </li></ul></dd>
     
 
@@ -660,7 +2260,7 @@
     
 
     
-    <h4 class="name" id="getPlayer"><span class="type-signature"></span>getPlayer<span class="signature">(cid)</span><span class="type-signature"> &rarr; {Player}</span></h4>
+    <h4 class="name" id="getPlayer"><span class="type-signature"></span>getPlayer<span class="signature">(cid)</span><span class="type-signature"> &rarr; {<a href="Player.html">Player</a>}</span></h4>
     
 
     
@@ -761,7 +2361,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line628">line 628</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line853">line 853</a>
     </li></ul></dd>
     
 
@@ -801,7 +2401,7 @@
     </dt>
     <dd>
         
-<span class="param-type">Player</span>
+<span class="param-type"><a href="Player.html">Player</a></span>
 
 
     </dd>
@@ -926,7 +2526,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line62">line 62</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line211">line 211</a>
     </li></ul></dd>
     
 
@@ -1037,7 +2637,7 @@
 <span class="param-type">String</span>
 |
 
-<span class="param-type">Player</span>
+<span class="param-type"><a href="Player.html">Player</a></span>
 
 
             
@@ -1088,7 +2688,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line547">line 547</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line765">line 765</a>
     </li></ul></dd>
     
 
@@ -1198,7 +2798,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line353">line 353</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line517">line 517</a>
     </li></ul></dd>
     
 
@@ -1316,7 +2916,79 @@
 
             
 
-            <td class="description last">The CometD message from the server</td>
+            <td class="description last">The CometD message from the server
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The data sent from the server</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>channel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The channel the message is in</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -1357,7 +3029,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line185">line 185</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line336">line 336</a>
     </li></ul></dd>
     
 
@@ -1445,7 +3117,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line637">line 637</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line862">line 862</a>
     </li></ul></dd>
     
 
@@ -1555,7 +3227,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line432">line 432</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line616">line 616</a>
     </li></ul></dd>
     
 
@@ -1665,7 +3337,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line585">line 585</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line803">line 803</a>
     </li></ul></dd>
     
 
@@ -1775,7 +3447,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line522">line 522</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line727">line 727</a>
     </li></ul></dd>
     
 
@@ -1885,7 +3557,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line559">line 559</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line777">line 777</a>
     </li></ul></dd>
     
 
@@ -1995,7 +3667,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line535">line 535</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line746">line 746</a>
     </li></ul></dd>
     
 
@@ -2200,7 +3872,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line238">line 238</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line389">line 389</a>
     </li></ul></dd>
     
 
@@ -2310,7 +3982,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line318">line 318</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line475">line 475</a>
     </li></ul></dd>
     
 
@@ -2421,7 +4093,7 @@ Used before endGame
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line488">line 488</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line679">line 679</a>
     </li></ul></dd>
     
 
@@ -2531,7 +4203,7 @@ Used before endGame
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line127">line 127</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line276">line 276</a>
     </li></ul></dd>
     
 
@@ -2641,7 +4313,7 @@ Used before endGame
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line382">line 382</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line552">line 552</a>
     </li></ul></dd>
     
 
@@ -2751,7 +4423,7 @@ Used before endGame
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line404">line 404</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line581">line 581</a>
     </li></ul></dd>
     
 
@@ -2861,7 +4533,7 @@ Used before endGame
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line470">line 470</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line661">line 661</a>
     </li></ul></dd>
     
 
@@ -2971,7 +4643,7 @@ Used before endGame
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line289">line 289</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line440">line 440</a>
     </li></ul></dd>
     
 
@@ -3081,7 +4753,7 @@ Used before endGame
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="host.js.html">host.js</a>, <a href="host.js.html#line362">line 362</a>
+        <a href="host.js.html">host.js</a>, <a href="host.js.html#line526">line 526</a>
     </li></ul></dd>
     
 
@@ -3149,13 +4821,13 @@ Used before endGame
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Client.html">Client</a></li><li><a href="CustomClient.html">CustomClient</a></li><li><a href="module.exports_module.exports.html">exports</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Client.html">Client</a></li><li><a href="CustomClient.html">CustomClient</a></li><li><a href="HostLockMessage.html">HostLockMessage</a></li><li><a href="HostSessionData.html">HostSessionData</a></li><li><a href="HostStartedData.html">HostStartedData</a></li><li><a href="HostUnlockMessage.html">HostUnlockMessage</a></li><li><a href="LiveEventBackup.html">LiveEventBackup</a></li><li><a href="LiveEventDisconnect.html">LiveEventDisconnect</a></li><li><a href="LiveEventFeedbackRequest.html">LiveEventFeedbackRequest</a></li><li><a href="LiveEventNameAccept.html">LiveEventNameAccept</a></li><li><a href="LiveEventPodium.html">LiveEventPodium</a></li><li><a href="LiveEventQuestionEnd.html">LiveEventQuestionEnd</a></li><li><a href="LiveEventQuestionReady.html">LiveEventQuestionReady</a></li><li><a href="LiveEventQuestionStart.html">LiveEventQuestionStart</a></li><li><a href="global.html#LiveEventQuizEnd">LiveEventQuizEnd</a></li><li><a href="LiveEventReplay.html">LiveEventReplay</a></li><li><a href="LiveEventStartQuiz.html">LiveEventStartQuiz</a></li><li><a href="LiveEventTeamAccept.html">LiveEventTeamAccept</a></li><li><a href="LiveEventTeamTalk.html">LiveEventTeamTalk</a></li><li><a href="LiveEventTimeOver.html">LiveEventTimeOver</a></li><li><a href="LiveEventTwoFactorReset.html">LiveEventTwoFactorReset</a></li><li><a href="LiveEventTwoFactorRight.html">LiveEventTwoFactorRight</a></li><li><a href="LiveEventTwoFactorWrong.html">LiveEventTwoFactorWrong</a></li><li><a href="Player.html">Player</a></li></ul><h3>Events</h3><ul><li><a href="global.html#event:Disconnect">Disconnect</a></li><li><a href="global.html#event:FeedbackReceived">FeedbackReceived</a></li><li><a href="global.html#event:FeedbackRequested">FeedbackRequested</a></li><li><a href="global.html#event:GameEnd">GameEnd</a></li><li><a href="global.html#event:GameReset">GameReset</a></li><li><a href="global.html#event:GameStart">GameStart</a></li><li><a href="global.html#event:PlayerJoined">PlayerJoined</a></li><li><a href="global.html#event:PlayerLeft">PlayerLeft</a></li><li><a href="global.html#event:QuestionAnswered">QuestionAnswered</a></li><li><a href="global.html#event:QuestionReady">QuestionReady</a></li><li><a href="global.html#event:QuestionResults">QuestionResults</a></li><li><a href="global.html#event:QuestionStart">QuestionStart</a></li><li><a href="global.html#event:Rankings">Rankings</a></li><li><a href="global.html#event:RecoveryDataRequested">RecoveryDataRequested</a></li><li><a href="global.html#event:TeamReceived">TeamReceived</a></li><li><a href="global.html#event:TimeOver">TimeOver</a></li><li><a href="global.html#event:TwoFactorAnswered">TwoFactorAnswered</a></li><li><a href="global.html#event:TwoFactorAuthReset">TwoFactorAuthReset</a></li></ul><h3>Global</h3><ul><li><a href="global.html#calculateReadTime">calculateReadTime</a></li><li><a href="global.html#DataRequest">DataRequest</a></li><li><a href="global.html#EndGame">EndGame</a></li><li><a href="global.html#FeedbackSent">FeedbackSent</a></li><li><a href="global.html#getPoints">getPoints</a></li><li><a href="global.html#isCorrect">isCorrect</a></li><li><a href="global.html#KickPlayer">KickPlayer</a></li><li><a href="global.html#Lock">Lock</a></li><li><a href="global.html#PlayerJoined">PlayerJoined</a></li><li><a href="global.html#PlayerLeft">PlayerLeft</a></li><li><a href="global.html#QuestionAnswered">QuestionAnswered</a></li><li><a href="global.html#ReadyQuestion">ReadyQuestion</a></li><li><a href="global.html#ReplayGame">ReplayGame</a></li><li><a href="global.html#RequestFeedback">RequestFeedback</a></li><li><a href="global.html#ResetGame">ResetGame</a></li><li><a href="global.html#ResetTwoFactorAuth">ResetTwoFactorAuth</a></li><li><a href="global.html#SendQuestionResults">SendQuestionResults</a></li><li><a href="global.html#SendRankings">SendRankings</a></li><li><a href="global.html#shuffle">shuffle</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Start">Start</a></li><li><a href="global.html#StartQuestion">StartQuestion</a></li><li><a href="global.html#StartTeamTalk">StartTeamTalk</a></li><li><a href="global.html#TeamSent">TeamSent</a></li><li><a href="global.html#TimeOver">TimeOver</a></li><li><a href="global.html#TwoFactorAnswered">TwoFactorAnswered</a></li><li><a href="global.html#Unlock">Unlock</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Fri Jan 22 2021 21:22:02 GMT-0800 (Pacific Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Sat Jan 23 2021 13:22:26 GMT-0800 (Pacific Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

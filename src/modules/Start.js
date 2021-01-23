@@ -5,6 +5,7 @@ const LiveEventStartQuiz = require("../classes/LiveEventStartQuiz");
  *
  * @returns {Promise<Boolean>} Whether the message was sent successfully
  */
-module.exports = function Start() {
+function Start() {
   return this.send("/service/player", new LiveEventStartQuiz(this));
-};
+}
+module.exports = Start;

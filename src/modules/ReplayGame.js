@@ -5,6 +5,7 @@ const LiveEventReplay = require("../classes/LiveEventReplay");
  *
  * @returns {Promise<Boolean>} Whether the message was sent successfully
  */
-module.exports = function ReplayGame() {
+function ReplayGame() {
   return this.send("/service/player", new LiveEventReplay(this));
-};
+}
+module.exports = ReplayGame;

@@ -1,5 +1,5 @@
 // The lock message
-module.exports = class HostLockMessage {
+class HostLockMessage {
 
   /**
    * constructor
@@ -7,7 +7,22 @@ module.exports = class HostLockMessage {
    * @param  {Client} client The client
    */
   constructor(client) {
+
+    /**
+     * The game id
+     *
+     * @name HostLockMessage#gameid
+     * @type String
+     */
     this.gameid = client.gameid;
+
+    /**
+     * The type of action
+     *
+     * @name HostLockMessage#type
+     * @type String
+     */
     this.type = "lock";
   }
-};
+}
+module.exports = HostLockMessage;

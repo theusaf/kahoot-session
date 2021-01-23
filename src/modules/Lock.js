@@ -5,6 +5,7 @@ const HostLockMessage = require("../classes/HostLockMessage");
  *
  * @returns {Promise<Boolean>} Whether the lock message was sent successfully
  */
-module.exports = function Lock() {
+function Lock() {
   return this.send("/service/player", new HostLockMessage(this), true);
-};
+}
+module.exports = Lock;

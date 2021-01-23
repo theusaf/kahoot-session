@@ -45,28 +45,177 @@ class Client extends EventEmitter {
   /**
    * constructor - Creates the Client
    *
-   * @param  {Object} options An object containing settings, controlling things such as team mode, two factor auth, and antibot
+   * @param {Object} options An object containing settings, controlling things such as team mode, two factor auth
+   * @param {Boolean} options.autoPlay Whether to automatically start, move through questions, and replay games
+   * @param {String} [options.gameMode=classic] The game mode of the game. Can be "classic" or "team"
+   * @param {Boolean} options.twoFactorAuth Whether to enable two-factor auth in the game
+   * @param {Boolbea} options.namerator Whether to enable the friendly nickname generator
+   * @param {Number} options.twoFactorInterval The time in seconds between two-factor resets
    */
   constructor(options) {
     super();
+
+    /**
+     * The time the quesiton started
+     *
+     * @name Client#questionStartTime
+     * @type Number
+     */
     this.questionStartTime = null;
+
+    /**
+     * The game options
+     *
+     * @name Client#questionStartTime
+     * @see Client
+     */
     this.options = options || {};
+
+    /**
+     * The CometD client. {@link https://docs.cometd.org/current7/reference/}
+     *
+     * @name Client#cometd
+     * @type CometDClient
+     */
     this.cometd = null;
+
+    /**
+     * The controllers, mapped by id
+     *
+     * @name Client#controllers
+     * @type Object&lt;Player>
+     */
     this.controllers = {};
+
+    /**
+     * The current question index
+     *
+     * @name Client#currentQuestionIndex
+     * @type Number
+     */
     this.currentQuestionIndex = 0;
+
+    /**
+     * The current quiz index, used in playlists
+     *
+     * @name Client#currentQuizIndex
+     * @type Number
+     */
     this.currentQuizIndex = 0;
+
+    /**
+     * The feedback received.
+     *
+     * @see FeedbackSent
+     * @name Client#feedback
+     * @type Object[]
+     */
     this.feedback = [];
+
+    /**
+     * The game pin of the game
+     *
+     * @name Client#gameid
+     * @type String
+     */
     this.gameid = null;
+
+    /**
+     * The time the QuestionReady started
+     *
+     * @name Client#getReadyTime
+     * @type Number
+     */
     this.getReadyTime = null;
+
+    /**
+     * The shuffled steps of the jumble question
+     *
+     * @name Client#jumbleSteps
+     * @type Number[]
+     */
     this.jumbleSteps = null;
+
+    /**
+     * A number from setTimeout used for autoPlay and question ending
+     *
+     * @name Client#mainEventTimer
+     * @type Number
+     */
     this.mainEventTimer = null;
+
+    /**
+     * A number from setInterval for use in two-factor auth resets
+     *
+     * @name Client#twoFactorInterval
+     * @type Number
+     */
     this.twoFactorInterval = null;
+
+    /**
+     * A shuffled list of numbers representing the current pattern for the two-factor steps
+     *
+     * @name Client#twoFactorSteps
+     * @type Number[]
+     */
     this.twoFactorSteps = shuffle([0,1,2,3]);
+
+    /**
+     * The current quiz being played
+     *
+     * @name Client#quiz
+     * @type Quiz
+     */
     this.quiz = null;
+
+    /**
+     * The list of quizzes or ids
+     *
+     * @name Client#quizPlaylist
+     * @type String[]|Quiz[]
+     */
     this.quizPlaylist = [];
+
+    /**
+     * The recovery data
+     *
+     * @name Client#recoveryData
+     * @type Object
+     * @see {@link https://kahoot.js.org/enum/LiveEventRecoveryData}
+     */
     this.recoveryData = {};
+
+    /**
+     * The time the quiz started
+     *
+     * @name Client#startTime
+     * @type Number
+     */
     this.startTime = null;
+
+    /**
+     * The current state of the game
+     * - "lobby"
+     * - "start"
+     * - "getready"
+     * - "teamtalk"
+     * - "question"
+     * - "timeover"
+     * - "questionend"
+     * - "podium"
+     * - "quizend"
+     *
+     * @name Client#state
+     * @type String
+     */
     this.state = "lobby";
+
+    /**
+     * The current status of the game. Either "ACTIVE" or "LOCKED"
+     *
+     * @name Client#status
+     * @type String
+     */
     this.status = "ACTIVE";
   }
 
@@ -209,6 +358,8 @@ class Client extends EventEmitter {
    * message - Handles messages from the server
    *
    * @param {Object} message The CometD message from the server
+   * @param {Object} message.data The data sent from the server
+   * @param {String} message.channel The channel the message is in
    */
   message(message) {
     const {channel,data} = message;
@@ -334,6 +485,12 @@ class Client extends EventEmitter {
       }
     };
     await modules.TimeOver.call(this);
+
+    /**
+     * Emitted when the time is up
+     *
+     * @event TimeOver    
+     */
     this.emit("TimeOver");
     return this.next();
   }
@@ -369,7 +526,14 @@ class Client extends EventEmitter {
         });
       }, 5e3);
     }
-    this.emit("QuestionResults");
+
+    /**
+     * Emitted when the question has ended
+     *
+     * @event QuestionResults
+     * @type Object&lt;Player>
+     */
+    this.emit("QuestionResults", this.controllers);
     return modules.SendQuestionResults.call(this);
   }
 
@@ -399,6 +563,12 @@ class Client extends EventEmitter {
     clearInterval(this.twoFactorInterval);
     await this.send("/service/player", new LiveEventDisconnect(this));
     this.cometd.disconnect();
+
+    /**
+     * Emitted when the game is disconnected
+     *
+     * @event Disconnect
+     */
     this.emit("Disconnect");
   }
 
@@ -420,7 +590,14 @@ class Client extends EventEmitter {
         this.emit("error", error);
       });
     }, 5e3);
-    this.emit("GameStart");
+
+    /**
+     * Emitted when the quiz starts
+     *
+     * @event GameStart
+     * @type Quiz
+     */
+    this.emit("GameStart", this.quiz);
     return modules.Start.call(this);
   }
 
@@ -449,7 +626,14 @@ class Client extends EventEmitter {
         this.emit("error", error);
       });
     }, this.recoveryData.data.timeAvailable);
-    this.emit("QuestionStart",this.quiz.questions[this.currentQuestionIndex]);
+
+    /**
+     * Emitted when the question starts
+     *
+     * @event QuestionStart
+     * @type Question
+     */
+    this.emit("QuestionStart", this.quiz.questions[this.currentQuestionIndex]);
   }
 
   /**
@@ -486,7 +670,14 @@ class Client extends EventEmitter {
         }, 20e3);
       }
     }
-    this.emit("QuestionReady",this.quiz.questions[this.currentQuestionIndex]);
+
+    /**
+     * Emitted when the question is starting up
+     *
+     * @event QuestionReady
+     * @type Question
+     */
+    this.emit("QuestionReady", this.quiz.questions[this.currentQuestionIndex]);
     return modules.ReadyQuestion.call(this);
   }
 
@@ -517,7 +708,14 @@ class Client extends EventEmitter {
     clearTimeout(this.mainEventTimer);
     this.state = "podium";
     await modules.SendRankings.call(this);
-    this.emit("Rankings");
+
+    /**
+     * Emitted at the end of the game, before GameEnd
+     *
+     * @event Rankings
+     * @type Object&lt;Player>
+     */
+    this.emit("Rankings", this.controllers);
     return this.next();
   }
 
@@ -538,7 +736,14 @@ class Client extends EventEmitter {
         });
       }, 15e3);
     }
-    this.emit("GameEnd");
+
+    /**
+     * Emitted at the end of the quiz
+     *
+     * @event GameEnd
+     * @type Object&lt;Player>
+     */
+    this.emit("GameEnd", this.controllers);
     return modules.EndGame.call(this);
   }
 
@@ -549,9 +754,15 @@ class Client extends EventEmitter {
    */
   requestFeedback(){
     clearTimeout(this.mainEventTimer);
-    this.emit("FeedbackRequested");
     this.recoveryData.state = 7;
     this.recoveryData.data = {};
+
+    /**
+     * Emitted when feedback is requested
+     *
+     * @event FeedbackRequested
+     */
+    this.emit("FeedbackRequested");
     return modules.RequestFeedback.call(this);
   }
 
@@ -561,8 +772,15 @@ class Client extends EventEmitter {
    * @returns {Promise&lt;Boolean>} Successful or not
    */
   resetTwoFactorAuth() {
-    this.emit("TwoFactorAuthReset");
     this.twoFactorSteps = shuffle([0,1,2,3]);
+
+    /**
+     * Emitted when the two factor resets
+     *
+     * @event TwoFactorAuthReset
+     * @type Number[]
+     */
+    this.emit("TwoFactorAuthReset", this.twoFactorSteps);
     return modules.ResetTwoFactorAuth.call(this);
   }
 
@@ -601,7 +819,7 @@ class Client extends EventEmitter {
       });
       return;
     }
-    this.emit("GameReset");
+    this.emit("GameReset", this.quiz);
     return modules.ResetGame.call(this);
   }
 
@@ -627,7 +845,14 @@ class Client extends EventEmitter {
       });
       return;
     }
-    this.emit("GameReset");
+
+    /**
+     * Emitted when the game resets
+     *
+     * @event GameReset
+     * @type Quiz
+     */
+    this.emit("GameReset", this.quiz);
     return await modules.ReplayGame.call(this);
   }
 
@@ -747,13 +972,13 @@ module.exports = {Client,CustomClient};
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Client.html">Client</a></li><li><a href="CustomClient.html">CustomClient</a></li><li><a href="module.exports_module.exports.html">exports</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Client.html">Client</a></li><li><a href="CustomClient.html">CustomClient</a></li><li><a href="HostLockMessage.html">HostLockMessage</a></li><li><a href="HostSessionData.html">HostSessionData</a></li><li><a href="HostStartedData.html">HostStartedData</a></li><li><a href="HostUnlockMessage.html">HostUnlockMessage</a></li><li><a href="LiveEventBackup.html">LiveEventBackup</a></li><li><a href="LiveEventDisconnect.html">LiveEventDisconnect</a></li><li><a href="LiveEventFeedbackRequest.html">LiveEventFeedbackRequest</a></li><li><a href="LiveEventNameAccept.html">LiveEventNameAccept</a></li><li><a href="LiveEventPodium.html">LiveEventPodium</a></li><li><a href="LiveEventQuestionEnd.html">LiveEventQuestionEnd</a></li><li><a href="LiveEventQuestionReady.html">LiveEventQuestionReady</a></li><li><a href="LiveEventQuestionStart.html">LiveEventQuestionStart</a></li><li><a href="global.html#LiveEventQuizEnd">LiveEventQuizEnd</a></li><li><a href="LiveEventReplay.html">LiveEventReplay</a></li><li><a href="LiveEventStartQuiz.html">LiveEventStartQuiz</a></li><li><a href="LiveEventTeamAccept.html">LiveEventTeamAccept</a></li><li><a href="LiveEventTeamTalk.html">LiveEventTeamTalk</a></li><li><a href="LiveEventTimeOver.html">LiveEventTimeOver</a></li><li><a href="LiveEventTwoFactorReset.html">LiveEventTwoFactorReset</a></li><li><a href="LiveEventTwoFactorRight.html">LiveEventTwoFactorRight</a></li><li><a href="LiveEventTwoFactorWrong.html">LiveEventTwoFactorWrong</a></li><li><a href="Player.html">Player</a></li></ul><h3>Events</h3><ul><li><a href="global.html#event:Disconnect">Disconnect</a></li><li><a href="global.html#event:FeedbackReceived">FeedbackReceived</a></li><li><a href="global.html#event:FeedbackRequested">FeedbackRequested</a></li><li><a href="global.html#event:GameEnd">GameEnd</a></li><li><a href="global.html#event:GameReset">GameReset</a></li><li><a href="global.html#event:GameStart">GameStart</a></li><li><a href="global.html#event:PlayerJoined">PlayerJoined</a></li><li><a href="global.html#event:PlayerLeft">PlayerLeft</a></li><li><a href="global.html#event:QuestionAnswered">QuestionAnswered</a></li><li><a href="global.html#event:QuestionReady">QuestionReady</a></li><li><a href="global.html#event:QuestionResults">QuestionResults</a></li><li><a href="global.html#event:QuestionStart">QuestionStart</a></li><li><a href="global.html#event:Rankings">Rankings</a></li><li><a href="global.html#event:RecoveryDataRequested">RecoveryDataRequested</a></li><li><a href="global.html#event:TeamReceived">TeamReceived</a></li><li><a href="global.html#event:TimeOver">TimeOver</a></li><li><a href="global.html#event:TwoFactorAnswered">TwoFactorAnswered</a></li><li><a href="global.html#event:TwoFactorAuthReset">TwoFactorAuthReset</a></li></ul><h3>Global</h3><ul><li><a href="global.html#calculateReadTime">calculateReadTime</a></li><li><a href="global.html#DataRequest">DataRequest</a></li><li><a href="global.html#EndGame">EndGame</a></li><li><a href="global.html#FeedbackSent">FeedbackSent</a></li><li><a href="global.html#getPoints">getPoints</a></li><li><a href="global.html#isCorrect">isCorrect</a></li><li><a href="global.html#KickPlayer">KickPlayer</a></li><li><a href="global.html#Lock">Lock</a></li><li><a href="global.html#PlayerJoined">PlayerJoined</a></li><li><a href="global.html#PlayerLeft">PlayerLeft</a></li><li><a href="global.html#QuestionAnswered">QuestionAnswered</a></li><li><a href="global.html#ReadyQuestion">ReadyQuestion</a></li><li><a href="global.html#ReplayGame">ReplayGame</a></li><li><a href="global.html#RequestFeedback">RequestFeedback</a></li><li><a href="global.html#ResetGame">ResetGame</a></li><li><a href="global.html#ResetTwoFactorAuth">ResetTwoFactorAuth</a></li><li><a href="global.html#SendQuestionResults">SendQuestionResults</a></li><li><a href="global.html#SendRankings">SendRankings</a></li><li><a href="global.html#shuffle">shuffle</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Start">Start</a></li><li><a href="global.html#StartQuestion">StartQuestion</a></li><li><a href="global.html#StartTeamTalk">StartTeamTalk</a></li><li><a href="global.html#TeamSent">TeamSent</a></li><li><a href="global.html#TimeOver">TimeOver</a></li><li><a href="global.html#TwoFactorAnswered">TwoFactorAnswered</a></li><li><a href="global.html#Unlock">Unlock</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Fri Jan 22 2021 21:22:01 GMT-0800 (Pacific Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Sat Jan 23 2021 13:22:26 GMT-0800 (Pacific Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
