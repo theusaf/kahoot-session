@@ -341,7 +341,7 @@ class Client extends EventEmitter {
         });
       }, 5e3);
     }
-    this.emit("QuestionResults");
+    this.emit("QuestionResults", this.controllers);
     return modules.SendQuestionResults.call(this);
   }
 
