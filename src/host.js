@@ -422,7 +422,6 @@ class Client extends EventEmitter {
           resolve();
         }, 10e3);
       });
-      return;
     }
     if(typeof channel === "object" && typeof channel.push === "function") {
       // An array
