@@ -29,11 +29,12 @@ class LiveEventStartQuiz {
      * The content of the qiuz start
      *
      * @name LiveEventStartQuiz#content
-     * @type String    
+     * @type String
      */
     this.content = JSON.stringify({
       quizType: "quiz",
-      quizQuestionAnswers: client.quizQuestionAnswers
+      quizQuestionAnswers: client.quizQuestionAnswers,
+      quizTitle: client.quiz.title
     });
   }
 }
