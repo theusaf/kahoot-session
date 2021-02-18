@@ -1,8 +1,8 @@
-/tests
 /node_modules
-/docs
-.DS_Store
-.eslintignore
-.editorconfig
-.travis.yml
 **/.DS_Store
+.DS_Store
+src
+tests
+docs
+index.js
+.travis.yml
